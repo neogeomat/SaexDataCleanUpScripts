@@ -75,7 +75,8 @@ class App(Frame):
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
             arcpy.env.workspace = DataCleanTemp
 
-            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp")
+            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp", "", "PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 4 Long 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,DISTRICT,-1,-1;VDC \"VDC\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#," + Data_Location + "\\Parcel,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#," + Data_Location + "\\Parcel,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELTY,-1,-1;ParcelNote \"ParcelNote\" true false false 200 Text 0 0 ,First,#," + Data_Location + "\\Parcel,ParcelNote,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Parcel,Shape_Length,-1,-1;Shape_Area \"Shape_Area\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Parcel,Shape_Area,-1,-1", "")
+
             arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
             # Process: Feature To Point
@@ -141,8 +142,11 @@ class App(Frame):
             ## remove processing folder
             # Process: Delete
             arcpy.Delete_management(DataCleanTemp, "Folder")
+
+            ## Finalizing data
             # Process: Delete Field
             arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
+            arcpy.CalculateField_management(Data_Location + "\\Parcel", "PARCELKEY","str( !GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)","PYTHON_9.3", "")
             arcpy.Compact_management(Data_Location)
             print(Data_Location + " cleaning process complete")
             print ('The script took {0} second !'.format(time.time() - startTime))
