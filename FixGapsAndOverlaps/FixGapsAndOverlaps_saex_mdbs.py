@@ -49,15 +49,6 @@ class App(Frame):
         print(mdb_list)
         # merged = "D:\\LIS_SYSTEM\\LIS_Spatial_Data\\merged.mdb"
 
-        # copy first file
-        try:
-            # shutil.copy(r'D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\BLANK84.mdb', path+"\\"+path.split("\\")[-1]+"_merged.mdb")
-            print("D:\\LIS_SYSTEM\\LIS_Spatial_Templates\\BLANK84.mdb copied as "+path.split("\\")[-1]+"_merged.mdb")
-        except IOError as e:
-            print("Unable to copy file. %s" % e)
-        except:
-            print("Unexpected error:", sys.exc_info())
-
         for i in mdb_list:
             import arcpy
             import os
@@ -65,7 +56,7 @@ class App(Frame):
             # Local variables:
             Folder_Location = "d:\\"
             # Data_Location = raw_input('location of mdb')
-            # Data_Location = 'D:\\Gdrive\\dosamritkarma\\CAS\\DataCleanUpScripts\\Dadapauwa_2ka1.mdb'
+            # Data_Location = 'D:\SATUNGAL\Santungal_1Ka\Santungal_1Ka.mdb'
             Data_Location = i
             if (os.path.exists("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
                 BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
@@ -74,6 +65,9 @@ class App(Frame):
                 exit()
 
             # Process: Create Temp Folder to strore all processing intermediaries
+            DataCleanTemp = Folder_Location + "\\DataCleanTemp"
+            if (os.path.exists(DataCleanTemp)): # delete folder if exits, otherwise it causes error
+                arcpy.Delete_management(DataCleanTemp, "Folder")
             arcpy.CreateFolder_management(Folder_Location, "DataCleanTemp")
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
             arcpy.env.workspace = DataCleanTemp
@@ -82,21 +76,21 @@ class App(Frame):
             arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel1.shp")
             arcpy.Delete_management(Data_Location + "\\Parcel")
 
+            # Process: Feature To Point
+            arcpy.FeatureToPoint_management(DataCleanTemp + "\\Parcel1.shp", DataCleanTemp + "\\ParcelCentroid.shp", "INSIDE")
+
             # Process: Copy Features
             arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0", "0")
 
             # Process: Feature Class To Coverage
             cov1 = DataCleanTemp + "\\cov1"
-            arcpy.FeatureclassToCoverage_conversion(DataCleanTemp + "\\Parcel1.shp REGION", cov1, "0.005 Meters",
-                                                    "DOUBLE")
+            arcpy.FeatureclassToCoverage_conversion(DataCleanTemp + "\\Parcel1.shp REGION", cov1, "0.005 Meters", "DOUBLE")
 
             # Process: Copy Features
-            arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "", "0",
-                                          "0", "0")
+            arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "", "0", "0", "0")
 
             # Process: Spatial Join
-            arcpy.SpatialJoin_analysis(DataCleanTemp + "\\CleanPoly.shp", DataCleanTemp + "\\Parcel1.shp",
-                                       DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL")
+            arcpy.SpatialJoin_analysis(DataCleanTemp + "\\CleanPoly.shp", DataCleanTemp + "\\ParcelCentroid.shp", DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","AREA \"AREA\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,AREA,-1,-1;PERIMETER \"PERIMETER\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,PERIMETER,-1,-1;COV1_ \"COV1_\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,COV1_,-1,-1;COV1_ID \"COV1_ID\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,COV1_ID,-1,-1;PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,DISTRICT,-1,-1;VDC \"VDC\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELTY,-1,-1;Shape_Leng \"Shape_Leng\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Leng,-1,-1;Shape_Area \"Shape_Area\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Area,-1,-1;ParcelNote \"ParcelNote\" true true false 200 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,ParcelNote,-1,-1;remarks \"remarks\" true true false 10 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,remarks,-1,-1;ORIG_FID \"ORIG_FID\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,ORIG_FID,-1,-1", "CONTAINS", "", "")
 
             # Process: Append
             arcpy.Append_management(DataCleanTemp + "\\NewJoinedData.shp", Data_Location + "\\Parcel", "NO_TEST")
