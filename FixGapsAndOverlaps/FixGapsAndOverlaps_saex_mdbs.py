@@ -52,6 +52,9 @@ class App(Frame):
         for i in mdb_list:
             import arcpy
             import os
+            import time
+
+            startTime = time.time()
 
             # Local variables:
             Folder_Location = "d:\\"
@@ -72,12 +75,12 @@ class App(Frame):
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
             arcpy.env.workspace = DataCleanTemp
 
-            # Process: Feature Class to Feature Class
-            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel1.shp")
-            arcpy.Delete_management(Data_Location + "\\Parcel")
+            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp")
+            arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
             # Process: Feature To Point
             arcpy.FeatureToPoint_management(DataCleanTemp + "\\Parcel1.shp", DataCleanTemp + "\\ParcelCentroid.shp", "INSIDE")
+            arcpy.Delete_management(Data_Location + "\\Parcel")
 
             # Process: Copy Features
             arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0", "0")
@@ -138,7 +141,12 @@ class App(Frame):
             ## remove processing folder
             # Process: Delete
             arcpy.Delete_management(DataCleanTemp, "Folder")
+            # Process: Delete Field
+            arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
+            arcpy.Compact_management(Data_Location)
             print(Data_Location + " cleaning process complete")
+            print ('The script took {0} second !'.format(time.time() - startTime))
+            ## genereate parcel key
         print("process complete")
         tkMessageBox.showinfo(title="Clean Saex Mdb files", message="Done")
             
