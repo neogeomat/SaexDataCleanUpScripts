@@ -3,7 +3,7 @@ from tkMessageBox import showerror
 
 class App(Frame):
     def __init__(self, master):
-        Frame.__init__(self,master)
+        Frame.__init__(self ,master)
         self.pack()
 
         self.grid()
@@ -18,20 +18,18 @@ class App(Frame):
 
         #create entry.
         self.sheetentry1= Entry(self,width=30)
-        self.sheetentry1.grid(row=0, column =1, sticky=E+W+N+S)        
-    
-        
+        self.sheetentry1.grid(row=0, column =1, sticky=E+W+N+S)
+
+
         #create calculate button
         self.button4=Button(self, text="Process", command=self.parcelIDcreator, width=30)
         self.button4.grid(row=1, column=1, sticky=E+W+N+S)
 
-    def parcelIDcreator (self):   
+    def parcelIDcreator (self):
         import tkMessageBox
         import arcpy
-        import glob
         import os
-        import shutil
-        from arcpy import env
+        # from arcpy import env
         path = self.sheetentry1.get()
         #print(path)
         if os.path.exists(path+"\\"+path.split("\\")[-1]+"_merged.mdb"):
@@ -45,13 +43,13 @@ class App(Frame):
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
-        
+
         print(mdb_list)
         # merged = "D:\\LIS_SYSTEM\\LIS_Spatial_Data\\merged.mdb"
 
         for i in mdb_list:
-            import arcpy
-            import os
+            # import arcpy
+            # import os
             import time
 
             startTime = time.time()
@@ -153,7 +151,7 @@ class App(Frame):
             ## genereate parcel key
         print("process complete")
         tkMessageBox.showinfo(title="Clean Saex Mdb files", message="Done")
-            
+
 root = Tk()
 root.title("Clean Saex Mdb files")
 myapp = App(root)
