@@ -32,10 +32,10 @@ class App(Frame):
         # from arcpy import env
         path = self.sheetentry1.get()
         #print(path)
-        if os.path.exists(path+"\\"+path.split("\\")[-1]+"_merged.mdb"):
-            os.remove(path+"\\"+path.split("\\")[-1]+"_merged.mdb")
-            print("old merged file deleted")
-        # mdb_list = glob.glob(path+"\**\*.mdb")
+        # if os.path.exists(path+"\\"+path.split("\\")[-1]+"_merged.mdb"):
+        #     os.remove(path+"\\"+path.split("\\")[-1]+"_merged.mdb")
+        #     print("old merged file deleted")
+        # # mdb_list = glob.glob(path+"\**\*.mdb")
         # mdb_list.extend(glob.glob(path+"\*.mdb"))
 
         mdb_list = []
