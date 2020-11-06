@@ -59,11 +59,11 @@ class App(Frame):
             # Data_Location = raw_input('location of mdb')
             # Data_Location = 'D:\SATUNGAL\Santungal_1Ka\Santungal_1Ka.mdb'
             Data_Location = i
-            if (os.path.exists("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
+            if (os.path.exists ("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
                 BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
             else:
                 print("Blank Template database not found, install saex")
-                exit()
+                exit ()
 
             # Process: Create Temp Folder to strore all processing intermediaries
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
