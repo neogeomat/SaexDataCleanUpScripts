@@ -51,18 +51,19 @@ Output: .csv file containing the error for each mdb file in the same location. T
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
-
+        total_mdbs = len(mdb_list)
         print(mdb_list)
         # start geoprocess
         layers = ["Parcel"]
         allerror=open(path+"\\ALL_ERROR.csv","a")
         allerror.truncate(0)
-
+        count = 0
         for i in mdb_list:
             f = open(i + "_error.csv", "a")
             f.truncate(0)
             env.workspace = i
-            print (env.workspace)
+            count += 1
+            print (env.workspace + " (" + str(count) + "/" + str(total_mdbs)+ ")")
             for l in layers:
                 TheShapefile = i + "\\" + l
                 # print TheShapefile
