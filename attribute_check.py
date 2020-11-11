@@ -5,7 +5,7 @@ class App(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.pack()
-        self.version = "v2.0.1"
+        self.version = "v2.1.0"
         self.grid()
         self.create_widgets()
 
@@ -27,7 +27,7 @@ class App(Frame):
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
         self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        instruction = """Version: 2.1.0
+        instruction = "Version: "+self.version +
 
 """\n Checks for blank attributes and incorrect attribute within parcel layer of mdb files. The error are populated in a csv file in the same folder containing mdb file.
 
