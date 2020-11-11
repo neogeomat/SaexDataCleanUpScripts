@@ -1,11 +1,12 @@
 from Tkinter import *
 
+version = "v2.1.0"
 
 class App(Frame):
+    global version
     def __init__(self, master):
         Frame.__init__(self, master)
         self.pack()
-        self.version = "v2.1.0"
         self.grid()
         self.create_widgets()
 
@@ -27,9 +28,7 @@ class App(Frame):
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
         self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        instruction = "Version: "+self.version +
-
-"""\n Checks for blank attributes and incorrect attribute within parcel layer of mdb files. The error are populated in a csv file in the same folder containing mdb file.
+        instruction = """\n Checks for blank attributes and incorrect attribute within parcel layer of mdb files. The error are populated in a csv file in the same folder containing mdb file.
 
 Requires arcpy (available through arcgis 10.x) and saex. Python executable must be from the arcgis installation.
 
@@ -176,11 +175,11 @@ Output: .csv file containing the error for each mdb file in the same location. T
 
         print("process complete")
         f.close()
-        tkMessageBox.showinfo(title="Check Attribute Errors " + self.version + ", message="Done")
+        tkMessageBox.showinfo(title="Check Attribute Errors " + version + ", message='Done'")
         allerror.close()
 
 
 root = Tk()
-root.title("Check Attribute Errors " + self.version + "")
+root.title("Check Attribute Errors " + version)
 myapp = App(root)
 myapp.mainloop()
