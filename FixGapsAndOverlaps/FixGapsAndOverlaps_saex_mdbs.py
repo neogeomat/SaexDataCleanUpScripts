@@ -145,6 +145,26 @@ class App(Frame):
             # Process: Delete Field
             arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
             arcpy.CalculateField_management(Data_Location + "\\Parcel", "PARCELKEY","str( !GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)","PYTHON_9.3", "")
+
+            # Add Fields
+            arcpy.AddField_management (Data_Location + "\\Parcel", "circularity", "FLOAT")
+            arcpy.AddField_management (Data_Location + "\\Parcel", "suspicious", "TEXT", field_length=5)
+
+            # Calculate Circularity
+            arcpy.CalculateField_management (Data_Location + "\\Parcel", "circularity",
+                                             "4 * math.pi * !SHAPE_Area!  / !SHAPE_Length!**2", "PYTHON")
+
+            # Calculate Suspicious
+            expression = "check(!Shape_Area!,!circularity!)"
+
+            codeblock = """def check(Shape_Area,circularity):
+                if(Shape_Area < 5 and circularity < 0.2):
+                    return 'yes'
+                else:
+                    return 'no'
+                    """
+            arcpy.CalculateField_management (Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
+
             arcpy.Compact_management(Data_Location)
             print(Data_Location + " cleaning process complete")
             print ('The script took {0} second !'.format(time.time() - startTime))
