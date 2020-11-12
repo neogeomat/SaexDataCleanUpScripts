@@ -137,7 +137,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
                         if not skipVDC:
                             VDC = TheRow.getValue("VDC")
-                            if VDC is None or VDC:
+                            if VDC is None or VDC == "" or VDC == " ":
                                 f.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
                                 allerror.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
                             elif VDC > 9999 or VDC == 0:
