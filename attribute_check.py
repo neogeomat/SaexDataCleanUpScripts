@@ -36,7 +36,9 @@ Input: Folder path
 
 Process: This scripts loops though each row of parcel layer of each mdb file in the path recursively and checks for blank and incorrect attributes for DISTRICT, VDC, MARDNO, GRIDS1, PARCELNO and PARCELTY columns. The errors inr each mdb file is populated showing the error along with PARCELID into seperate .csv file (containg the mdb file name) in the same location. 
 
-Output: .csv file containing the error for each mdb file in the same location. The error in the mdb should be corrected manually."""
+Output: .csv file containing the error for each mdb file in the same location. The error in the mdb should be corrected manually.
+
+For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
@@ -44,7 +46,9 @@ Output: .csv file containing the error for each mdb file in the same location. T
         import tkMessageBox
         import arcpy
         import os
+        import time
         from arcpy import env
+        starttime = time.time();
         path = self.sheetentry1.get()
         mdb_list = []
         for root, dirnames, filenames in os.walk(path):
@@ -52,7 +56,7 @@ Output: .csv file containing the error for each mdb file in the same location. T
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
         total_mdbs = len(mdb_list)
-        print(mdb_list)
+        # print(mdb_list)
         # start geoprocess
         layers = ["Parcel"]
         allerror=open(path+"\\ALL_ERROR.csv","a")
@@ -64,6 +68,7 @@ Output: .csv file containing the error for each mdb file in the same location. T
             env.workspace = i
             count += 1
             print (env.workspace + " (" + str(count) + "/" + str(total_mdbs)+ ")")
+            # print (" (" + str(count) + "/" + str(total_mdbs)+ ")")
             for l in layers:
                 TheShapefile = i + "\\" + l
                 # print TheShapefile
@@ -101,7 +106,7 @@ Output: .csv file containing the error for each mdb file in the same location. T
                         allerror.write("Grid Sheet Column does not exist"+ "\n")
                         skipGrid=True
                     else:
-                        skipGrid=False
+                        skipGrid=FALSE
 
                     isParcelty = arcpy.ListFields(TheShapefile, "PARCELTY")
                     if (len(isParcelty)) != 1:
@@ -180,6 +185,9 @@ Output: .csv file containing the error for each mdb file in the same location. T
 
         print("process complete")
         f.close()
+
+        endtime = time.time()
+        print("TIme taken: " + str(endtime -starttime))
         tkMessageBox.showinfo(title="Check Attribute Errors" + version, message="Done")
         allerror.close()
 
