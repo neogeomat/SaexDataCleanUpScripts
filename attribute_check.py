@@ -22,7 +22,7 @@ class App(Frame):
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         # create calculate button
-        self.button4 = Button(self, text="Process", command=self.parcelIDcreator, width=30)
+        self.button4 = Button(self, text="Process", command=self.attributeChecker, width=30)
         self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
@@ -42,7 +42,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
-    def parcelIDcreator(self):
+    def attributeChecker(self):
         import tkMessageBox
         import arcpy
         import os
