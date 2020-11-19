@@ -52,12 +52,13 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
-                    x = re.findall ("^[A-Z]*[a-z\s_]+(\d+[\s_]*[A-Za-z]*[\s_]*\d*)", filename)
+                    new_filename = filename.replace(" ", "")
+                    x = re.findall ("^[A-Za-z\s_]+(\d+[\s_(-]*[A-Za-z]*[\(\s_-]*\d*)", new_filename)
                     if x:
                         print(filename+","+x[0])
                         allerror.write (filename+","+x[0]+"\n")
                     else:
-                        print("No match")
+                        print(filename + "," + " ")
                         allerror.write (filename + "," + " " + "\n")
         tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
         allerror.close()
