@@ -4,11 +4,55 @@ version = "v2.1.1"
 
 class App(Frame):
     global version
+    ka_kha_ga={"":"00",
+
+               "ka":"01",
+               "k":"01",
+
+               "kha":"02",
+               "kh":"02",
+               
+               "ga":"03",
+               "gha":"04",
+               "nga":"05",
+               "cha":"06",
+               "chha":"07",
+               "ja":"08",
+               "jha":"09",
+               "yna":"10",
+               "Ta":"11",
+               "Tha":"12",
+               "Da":"13",
+               "Dha":"14",
+               "ana":"15",
+               "ta":"16",
+               "tha":"17",
+               "da":"18",
+               "dha":"19",
+               "na":"20",
+               "pa":"21",
+               "fa":"22",
+               "ba":"23",
+               "bha":"24",
+               "ma":"25",
+               "ya":"26",
+               "ra":"27",
+               "la":"28",
+               "wa":"29",
+               "sha":"30",
+               "SHA":"31",
+               "sa":"32",
+               "ha":"33",
+               "kshya":"34",
+               "tra":"35",
+               "gya":"36"
+               }
     def __init__(self, master):
         Frame.__init__(self, master)
         self.pack()
         self.grid()
         self.create_widgets()
+
 
     def create_widgets(self):
         """Create buttons that do nothing"""
