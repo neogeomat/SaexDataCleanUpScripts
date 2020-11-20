@@ -99,6 +99,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
+                    parcelfile=path+"\\"+filename+"\\"+"Parcel"
+                    print parcelfile
                     new_filename = filename.replace(" ", "")
                     x = re.findall ("^[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
@@ -109,7 +111,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         new_string_no = x[0][2]
                         if new_string_no=="":
                             new_string_no="0"
-                        print("code=,5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no)
+                        print("code=5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no)
+                        sheet_code="5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no
+
+                        arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
                         allerror.write (filename+","+x[0][0]+","+x[0][1]+","+x[0][2]+"\n")
                     else:
                         print(filename + "," + " ")
