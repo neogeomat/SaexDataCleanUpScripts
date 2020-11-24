@@ -12,6 +12,8 @@ ka_kha_ga = {"": "00",
              "ga": "03",
              "gha": "04",
              "nga": "05",
+             "ng": "05",
+             "ch": "06",
              "cha": "06",
              "chha": "07",
              "ja": "08",
@@ -22,12 +24,14 @@ ka_kha_ga = {"": "00",
              "Da": "13",
              "Dha": "14",
              "ana": "15",
-             "ta": "16",
-             "tha": "17",
-             "da": "18",
-             "dha": "19",
+             "tta": "16",
+             "ttha": "17",
+             "dda": "18",
+             "ddha": "19",
+             "dhha": "19",
              "na": "20",
              "pa": "21",
+             "pha": "22",
              "fa": "22",
              "ba": "23",
              "bha": "24",
@@ -40,6 +44,7 @@ ka_kha_ga = {"": "00",
              "SHA": "31",
              "sa": "32",
              "ha": "33",
+             "ksha": "34",
              "kshya": "34",
              "tra": "35",
              "gya": "36"
@@ -102,7 +107,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     parcelfile=path+"\\"+filename+"\\"+"Parcel"
                     print parcelfile
                     new_filename = filename.replace(" ", "")
-                    x = re.findall ("^[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+                    x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
                     if x:
                         print(filename+","+x[0][0]+x[0][1]+x[0][2])
@@ -111,11 +116,15 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         new_string_no = x[0][2]
                         if new_string_no=="":
                             new_string_no="0"
-                        print("code=5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no)
-                        sheet_code="5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no
+                        try:
+                            print("code=5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no)
+                            sheet_code="5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no
 
-                        arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                        allerror.write (filename+","+x[0][0]+","+x[0][1]+","+x[0][2]+"\n")
+                            arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
+                            allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
+                        except:
+                            allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
+
                     else:
                         print(filename + "," + " ")
                         allerror.write (filename + "," + " " + "\n")
