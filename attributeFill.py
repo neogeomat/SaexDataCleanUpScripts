@@ -104,8 +104,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
-                    parcelfile=path+"\\"+filename+"\\"+"Parcel"
-                    print parcelfile
+                    parcelfile=os.path.join(root, filename,"Parcel")
+                    print (parcelfile)
                     new_filename = filename.replace(" ", "")
                     x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
