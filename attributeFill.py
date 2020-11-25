@@ -121,6 +121,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             sheet_code="5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no
 
                             arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
+                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
