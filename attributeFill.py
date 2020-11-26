@@ -1,59 +1,61 @@
 from Tkinter import *
 
-version = "v2.2.1"
-ka_kha_ga = {"": "00",
+version = "v2.2.2"
+dic_case_sen={
+    "Ta": "11",
+    "Tha": "12",
+    "Da": "13",
+    "Dha": "14",
+    "tta": "16",
+    "ttha": "17",
+    "dda": "18",
+    "ddha": "19",
+    "dhha": "19",
+    "sha": "30",
+    "SHA": "31",
+    "sa": "32",
+}
+dic_case_insen = {
+    "": "00",
+    "ka": "01",
+    "k": "01",
 
-             "ka": "01",
-             "k": "01",
+    "kha": "02",
+    "kh": "02",
 
-             "kha": "02",
-             "kh": "02",
-
-             "ga": "03",
-             "gha": "04",
-             "nga": "05",
-             "ng": "05",
-             "ch": "06",
-             "cha": "06",
-             "chha": "07",
-             "ja": "08",
-             "jha": "09",
-             "yna": "10",
-             "Ta": "11",
-             "Tha": "12",
-             "Da": "13",
-             "Dha": "14",
-             "ana": "15",
-             "tta": "16",
-             "ttha": "17",
-             "dda": "18",
-             "ddha": "19",
-             "dhha": "19",
-             "na": "20",
-             "pa": "21",
-             "pha": "22",
-             "fa": "22",
-             "ba": "23",
-             "bha": "24",
-             "ma": "25",
-             "ya": "26",
-             "ra": "27",
-             "la": "28",
-             "wa": "29",
-             "sha": "30",
-             "SHA": "31",
-             "sa": "32",
-             "ha": "33",
-             "ksha": "34",
-             "kshya": "34",
-             "tra": "35",
-             "gya": "36"
-             }
+    "ga": "03",
+    "gha": "04",
+    "nga": "05",
+    "ng": "05",
+    "ch": "06",
+    "cha": "06",
+    "chha": "07",
+    "ja": "08",
+    "jha": "09",
+    "yna": "10",
+    "ana": "15",
+    "na": "20",
+    "pa": "21",
+    "pha": "22",
+    "fa": "22",
+    "ba": "23",
+    "bha": "24",
+    "ma": "25",
+    "ya": "26",
+    "ra": "27",
+    "la": "28",
+    "wa": "29",
+    "ha": "33",
+    "ksha":"34",
+    "kshya": "34",
+    "tra": "35",
+    "gya": "36"
+}
 
 
 class App(Frame):
     global version
-    global ka_kha_ga
+    global dic_case_sen
 
     def __init__(self, master):
         Frame.__init__(self, master)
@@ -102,9 +104,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror.truncate (0)
         for root, dirnames, filenames in os.walk(path):
             for dirname in dirnames:
+                print dirname
                 if (os.path.join(root,dirname).lower().find('file') != -1):
                     allerror.write(os.path.join(root,dirname) + ",error, name contains file, check if filemap or not" +"\n")
                 else:
+                    print os.path.join(root,dirname)
                     for filename in filenames:
                         if filename.endswith('.mdb'):
                             mdb_list.append(os.path.join(root, filename))
@@ -117,13 +121,16 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                 print(filename+","+x[0][0]+x[0][1]+x[0][2])
                                 bad_chars = ['_', '-', '(', ")"," "]
                                 new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
+                                if(new_string_name) in dic_case_sen:
+                                    dic_code=dic_case_sen[new_string_name]
+                                else:
+                                    dic_code=dic_case_insen[new_string_name.lower()]
                                 new_string_no = x[0][2]
                                 if new_string_no=="":
                                     new_string_no="0"
                                 try:
-                                    print("code=5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no)
-                                    sheet_code="5555"+x[0][0].zfill(2)+ka_kha_ga[new_string_name]+new_string_no
-
+                                    print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
+                                    sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
                                     arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
                                     arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                                     allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
