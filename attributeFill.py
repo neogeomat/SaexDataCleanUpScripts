@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.2"
+version = "v2.2.3"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -103,43 +103,38 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror = open (path + "\\regex.csv", "a")
         allerror.truncate (0)
         for root, dirnames, filenames in os.walk(path):
-            for dirname in dirnames:
-                print dirname
-                if (os.path.join(root,dirname).lower().find('file') != -1):
-                    allerror.write(os.path.join(root,dirname) + ",error, name contains file, check if filemap or not" +"\n")
-                else:
-                    print os.path.join(root,dirname)
-                    for filename in filenames:
-                        if filename.endswith('.mdb'):
-                            mdb_list.append(os.path.join(root, filename))
-                            parcelfile=os.path.join(root, filename,"Parcel")
-                            print (parcelfile)
-                            new_filename = filename.replace(" ", "")
-                            x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
-                            print(x)
-                            if x:
-                                print(filename+","+x[0][0]+x[0][1]+x[0][2])
-                                bad_chars = ['_', '-', '(', ")"," "]
-                                new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
-                                if(new_string_name) in dic_case_sen:
-                                    dic_code=dic_case_sen[new_string_name]
-                                else:
-                                    dic_code=dic_case_insen[new_string_name.lower()]
-                                new_string_no = x[0][2]
-                                if new_string_no=="":
-                                    new_string_no="0"
-                                try:
-                                    print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
-                                    sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
-                                    arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                                    arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
-                                    allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
-                                except:
-                                    allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
+            [dirnames.remove(d) for d in list(dirnames) if os.path.join(root,d).lower().find('file')!=-1]
+            for filename in filenames:
+                if filename.endswith('.mdb'):
+                    mdb_list.append(os.path.join(root, filename))
+                    parcelfile=os.path.join(root, filename,"Parcel")
+                    print (parcelfile)
+                    new_filename = filename.replace(" ", "")
+                    x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+                    print(x)
+                    if x:
+                        print(filename+","+x[0][0]+x[0][1]+x[0][2])
+                        bad_chars = ['_', '-', '(', ")"," "]
+                        new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
+                        if(new_string_name) in dic_case_sen:
+                            dic_code=dic_case_sen[new_string_name]
+                        elif(new_string_name.lower()) in dic_case_insen:
+                            dic_code=dic_case_insen[new_string_name.lower()]
+                        new_string_no = x[0][2]
+                        if new_string_no=="":
+                            new_string_no="0"
+                        try:
+                            print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
+                            sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
+                            arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
+                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
+                            allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
+                        except:
+                            allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
 
-                            else:
-                                print(filename + "," + " ")
-                                allerror.write (filename + "," + " " + "\n")
+                    else:
+                        print(filename + "," + " ")
+                        allerror.write (filename + "," + " " + "\n")
         tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
         allerror.close()
 
