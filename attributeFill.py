@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.3"
+version = "v2.2.4"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -109,6 +109,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     mdb_list.append(os.path.join(root, filename))
                     parcelfile=os.path.join(root, filename,"Parcel")
                     print (parcelfile)
+                    try:
+                        arcpy.Compact_management(os.path.join(root,filename))
+                    except:
+                        print("Compact error for "+filename)
                     new_filename = filename.replace(" ", "")
                     x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
