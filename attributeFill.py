@@ -126,8 +126,15 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         try:
                             print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
                             sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
-                            arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
+
+                            TheRows = arcpy.UpdateCursor(parcelfile)
+                            for TheRow in TheRows:
+                                Grid = TheRow.getValue("GRIDS1")
+                                if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == "" or len(Grid) > 9 or len(Grid) < 7):
+                                    TheRow.setValue("GRIDS1",sheet_code)
+                                    TheRows.updateRow(TheRow)
+                            #arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
+                            #arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
