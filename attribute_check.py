@@ -63,6 +63,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror.truncate(0)
         count = 0
         for i in mdb_list:
+            try:
+                arcpy.Compact_management(i)
+            except:
+                print("Compact error for " + i)
             f = open(i + "_error.csv", "a")
             f.truncate(0)
             env.workspace = i
