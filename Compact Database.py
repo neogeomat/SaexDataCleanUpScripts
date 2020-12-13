@@ -49,15 +49,25 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import re
         path = self.sheetentry1.get()
         mdb_list = []
+        count = 0
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
+                    total_mdbs = len(mdb_list)
 
-                    try:
-                        arcpy.Compact_management(os.path.join(root,filename))
-                    except:
-                        print("Compact error for "+filename)
+        for i in mdb_list:
+            import time
+            startTime= time.time()
+            count +=1
+            try:
+                arcpy.Compact_management(i)
+            except:
+                print("Compact error for "+i)
+            print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
+        print(" Compact process complete")
+        print ('The script took {0} second !'.format(time.time() - startTime))
+
         tkMessageBox.showinfo(title="Compact database" + version, message="Done")
 root = Tk()
 root.title("Compact database " + version)
