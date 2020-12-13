@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.0.0"
+version = "v1.1.1"
 
 class App(Frame):
     global version
@@ -24,12 +24,28 @@ class App(Frame):
         self.sheetentry1 = Entry(self, width=30)
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
+        # create label for District
+        self.Sheet = Label(self, text="Enter District Code", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create entry.
+        self.DistrictCode = Entry(self, width=30)
+        self.DistrictCode.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create label for VDC
+        self.Sheet = Label(self, text="Enter VDC Code", width=30)
+        self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create entry.
+        self.VDCCode = Entry(self, width=30)
+        self.VDCCode.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
         # create calculate button
         self.button4 = Button(self, text="Process", command=self.attributeChecker, width=30)
-        self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.button4.grid(row=3, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid(row=4, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n
 Input: Folder path
@@ -39,7 +55,7 @@ Output: .csv file containing the error for each mdb file in the same location. T
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
-        self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid(row=5, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
     def attributeChecker(self):  # sourcery skip
         import tkMessageBox
@@ -47,8 +63,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import os
         from arcpy import env
         import re
-        district_code=26
-        vdc_code=26
+        district_code=self.DistrictCode.get()
+        vdc_code=self.VDCCode.get()
         path = self.sheetentry1.get()
         mdb_list = []
         allerror = open (path + "\\regex.csv", "a")
@@ -74,9 +90,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         #bad_chars = ['_', '-', '(', ")"," "]
                         #new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
                         try:
-                            arcpy.CalculateField_management(parcelfile,"VDC",vdc_code,"PYTHON")#FOR VDC_CODE
+                            if(district_code != '' and int(district_code)):
+                                arcpy.CalculateField_management(parcelfile,"DISTRICT",int(district_code),"PYTHON")#FOR DISTRICT_CODE
+                            if (vdc_code != '' and int(vdc_code)):
+                                arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
                             arcpy.CalculateField_management(parcelfile,"WARDNO",ward_code,"PYTHON")#FOR WARD_CODE
-                            arcpy.CalculateField_management(parcelfile,"DISTRICT",district_code,"PYTHON")#FOR DISTRICT_CODE
+
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
 
