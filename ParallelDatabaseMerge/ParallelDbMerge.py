@@ -1,43 +1,56 @@
 from Tkinter import *
+import Tkinter, Tkconstants, tkFileDialog
 
-version = "v2.0.0"
-
+version = "v2.1.0"
 
 class App (Frame):
     global version
-    global dic_case_sen
 
-    def __init__(self, master):
-        Frame.__init__ (self, master)
-        self.pack ()
-        self.grid ()
-        self.create_widgets ()
+    def browse_button1(self):
+        # global folder_path
+        self.SourceMDB = tkFileDialog.askopenfilename()
+        self.folder_path.set(self.SourceMDB )
+
+    def browse_button2(self):
+        self.TargetMDB = tkFileDialog.askopenfilename()
+        self.folder_path1.set(self.TargetMDB )
 
     def create_widgets(self):
+
         """Create buttons that do nothing"""
+        self.folder_path = StringVar()
+        self.folder_path1 = StringVar()
 
         # create label for sheet
-        self.Sheet = Label (self, text="Enter first mdb file as source", width=30)
-        self.Sheet.grid (row=0, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet = Label (self, text="Select first mdb file as source", width=30)
+        self.Sheet.grid (row=0, column=0)
 
         # create entry.
-        self.sourceMdb = Entry (self, width=30)
-        self.sourceMdb.grid (row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.sheet = Label(self, textvariable=self.folder_path)
+        self.sheet.grid(row=0, column=1, padx=5, pady=5,sticky=E + W + N + S)
+
+        self.sourceMdb = Button(self,text="Browse source", command=self.browse_button1,height=1)
+        #folder_path.set(self.sourceMdb)
+        self.sourceMdb.grid (row=0, column=2, padx=5, pady=5, sticky=E + W + N + S)
 
         # create label for District
-        self.Sheet = Label (self, text="Enter second mdb file as target", width=30)
+        self.Sheet = Label (self, text="Select second mdb file as target", width=30)
         self.Sheet.grid (row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         # create entry.
-        self.targetMdb = Entry (self, width=30)
-        self.targetMdb.grid (row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.sheet = Label(self, textvariable=self.folder_path1)
+        self.sheet.grid(row=1, column=1, padx=5, pady=5,sticky=E + W + N + S)
+
+        self.targetMdb = Button(self, text="Browse target", command=self.browse_button2)
+        #folder_path1.set(self.sourceMdb)
+        self.targetMdb.grid (row=1, column=2, padx=5, pady=5, sticky=E + W + N + S)
 
         # create calculate button
         self.button4 = Button (self, text="Process", command=self.ParallelDbMerge, width=30)
         self.button4.grid (row=3, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label (self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid (row=4, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid (row=4, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n
 Input: 
@@ -47,7 +60,12 @@ Process:
 Output: 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label (self, text=instruction, width=50, justify=LEFT, wraplength=400)
-        self.Sheet.grid (row=5, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid (row=5, columnspan=5, padx=5, pady=5, sticky=E + W + N + S)
+    def __init__(self, master):
+        Frame.__init__ (self, master)
+        self.create_widgets ()
+        self.pack()
+        self.grid()
 
     def ParallelDbMerge(self):  # sourcery skip
         import tkMessageBox
@@ -55,25 +73,21 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import os
         from arcpy import env
         import re
+        folder_path = StringVar()
+        folder_path1 = StringVar()
 
         ###
         # Script arguments
-        Sourceparcel = self.sourceMdb.get() + "\\Parcel"
+        #Sourceparcel = self.sourceMdb.get() + "\\Parcel"
+        # print self.sourceMdb.get()
+        print self.SourceMDB
+        print self.TargetMDB
+        Sourceparcel = self.SourceMDB + "\\Parcel"
 
-        TargetParcel = self.targetMdb.get() + "\\Parcel"
+        #TargetParcel = self.targetMdb.get() + "\\Parcel"
+        TargetParcel = self.TargetMDB + "\\Parcel"
 
         Parcel1 = TargetParcel + "1"
-        # Local variables:
-        Parcel_Rename = self.targetMdb.get() + "\\Parcel_Rename"
-        Parcel_Layer1__2_ = "Parcel_Rename_Layer"
-        Parcel__3_ = Parcel_Layer1__2_
-        Parcel_F__2_ = Parcel_Layer1__2_
-        Parcel_Layer1 = "Parcel_Layer"
-        Parcel_F__3_ = Parcel__3_
-        Parcel_F__4_ = Parcel_F__2_
-        Output_Layer__2_ = "Parcel_Rename_Layer1"
-        Delete_succeeded = "true"
-
         # Process: Rename
         # arcpy.Rename_management (TargetParcel, Parcel_Rename, "FeatureClass")
 
