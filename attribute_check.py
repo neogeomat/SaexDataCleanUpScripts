@@ -83,7 +83,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isDistrict = arcpy.ListFields(TheShapefile, "DISTRICT")
                     if (len(isDistrict)) != 1:
                         f.write("District Column does not exist"+ "\n")
-                        allerror.write("District Column does not exist"+ "\n")
+                        allerror.write("District Column does not exist, ,"+i+ "\n")
                         skipDistrict=True
                     else:
                         skipDistrict=False
@@ -91,7 +91,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isVDC = arcpy.ListFields(TheShapefile, "VDC")
                     if (len(isVDC)) != 1:
                         f.write("VDC Column does not exist"+ "\n")
-                        allerror.write("VDC Column does not exist"+ "\n")
+                        allerror.write("VDC Column does not exist, ,"+i+ "\n")
                         skipVDC=True
                     else:
                         skipVDC=False
@@ -99,7 +99,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isWard = arcpy.ListFields(TheShapefile, "WARDNO")
                     if (len(isWard)) != 1:
                         f.write("Ward No Column does not exist"+ "\n")
-                        allerror.write("Ward No Column does not exist"+ "\n")
+                        allerror.write("Ward No Column does not exist, ,"+i+ "\n")
                         skipWard=True
                     else:
                         skipWard=False
@@ -107,7 +107,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isGrid = arcpy.ListFields(TheShapefile, "GRIDS1")
                     if (len(isGrid)) != 1:
                         f.write("Grid Sheet Column does not exist"+ "\n")
-                        allerror.write("Grid Sheet Column does not exist"+ "\n")
+                        allerror.write("Grid Sheet Column does not exist, ,"+ i + "\n")
                         skipGrid=True
                     else:
                         skipGrid=FALSE
@@ -115,7 +115,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isParcelty = arcpy.ListFields(TheShapefile, "PARCELTY")
                     if (len(isParcelty)) != 1:
                         f.write("Parcel Type Column does not exist" + "\n")
-                        allerror.write("Parcel Type Column does not exist" + "\n")
+                        allerror.write("Parcel Type Column does not exist, ," + i + "\n")
                         skipParcelty = True
                     else:
                         skipParcelty = False
@@ -123,10 +123,19 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     isParcelno = arcpy.ListFields(TheShapefile, "PARCELNO")
                     if (len(isParcelty)) != 1:
                         f.write("Parcel No Column does not exist" + "\n")
-                        allerror.write("Parcel No Column does not exist" + "\n")
+                        allerror.write("Parcel No Column does not exist, ," + i + "\n")
                         skipParcelno = True
                     else:
                         skipParcelno = False
+
+                    #Check if Suspicious Column exists
+                    isSuspicious = arcpy.ListFields(TheShapefile, "suspicious")
+                    if (len(isSuspicious)) != 1:
+                        f.write("Suspicious Column does not exist"+ "\n")
+                        allerror.write("Suspicious Column does not exist, ,"+ i + "\n")
+                        skipSuspicious=True
+                    else:
+                        skipSuspicious=False
 
                     # Loop through each row in the attributes
                     for TheRow in TheRows:
@@ -134,58 +143,64 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             District = TheRow.getValue("DISTRICT")
                             if District is None or District == "" or District == " ":
                                 f.write("District Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("District Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("District Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
                             elif District > 75 or District == 0:
                                 f.write("District Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("District Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("District Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
 
                         if not skipVDC:
                             VDC = TheRow.getValue("VDC")
                             if VDC is None or VDC == "" or VDC == " ":
                                 f.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
                             elif VDC > 9999 or VDC == 0:
                                 f.write("VDC Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("VDC Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("VDC Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
 
                         if not skipWard:
                             Wardno = TheRow.getValue("WARDNO")
                             if Wardno is None or Wardno == "" or Wardno == " ":
                                 f.write("Ward No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Ward No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Ward No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
                             elif (not Wardno.isdigit()):
                                 f.write("Ward No in Digit and String at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + ", Check mapsheets_code for freesheets\n")
-                                allerror.write("Ward No in Digit and String at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + ", Check mapsheets_code for freesheets\n")
+                                allerror.write("Ward No in Digit and String at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + ", Check mapsheets_code for freesheets" + "," + i +"\n")
                             elif (int(Wardno) == 0 or int(Wardno) > 35):
                                 f.write("Ward No Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Ward No Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Ward No Error at OBJECTID=," + str(TheRow.getValue("OBJECTID"))  + "," + i + "\n")
 
                         if not skipGrid:
                             Grid = TheRow.getValue("GRIDS1")
                             if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == ""):
                                 f.write("Grid Sheet Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Grid Sheet Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Grid Sheet Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
                             elif (len(Grid) > 9 or len(Grid) < 7):
                                 f.write("Grid Sheet Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Grid Sheet Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Grid Sheet Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID"))  + "," + i + "\n")
 
                         if not skipParcelno:
                             Parcelno = TheRow.getValue("PARCELNO")
                             if (Parcelno is None or Parcelno is ""):
                                 f.write("Parcel No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Parcel No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
                             elif (int(Parcelno) == 0):
                                 f.write("Parcel No 0 at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel No 0 at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Parcel No 0 at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
 
                         if not skipParcelty:
                             Parceltype = TheRow.getValue("PARCELTY")
                             if (Parceltype == None):
                                 f.write("Parcel Type Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel Type Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Parcel Type Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
+
+                        if not skipSuspicious:
+                            Suspicioustype = TheRow.getValue("suspicious")
+                            if (str(Suspicioustype).lower() == "yes"):
+                                f.write("Suspicious Type YES at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
+                                allerror.write("Suspicious Type YES at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
                 else:
-                    f.write("Parcel Layer not found\n")
-                    allerror.write("Parcel Layer not found\n")
+                    f.write("Parcel Layer not found for \n"+i)
+                    allerror.write("Parcel Layer not found for \n"+i)
 
         print("process complete")
         f.close()
