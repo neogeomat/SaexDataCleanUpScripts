@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.1.2"
+version = "v1.1.3"
 
 class App(Frame):
     global version
@@ -53,7 +53,7 @@ Input: Folder path, district does and vdc code
 Process: At First Input the folder path for whole district, then give the district code and leave vdc code blank.This will fill the district attribute for all mdbs.
         Then again run the program and then Input the folder path for each vdc and each time give the vdc code but leave district code blank.This will fill the vdc code each time you run the program for each folder.
  
-Output: The Parcel shapefile with District Code, Vdc code and ward code filled.
+Output: The Parcel shapefile with District Code, Vdc code filled.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
@@ -88,7 +88,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     print(x)
                     if x:
                         #print(filename+","+x[0][0]+x[0][1]+x[0][2])
-                        ward_code=int(x[0][0])
                         #bad_chars = ['_', '-', '(', ")"," "]
                         #new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
                         try:
@@ -96,7 +95,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                 arcpy.CalculateField_management(parcelfile,"DISTRICT",int(district_code),"PYTHON")#FOR DISTRICT_CODE
                             if (vdc_code != '' and int(vdc_code)):
                                 arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
-                            arcpy.CalculateField_management(parcelfile,"WARDNO",ward_code,"PYTHON")#FOR WARD_CODE
 
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")

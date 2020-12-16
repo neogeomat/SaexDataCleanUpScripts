@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.4"
+version = "v2.2.5"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -85,8 +85,8 @@ class App(Frame):
         instruction = """\n
 Input: Folder path
 
-Process: 
-Output: .csv file containing the error for each mdb file in the same location. The error in the mdb should be corrected manually.
+Process: Extracts the ward no and no from the name of the file and creates the grid sheet code. Then it fills the grid code if the grid attribute is blank or error. Also it adds the ward no. to WARDNO column. 
+Output: Mdb file with grid sheet code and ward no column filled.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
@@ -125,6 +125,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         elif(new_string_name.lower()) in dic_case_insen:
                             dic_code=dic_case_insen[new_string_name.lower()]
                         new_string_no = x[0][2]
+                        ward_code=int(x[0][0])
                         if new_string_no=="":
                             new_string_no="0"
                         try:
@@ -138,7 +139,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                     TheRow.setValue("GRIDS1",sheet_code)
                                     TheRows.updateRow(TheRow)
                             #arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                            #arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
+                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
