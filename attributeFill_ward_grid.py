@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.5"
+version = "v2.2.6"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -102,8 +102,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         mdb_list = []
         allerror = open (path + "\\regex.csv", "a")
         allerror.truncate (0)
+        matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
-            [dirnames.remove(d) for d in list(dirnames) if os.path.join(root,d).lower().find('file')!=-1]
+            if any(x in root.lower() for x in matches):
+                break
+
+            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)]
+            #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('file')!=-1]
+            #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('trig')!=-1]
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
@@ -131,7 +137,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         try:
                             print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
                             sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
-
+                            del dic_code
+                            del new_string_no
                             TheRows = arcpy.UpdateCursor(parcelfile)
                             for TheRow in TheRows:
                                 Grid = TheRow.getValue("GRIDS1")
