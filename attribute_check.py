@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.1"
+version = "v2.1.2"
 
 class App(Frame):
     global version
