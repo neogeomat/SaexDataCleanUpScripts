@@ -132,6 +132,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             dic_code=dic_case_insen[new_string_name.lower()]
                         new_string_no = x[0][2]
                         ward_code=int(x[0][0])
+                        if(ward_code>99):
+                            continue
                         if new_string_no=="":
                             new_string_no="0"
                         try:
