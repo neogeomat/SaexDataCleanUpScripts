@@ -1,17 +1,15 @@
 from Tkinter import *
 
-version = "v1.0.0"
+version = "v1.0.1"
 
 class App(Frame):
     global version
-    global dic_case_sen
 
     def __init__(self, master):
         Frame.__init__(self, master)
         self.pack()
         self.grid()
         self.create_widgets()
-
 
     def create_widgets(self):
         """Create buttons that do nothing"""
@@ -45,8 +43,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import tkMessageBox
         import arcpy
         import os
-        from arcpy import env
-        import re
+        import time
+        startTime = time.time ()
         path = self.sheetentry1.get()
         mdb_list = []
         count = 0
@@ -57,8 +55,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     total_mdbs = len(mdb_list)
 
         for i in mdb_list:
-            import time
-            startTime= time.time()
+
             count +=1
             try:
                 arcpy.Compact_management(i)
