@@ -47,9 +47,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import os
         from arcpy import env
         import re
+        import time
         path = self.sheetentry1.get()
         mdb_list = []
         count = 0
+        startTime = time.time()
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.endswith('.mdb'):
@@ -57,8 +59,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     total_mdbs = len(mdb_list)
 
         for i in mdb_list:
-            import time
-            startTime= time.time()
             count +=1
             try:
                 arcpy.Compact_management(i)
