@@ -52,7 +52,6 @@ dic_case_insen = {
     "gya": "36"
 }
 
-
 class App(Frame):
     global version
     global dic_case_sen
@@ -62,7 +61,6 @@ class App(Frame):
         self.pack()
         self.grid()
         self.create_widgets()
-
 
     def create_widgets(self):
         """Create buttons that do nothing"""
@@ -104,10 +102,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror.truncate (0)
         matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
-            if any(x in root.lower() for x in matches):
+            if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
                 break
-
-            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)]
+            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)] # To skip file if they contain file/trif in absolite path
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('file')!=-1]
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('trig')!=-1]
             for filename in filenames:
@@ -120,7 +117,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     except:
                         print("Compact error for "+filename)
                     new_filename = filename.replace(" ", "")
-                    x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+                    x = re.findall ("^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
                     if x:
                         print(filename+","+x[0][0]+x[0][1]+x[0][2])
