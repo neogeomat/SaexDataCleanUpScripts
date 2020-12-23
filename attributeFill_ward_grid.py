@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.6"
+version = "v2.2.7"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -142,8 +142,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                 if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == "" or len(Grid) > 9 or len(Grid) < 7):
                                     TheRow.setValue("GRIDS1",sheet_code)
                                     TheRows.updateRow(TheRow)
+                                Ward = TheRow.getValue("WARDNO")
+                                if (Ward is None or len(Ward) == 0 or Ward == " " or Ward == "" or int(Ward) > 40):
+                                    TheRow.setValue("WARDNO", int(x[0][0]))
+                                    TheRows.updateRow(TheRow)
                             #arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
+                            #arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
