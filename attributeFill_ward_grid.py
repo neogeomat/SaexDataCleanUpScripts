@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.7"
+version = "v2.3.1"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -74,7 +74,7 @@ class App(Frame):
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         # create calculate button
-        self.button4 = Button(self, text="Process", command=self.attributeChecker, width=30)
+        self.button4 = Button(self, text="Process", command=self.attributeFillWardFrid, width=30)
         self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
@@ -90,7 +90,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
-    def attributeChecker(self):  # sourcery skip
+    def attributeFillWardFrid(self):  # sourcery skip
         import tkMessageBox
         import arcpy
         import os
@@ -155,11 +155,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     else:
                         print(filename + "," + " ")
                         allerror.write (filename + "," + " " + "\n")
-        tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
+        tkMessageBox.showinfo(title="Fill Ward No and Grid in freesheet" + version, message="Done")
         allerror.close()
 
 
 root = Tk()
-root.title("Fix Attribute Errors " + version)
+root.title("Fill Ward No and Grid in freesheet" + version)
 myapp = App(root)
 myapp.mainloop()
