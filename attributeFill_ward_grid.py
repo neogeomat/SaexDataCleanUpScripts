@@ -33,6 +33,7 @@ dic_case_insen = {
     "ja": "08",
     "jha": "09",
     "yna": "10",
+    "yan": "10"
     "ana": "15",
     "na": "20",
     "pa": "21",
@@ -99,7 +100,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         path = self.sheetentry1.get()
         mdb_list = []
         allerror = open (path + "\\regex.csv", "a")
+        exception_list= open(path+"\\exception_list_att_fill_ward_grid.csv","a")
         allerror.truncate (0)
+        exception_list.truncate (0)
         matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
             if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
@@ -115,6 +118,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     try:
                         arcpy.Compact_management(os.path.join(root,filename))
                     except:
+                        exception_list.write("Compact Error for ,"+filename+"\n")
                         print("Compact error for "+filename)
                     new_filename = filename.replace(" ", "")
                     x = re.findall ("^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
@@ -150,6 +154,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             #arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
+                            exception_list.write("Attribute fill Error for ," + filename + "\n")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
 
                     else:
@@ -157,6 +162,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         allerror.write (filename + "," + " " + "\n")
         tkMessageBox.showinfo(title="Fill Ward No and Grid in freesheet" + version, message="Done")
         allerror.close()
+        exception_list.close()
 
 
 root = Tk()

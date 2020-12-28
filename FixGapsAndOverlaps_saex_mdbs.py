@@ -56,6 +56,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         # # mdb_list = glob.glob(path+"\**\*.mdb")
         # mdb_list.extend(glob.glob(path+"\*.mdb"))
 
+        exception_list= open(path+"\\exception_list_gap_overlap.csv","a")
+
         mdb_list = []
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -192,6 +194,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 print(Data_Location + " cleaning process complete")
                 ## genereate parcel key
             except:
+                exception_list.write("Gap Overlap Error for ," + i + "\n")
                 print ("error for "+i)
         print ('The script took {0} second !'.format(time.time() - startTime))
         print("process complete")

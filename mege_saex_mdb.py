@@ -51,6 +51,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         from arcpy import env
         path = self.sheetentry1.get()
         #print(path)
+        exception_list= open(path+"\\exception_list_merge.csv","a")
         if os.path.exists(path+"\\"+path.split("\\")[-1]+"_merged.mdb"):
             os.remove(path+"\\"+path.split("\\")[-1]+"_merged.mdb")
             print("old merged file deleted")
@@ -72,8 +73,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             shutil.copy(r'D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\BLANK84.mdb', path+"\\"+path.split("\\")[-1]+"_merged.mdb")
             print("D:\\LIS_SYSTEM\\LIS_Spatial_Templates\\BLANK84.mdb copied as "+path.split("\\")[-1]+"_merged.mdb")
         except IOError as e:
+            exception_list.write("Unable to Copy Error for ," + path + "\n")
             print("Unable to copy file. %s" % e)
         except:
+            exception_list.write("Unexpected Error for ," + path + "\n")
             print("Unexpected error:", sys.exc_info())
         merged = path+"\\"+path.split("\\")[-1]+"_merged.mdb\\"
 
@@ -85,9 +88,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             count += 1
             print (env.workspace + " (" + str (count) + "/" + str (total_mdbs) + ")")
             for l in layers:
-                arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
-                # print(merged + l)
-                # arcpy.Merge_management(l, merged)
+                try:
+                    arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
+                    # print(merged + l)
+                    # arcpy.Merge_management(l, merged)
+                except:
+                    exception_list.write("Merge Database Error for ," + i + "\n")
         print("process complete")
         tkMessageBox.showinfo(title="Merge Saex Mdb files" + version, message="Done")
             

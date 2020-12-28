@@ -47,6 +47,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         startTime = time.time ()
         path = self.sheetentry1.get()
         mdb_list = []
+        exception_list= open(path+"\\exception_list_compact.csv","a")
         count = 0
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -60,9 +61,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             try:
                 arcpy.Compact_management(i)
             except:
+                exception_list.write("Compact Error for ," + i + "\n")
                 print("Compact error for "+i)
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
         print(" Compact process complete")
+        exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
 
         tkMessageBox.showinfo(title="Compact database" + version, message="Done")
