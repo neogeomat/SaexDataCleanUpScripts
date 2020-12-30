@@ -69,6 +69,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         vdc_code=self.VDCCode.get()
         path = self.sheetentry1.get()
         mdb_list = []
+        exception_list= open(path+"\\exception_list_att_fill_vdc_dis_code.csv","a")
         allerror = open (path + "\\regex.csv", "a")
         allerror.truncate (0)
         for root, dirnames, filenames in os.walk(path):
@@ -81,6 +82,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     try:
                         arcpy.Compact_management(os.path.join(root,filename))
                     except:
+                        exception_list.write("Compact Error for ,"+filename+"\n")
                         print("Compact error for "+filename)
 
                     new_filename = filename.replace(" ", "")
@@ -97,6 +99,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                 arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
 
                         except:
+                            exception_list.write("Attribute fill Error for ," + filename + "\n")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
 
                     else:
@@ -104,6 +107,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         allerror.write (filename + "," + " " + "\n")
         tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
         allerror.close()
+        exception_list.close()
 
 
 root = Tk()

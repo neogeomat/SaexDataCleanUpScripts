@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.2.6"
+version = "v2.3.1"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -33,6 +33,7 @@ dic_case_insen = {
     "ja": "08",
     "jha": "09",
     "yna": "10",
+    "yan": "10"
     "ana": "15",
     "na": "20",
     "pa": "21",
@@ -52,7 +53,6 @@ dic_case_insen = {
     "gya": "36"
 }
 
-
 class App(Frame):
     global version
     global dic_case_sen
@@ -62,7 +62,6 @@ class App(Frame):
         self.pack()
         self.grid()
         self.create_widgets()
-
 
     def create_widgets(self):
         """Create buttons that do nothing"""
@@ -76,7 +75,7 @@ class App(Frame):
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         # create calculate button
-        self.button4 = Button(self, text="Process", command=self.attributeChecker, width=30)
+        self.button4 = Button(self, text="Process", command=self.attributeFillWardFrid, width=30)
         self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
@@ -92,7 +91,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
-    def attributeChecker(self):  # sourcery skip
+    def attributeFillWardFrid(self):  # sourcery skip
         import tkMessageBox
         import arcpy
         import os
@@ -101,13 +100,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         path = self.sheetentry1.get()
         mdb_list = []
         allerror = open (path + "\\regex.csv", "a")
+        exception_list= open(path+"\\exception_list_att_fill_ward_grid.csv","a")
         allerror.truncate (0)
+        exception_list.truncate (0)
         matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
-            if any(x in root.lower() for x in matches):
+            if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
                 break
-
-            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)]
+            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)] # To skip file if they contain file/trif in absolite path
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('file')!=-1]
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('trig')!=-1]
             for filename in filenames:
@@ -118,9 +118,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     try:
                         arcpy.Compact_management(os.path.join(root,filename))
                     except:
+                        exception_list.write("Compact Error for ,"+filename+"\n")
                         print("Compact error for "+filename)
                     new_filename = filename.replace(" ", "")
-                    x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+                    x = re.findall ("^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
                     if x:
                         print(filename+","+x[0][0]+x[0][1]+x[0][2])
@@ -147,20 +148,26 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                 if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == "" or len(Grid) > 9 or len(Grid) < 7):
                                     TheRow.setValue("GRIDS1",sheet_code)
                                     TheRows.updateRow(TheRow)
+                                Ward = TheRow.getValue("WARDNO")
+                                if (Ward is None or len(Ward) == 0 or Ward == " " or Ward == "" or int(Ward) > 40):
+                                    TheRow.setValue("WARDNO", int(x[0][0]))
+                                    TheRows.updateRow(TheRow)
                             #arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
-                            arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
+                            #arcpy.CalculateField_management(parcelfile,"WARDNO",int(x[0][0]),"PYTHON")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                         except:
+                            exception_list.write("Attribute fill Error for ," + filename + "\n")
                             allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
 
                     else:
                         print(filename + "," + " ")
                         allerror.write (filename + "," + " " + "\n")
-        tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
+        tkMessageBox.showinfo(title="Fill Ward No and Grid in freesheet" + version, message="Done")
         allerror.close()
+        exception_list.close()
 
 
 root = Tk()
-root.title("Fix Attribute Errors " + version)
+root.title("Fill Ward No and Grid in freesheet" + version)
 myapp = App(root)
 myapp.mainloop()
