@@ -70,6 +70,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         path = self.sheetentry1.get()
         mdb_list = []
         exception_list= open(path+"\\exception_list_att_fill_vdc_dis_code.csv","a")
+        exception_list.truncate(0)
         allerror = open (path + "\\regex.csv", "a")
         allerror.truncate (0)
         for root, dirnames, filenames in os.walk(path):
