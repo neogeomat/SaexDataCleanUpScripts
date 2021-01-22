@@ -182,12 +182,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## parfid in construction
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(Data_Location + "\\Construction", Data_Location + "\\Parcel",
+
+                aarcpy.Intersect_analysis([Data_Location + "\\Construction", Data_Location + "\\Parcel"], DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ConstructionParcelIntersect.shp", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
                                            "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
                                            + Data_Location + "\\Parcel,ids,-1,-1","INTERSECT", "", "")
 
                 # Process: Calculate Field (2)
@@ -225,9 +227,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                         return 'no'
                         """
                 arcpy.CalculateField_management (Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
-
-
-
 
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
