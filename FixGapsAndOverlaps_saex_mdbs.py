@@ -158,7 +158,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## parfid in segments
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(Data_Location + "\\Segments", Data_Location + "\\Parcel",
+                arcpy.Intersect_analysis([Data_Location + "\\Segments", Data_Location + "\\Parcel"],
+                                         DataCleanTemp + "\\SegmentsParcelIntersect.shp", "", "", "line")
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\SegmentsParcelIntersect.shp", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"
                                            + Data_Location + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"
                                            + Data_Location + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
@@ -183,7 +185,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 ## parfid in construction
                 # Process: Spatial Join
 
-                aarcpy.Intersect_analysis([Data_Location + "\\Construction", Data_Location + "\\Parcel"], DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
+                arcpy.Intersect_analysis([Data_Location + "\\Construction", Data_Location + "\\Parcel"], DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
                 arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ConstructionParcelIntersect.shp", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
                                            "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
