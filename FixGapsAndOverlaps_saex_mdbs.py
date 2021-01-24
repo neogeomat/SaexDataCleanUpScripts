@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.2"
+version = "v2.1.3"
 
 class App(Frame):
     global version
@@ -110,7 +110,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                                                             + Data_Location + "\\Parcel,Shape_Length,-1,-1;Shape_Area \"Shape_Area\" false true true 8 Double 0 0 ,First,#,"
                                                             + Data_Location + "\\Parcel,Shape_Area,-1,-1", "")
 
-                arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
+                arcpy.MakeFeatureLayer_management(DataCleanTemp + "\\Parcel.shp", "selection_parcel")
+                arcpy.SelectLayerByAttribute_management("selection_parcel","NEW_SELECTION",'"Shape_Area"<0.05')
+                arcpy.Eliminate_management("selection_parcel",DataCleanTemp + "\\Parcel1.shp","AREA")
+                arcpy.SelectLayerByAttribute_management("selection_parcel","CLEAR_SELECTION")
+                #arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
                 # Process: Feature To Point
                 arcpy.FeatureToPoint_management(DataCleanTemp + "\\Parcel1.shp", DataCleanTemp + "\\ParcelCentroid.shp", "INSIDE")
