@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.2"
+version = "v2.1.3"
 
 class App(Frame):
     global version
@@ -110,7 +110,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                                                             + Data_Location + "\\Parcel,Shape_Length,-1,-1;Shape_Area \"Shape_Area\" false true true 8 Double 0 0 ,First,#,"
                                                             + Data_Location + "\\Parcel,Shape_Area,-1,-1", "")
 
-                arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
+                arcpy.MakeFeatureLayer_management(DataCleanTemp + "\\Parcel.shp", "selection_parcel")
+                arcpy.SelectLayerByAttribute_management("selection_parcel","NEW_SELECTION",'"Shape_Area"<0.05')
+                arcpy.Eliminate_management("selection_parcel",DataCleanTemp + "\\Parcel1.shp","AREA")
+                arcpy.SelectLayerByAttribute_management("selection_parcel","CLEAR_SELECTION")
+                #arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
                 # Process: Feature To Point
                 arcpy.FeatureToPoint_management(DataCleanTemp + "\\Parcel1.shp", DataCleanTemp + "\\ParcelCentroid.shp", "INSIDE")
@@ -158,7 +162,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## parfid in segments
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(Data_Location + "\\Segments", Data_Location + "\\Parcel",
+                arcpy.Intersect_analysis([Data_Location + "\\Segments", Data_Location + "\\Parcel"],
+                                         DataCleanTemp + "\\SegmentsParcelIntersect.shp", "", "", "line")
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\SegmentsParcelIntersect.shp", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"
                                            + Data_Location + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"
                                            + Data_Location + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
@@ -182,12 +188,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## parfid in construction
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(Data_Location + "\\Construction", Data_Location + "\\Parcel",
+
+                arcpy.Intersect_analysis([Data_Location + "\\Construction", Data_Location + "\\Parcel"], DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ConstructionParcelIntersect.shp", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
                                            "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
-                                           + Data_Location + "\\Construction,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ConstructionParcelIntersect.shp,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
                                            + Data_Location + "\\Parcel,ids,-1,-1","INTERSECT", "", "")
 
                 # Process: Calculate Field (2)
@@ -225,9 +233,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                         return 'no'
                         """
                 arcpy.CalculateField_management (Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
-
-
-
 
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
