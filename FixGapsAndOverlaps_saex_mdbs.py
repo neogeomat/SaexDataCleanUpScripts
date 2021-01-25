@@ -98,7 +98,17 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 count += 1
                 print (Data_Location + " (" + str (count) + "/" + str (total_mdbs) + ")")
 
-                arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp", "", "PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 4 Long 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,DISTRICT,-1,-1;VDC \"VDC\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#," + Data_Location + "\\Parcel,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#," + Data_Location + "\\Parcel,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Parcel,PARCELTY,-1,-1;ParcelNote \"ParcelNote\" true false false 200 Text 0 0 ,First,#," + Data_Location + "\\Parcel,ParcelNote,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Parcel,Shape_Length,-1,-1;Shape_Area \"Shape_Area\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Parcel,Shape_Area,-1,-1", "")
+                arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp", "", "PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 4 Long 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 2 Short 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,DISTRICT,-1,-1;VDC \"VDC\" true true false 2 Short 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 2 Short 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,PARCELTY,-1,-1;ParcelNote \"ParcelNote\" true false false 200 Text 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,ParcelNote,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,Shape_Length,-1,-1;Shape_Area \"Shape_Area\" false true true 8 Double 0 0 ,First,#,"
+                                                            + Data_Location + "\\Parcel,Shape_Area,-1,-1", "")
 
                 arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
@@ -117,7 +127,24 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "", "0", "0", "0")
 
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\CleanPoly.shp", DataCleanTemp + "\\ParcelCentroid.shp", DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","AREA \"AREA\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,AREA,-1,-1;PERIMETER \"PERIMETER\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,PERIMETER,-1,-1;COV1_ \"COV1_\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,COV1_,-1,-1;COV1_ID \"COV1_ID\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\CleanPoly.shp,COV1_ID,-1,-1;PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,DISTRICT,-1,-1;VDC \"VDC\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELTY,-1,-1;Shape_Leng \"Shape_Leng\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Leng,-1,-1;Shape_Area \"Shape_Area\" true true false 19 Double 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Area,-1,-1;ParcelNote \"ParcelNote\" true true false 200 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,ParcelNote,-1,-1;remarks \"remarks\" true true false 10 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,remarks,-1,-1;ORIG_FID \"ORIG_FID\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,ORIG_FID,-1,-1", "CONTAINS", "", "")
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\CleanPoly.shp", DataCleanTemp + "\\ParcelCentroid.shp",
+                                           DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","AREA \"AREA\" true true false 19 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\CleanPoly.shp,AREA,-1,-1;PERIMETER \"PERIMETER\" true true false 19 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\CleanPoly.shp,PERIMETER,-1,-1;COV1_ \"COV1_\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\CleanPoly.shp,COV1_,-1,-1;COV1_ID \"COV1_ID\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\CleanPoly.shp,COV1_ID,-1,-1;PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,PARCELKEY,-1,-1;PARCELNO \"PARCELNO\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,DISTRICT,-1,-1;VDC \"VDC\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,GRIDS1,-1,-1;PARCELTY \"PARCELTY\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,PARCELTY,-1,-1;Shape_Leng \"Shape_Leng\" true true false 19 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Leng,-1,-1;Shape_Area \"Shape_Area\" true true false 19 Double 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,Shape_Area,-1,-1;ParcelNote \"ParcelNote\" true true false 200 Text 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,ParcelNote,-1,-1;remarks \"remarks\" true true false 10 Text 0 0 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,remarks,-1,-1;ORIG_FID \"ORIG_FID\" true true false 10 Long 0 10 ,First,#,"
+                                           + DataCleanTemp + "\\ParcelCentroid.shp,ORIG_FID,-1,-1", "CONTAINS", "", "")
 
                 # Process: Append
                 arcpy.Append_management(DataCleanTemp + "\\NewJoinedData.shp", Data_Location + "\\Parcel", "NO_TEST")
@@ -132,9 +159,15 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 ## parfid in segments
                 # Process: Spatial Join
                 arcpy.SpatialJoin_analysis(Data_Location + "\\Segments", Data_Location + "\\Parcel",
-                                           DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
-                                           "SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#," + Data_Location + "\\Segments,ParFID,-1,-1;MBoundTy \"MBoundTy\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Segments,MBoundTy,-1,-1;ABoundTy \"ABoundTy\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Segments,ABoundTy,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Segments,Shape_Length,-1,-1;MarginName \"MarginName\" true true false 50 Text 0 0 ,First,#," + Data_Location + "\\Segments,MarginName,-1,-1;Ids \"Ids\" true true false 0 Long 0 0 ,First,#," + Data_Location + "\\Parcel,Ids,-1,-1",
-                                           "INTERSECT", "", "")
+                                           DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,ParFID,-1,-1;MBoundTy \"MBoundTy\" true true false 2 Short 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,MBoundTy,-1,-1;ABoundTy \"ABoundTy\" true true false 2 Short 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,ABoundTy,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,Shape_Length,-1,-1;MarginName \"MarginName\" true true false 50 Text 0 0 ,First,#,"
+                                           + Data_Location + "\\Segments,MarginName,-1,-1;Ids \"Ids\" true true false 0 Long 0 0 ,First,#,"
+                                           + Data_Location + "\\Parcel,Ids,-1,-1","INTERSECT", "", "")
 
                 # Process: Calculate Field (2)
                 arcpy.CalculateField_management(DataCleanTemp + "\\SegWithParFid.shp", "ParFID", "[ids]", "VB", "")
@@ -151,8 +184,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 # Process: Spatial Join
                 arcpy.SpatialJoin_analysis(Data_Location + "\\Construction", Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
-                                           "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#," + Data_Location + "\\Construction,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#," + Data_Location + "\\Construction,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#," + Data_Location + "\\Construction,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#," + Data_Location + "\\Parcel,ids,-1,-1",
-                                           "INTERSECT", "", "")
+                                           "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
+                                           + Data_Location + "\\Construction,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
+                                           + Data_Location + "\\Construction,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                           + Data_Location + "\\Construction,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
+                                           + Data_Location + "\\Parcel,ids,-1,-1","INTERSECT", "", "")
 
                 # Process: Calculate Field (2)
                 arcpy.CalculateField_management(DataCleanTemp + "\\ConsWithParFid.shp", "ParFID", "[ids]", "VB", "")
@@ -190,6 +226,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                         """
                 arcpy.CalculateField_management (Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
 
+
+
+
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
                 ## genereate parcel key
@@ -198,7 +237,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 print ("error for "+i)
         print ('The script took {0} second !'.format(time.time() - startTime))
         print("process complete")
-        tkMessageBox.showinfo(title="Clean Saex Mdb files"  + version, message="Done")
+        tkMessageBox.showinfo(title="Clean Saex Mdb files" + version, message="Done")
 
 root = Tk()
 root.title("Clean Saex Mdb files"  + version)
