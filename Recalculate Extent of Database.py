@@ -65,12 +65,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                      feature_classes.append(os.path.join(dirpath, filename))
             try:
                 for feature in feature_classes:
-                    print feature
+                    # print feature
                     arcpy.RecalculateFeatureClassExtent_management(feature)
             except:
                 exception_list.write("Extent ReCalculation Error for ," + i + "\n")
                 print("Extent ReCalculation error for "+i)
-                print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
+            print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
         print("Extent ReCalculation process complete")
         exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
