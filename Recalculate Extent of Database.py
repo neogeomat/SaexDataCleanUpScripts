@@ -33,7 +33,7 @@ class App(Frame):
 Input: Folder path
 
 Process:Input the folder location 
-Output: Recalculated Extent Database.
+Output: Recalculated Extent of all feature classes within Database.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
