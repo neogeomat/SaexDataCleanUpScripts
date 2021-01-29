@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.4"
+version = "v2.1.5"
 
 class App(Frame):
     global version
@@ -154,6 +154,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 arcpy.SelectLayerByAttribute_management("selection_parcel", "NEW_SELECTION", '"Area"<0.05')
                 arcpy.Eliminate_management("selection_parcel", DataCleanTemp + "\\Parcel1.shp", "LENGTH")
                 arcpy.SelectLayerByAttribute_management("selection_parcel", "CLEAR_SELECTION")
+                arcpy.Delete_management("selection_parcel")
 
                 # Process: Append
                 arcpy.Append_management(DataCleanTemp + "\\Parcel1.shp", Data_Location + "\\Parcel", "NO_TEST")
@@ -215,8 +216,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## remove processing folder
                 # Process: Delete
-                # arcpy.Delete_management(DataCleanTemp, "Folder")
-
+                try:
+                    arcpy.Delete_management(DataCleanTemp, "Folder")
+                    print "Folder Deleted"
+                except:
+                    print "Folder not Deleted"
                 ## Finalizing data
                 # Process: Delete Field
                 arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
@@ -236,11 +240,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 expression = "check(!Shape_Area!,!circularity!)"
 
                 codeblock = """def check(Shape_Area,circularity):
-                        if(Shape_Area < 5 and circularity < 0.2):
-                            return 'yes'
-                        else:
-                            return 'no'
-                            """
+                            if(Shape_Area < 5 and circularity < 0.2):
+                                return 'yes'
+                            else:
+                                return 'no'
+                                """
                 arcpy.CalculateField_management(Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
 
                 arcpy.Compact_management(Data_Location)
