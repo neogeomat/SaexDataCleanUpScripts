@@ -216,11 +216,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ## remove processing folder
                 # Process: Delete
-                try:
-                    arcpy.Delete_management(DataCleanTemp, "Folder")
-                    print "Folder Deleted"
-                except:
-                    print "Folder not Deleted"
+                arcpy.Delete_management(DataCleanTemp, "Folder")
+
                 ## Finalizing data
                 # Process: Delete Field
                 arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
