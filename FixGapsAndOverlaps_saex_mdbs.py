@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.5"
+version = "v2.1.6"
 
 class App(Frame):
     global version
@@ -57,7 +57,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         # mdb_list.extend(glob.glob(path+"\*.mdb"))
 
         exception_list= open(path+"\\exception_list_gap_overlap.csv","a")
-
+        exception_list.truncate(0)
         mdb_list = []
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -67,7 +67,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         # print(mdb_list)
         total_mdbs = len(mdb_list)
         # merged = "D:\\LIS_SYSTEM\\LIS_Spatial_Data\\merged.mdb"
-        count = 0
+        count = 1
         import time
 
         startTime = time.time()
@@ -75,27 +75,34 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         for i in mdb_list:
             # import arcpy
             # import os
-
-            # Local variables:
-            Folder_Location = "d:\\"
-            # Data_Location = raw_input('location of mdb')
-            # Data_Location = 'D:\SATUNGAL\Santungal_1Ka\Santungal_1Ka.mdb'
-            Data_Location = i
-            if (os.path.exists ("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
-                BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
+            parcel_list=arcpy.GetCount_management(i+"\\Parcel")
+            no_of_attribute=int(parcel_list.getOutput(0))
+            print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
+            if(no_of_attribute==0):
+                exception_list.write("Parcel layer has 0 Features for ," + i + "\n")
+                count+=1
             else:
-                print("Blank Template database not found, install saex")
-                exit ()
-            try:
+                # Local variables:
+                Folder_Location = "d:\\"
+                # Data_Location = raw_input('location of mdb')
+                # Data_Location = 'D:\SATUNGAL\Santungal_1Ka\Santungal_1Ka.mdb'
+                Data_Location = i
+                if (os.path.exists ("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
+                    BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
+                else:
+                    print("Blank Template database not found, install saex")
+                    exit ()
                 # Process: Create Temp Folder to strore all processing intermediaries
                 DataCleanTemp = Folder_Location + "\\DataCleanTemp"
                 if (os.path.exists(DataCleanTemp)):  # delete folder if exits, otherwise it causes error
                     arcpy.Delete_management(DataCleanTemp, "Folder")
+                if (arcpy.Exists("selection_parcel")):
+                    arcpy.Delete_management("selection_parcel")
                 arcpy.CreateFolder_management(Folder_Location, "DataCleanTemp")
                 DataCleanTemp = Folder_Location + "\\DataCleanTemp"
                 arcpy.env.workspace = DataCleanTemp
+                arcpy.env.overwriteOutput = True
                 count += 1
-                print (Data_Location + " (" + str(count) + "/" + str(total_mdbs) + ")")
 
                 arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp", "",
                                                             "PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#,"
@@ -118,7 +125,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 arcpy.Delete_management(Data_Location + "\\Parcel")
 
                 # Process: Copy Features
-                arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0", "0")
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0",
+                                              "0")
 
                 # Process: Feature Class To Coverage
                 cov1 = DataCleanTemp + "\\cov1"
@@ -126,7 +134,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                                                         "DOUBLE")
 
                 # Process: Copy Features
-                arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "", "0",
+                arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "",
+                                              "0",
                                               "0", "0")
 
                 # Process: Spatial Join
@@ -154,7 +163,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 arcpy.SelectLayerByAttribute_management("selection_parcel", "NEW_SELECTION", '"Area"<0.05')
                 arcpy.Eliminate_management("selection_parcel", DataCleanTemp + "\\Parcel1.shp", "LENGTH")
                 arcpy.SelectLayerByAttribute_management("selection_parcel", "CLEAR_SELECTION")
-                arcpy.Delete_management("selection_parcel")
+                if (arcpy.Exists("selection_parcel")):
+                    arcpy.Delete_management("selection_parcel")
 
                 # Process: Append
                 arcpy.Append_management(DataCleanTemp + "\\Parcel1.shp", Data_Location + "\\Parcel", "NO_TEST")
@@ -187,7 +197,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 # Process: Delete Features
                 arcpy.Delete_management(Data_Location + "\\Segments")
-                arcpy.CopyFeatures_management(BLANK84_Template + "\\Segments", Data_Location + "\\Segments", "", "0", "0",
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Segments", Data_Location + "\\Segments", "", "0",
+                                              "0",
                                               "0")
 
                 # Process: Append
@@ -198,7 +209,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 arcpy.Intersect_analysis([Data_Location + "\\Construction", Data_Location + "\\Parcel"],
                                          DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
-                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ConstructionParcelIntersect.shp", Data_Location + "\\Parcel",
+                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ConstructionParcelIntersect.shp",
+                                           Data_Location + "\\Parcel",
                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
                                            "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
                                            + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
@@ -212,7 +224,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 arcpy.Delete_management(Data_Location + "\\Construction")
                 arcpy.CopyFeatures_management(BLANK84_Template + "\\Construction", Data_Location + "\\Construction", "",
                                               "0", "0", "0")
-                arcpy.Append_management(DataCleanTemp + "\\ConsWithParFid.shp", Data_Location + "\\Construction", "NO_TEST")
+                arcpy.Append_management(DataCleanTemp + "\\ConsWithParFid.shp", Data_Location + "\\Construction",
+                                        "NO_TEST")
 
                 ## remove processing folder
                 # Process: Delete
@@ -221,9 +234,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 ## Finalizing data
                 # Process: Delete Field
                 arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
-                arcpy.CalculateField_management(Data_Location + "\\Parcel", "PARCELKEY",
+                try:
+                    arcpy.CalculateField_management(Data_Location + "\\Parcel", "PARCELKEY",
                                                 "str( !GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
                                                 "PYTHON_9.3", "")
+                except:
+                    exception_list.write("ParcelKey Error for ,"+i+"\n")
 
                 # Add Fields
                 arcpy.AddField_management(Data_Location + "\\Parcel", "circularity", "FLOAT")
@@ -237,18 +253,19 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 expression = "check(!Shape_Area!,!circularity!)"
 
                 codeblock = """def check(Shape_Area,circularity):
-                            if(Shape_Area < 5 and circularity < 0.2):
-                                return 'yes'
-                            else:
-                                return 'no'
-                                """
-                arcpy.CalculateField_management(Data_Location + "\\Parcel", "suspicious", expression, "PYTHON", codeblock)
+                                if(Shape_Area < 5 and circularity < 0.2):
+                                    return 'yes'
+                                else:
+                                    return 'no'
+                                    """
+                arcpy.CalculateField_management(Data_Location + "\\Parcel", "suspicious", expression, "PYTHON",
+                                                codeblock)
 
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
-            except:
-                exception_list.write("Gap Overlap Error for ," + i + "\n")
-                print ("error for "+i)
+                # except:
+                #     exception_list.write("Gap Overlap Error for ," + i + "\n")
+                #     print ("error for "+i)
         print ('The script took {0} second !'.format(time.time() - startTime))
         print("process complete")
         tkMessageBox.showinfo(title="Clean Saex Mdb files" + version, message="Done")
