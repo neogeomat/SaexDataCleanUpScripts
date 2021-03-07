@@ -33,7 +33,7 @@ dic_case_insen = {
     "ja": "08",
     "jha": "09",
     "yna": "10",
-    "yan": "10"
+    "yan": "10",
     "ana": "15",
     "na": "20",
     "pa": "21",
@@ -102,7 +102,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror = open (path + "\\regex.csv", "a")
         exception_list= open(path+"\\exception_list_att_fill_ward_grid.csv","a")
         allerror.truncate (0)
-        exception_list.truncate (0)
+        exception_list.truncate(0)
         matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
             if any(x in root.lower() for x in matches): # To detect and skip file/trig folder

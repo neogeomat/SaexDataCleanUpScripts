@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.1.3"
+version = "v1.1.4"
 
 class App(Frame):
     global version
@@ -70,10 +70,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         path = self.sheetentry1.get()
         mdb_list = []
         exception_list= open(path+"\\exception_list_att_fill_vdc_dis_code.csv","a")
+        exception_list.truncate(0)
         allerror = open (path + "\\regex.csv", "a")
         allerror.truncate (0)
+        matches=["file","trig"]
         for root, dirnames, filenames in os.walk(path):
-            [dirnames.remove(d) for d in list(dirnames) if os.path.join(root,d).lower().find('file')!=-1]
+            # if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
+            #     break
+            # [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)] # To skip file if they contain file/trif in absolite path
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
@@ -85,26 +89,27 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         exception_list.write("Compact Error for ,"+filename+"\n")
                         print("Compact error for "+filename)
 
-                    new_filename = filename.replace(" ", "")
-                    x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
-                    print(x)
-                    if x:
-                        #print(filename+","+x[0][0]+x[0][1]+x[0][2])
-                        #bad_chars = ['_', '-', '(', ")"," "]
-                        #new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
-                        try:
-                            if(district_code != '' and int(district_code)):
-                                arcpy.CalculateField_management(parcelfile,"DISTRICT",int(district_code),"PYTHON")#FOR DISTRICT_CODE
-                            if (vdc_code != '' and int(vdc_code)):
-                                arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
+                    # new_filename = filename.replace(" ", "")
+                    # x = re.findall ("^...[A-Za-z\s_]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+                    # print(x)
+                    # if x:
+                    #     #print(filename+","+x[0][0]+x[0][1]+x[0][2])
+                    #     #bad_chars = ['_', '-', '(', ")"," "]
+                    #     #new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
+                    try:
+                        if(district_code != '' and int(district_code)):
+                            #print district_code
+                            arcpy.CalculateField_management(parcelfile,"DISTRICT",int(district_code),"PYTHON")#FOR DISTRICT_CODE
+                        if (vdc_code != '' and int(vdc_code)):
+                            arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
 
-                        except:
-                            exception_list.write("Attribute fill Error for ," + filename + "\n")
-                            allerror.write(filename + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" +"\n")
-
-                    else:
-                        print(filename + "," + " ")
-                        allerror.write (filename + "," + " " + "\n")
+                    except:
+                        exception_list.write("Attribute fill Error for ," + filename + "\n")
+                        allerror.write(filename + "," + ",error" +"\n")
+                    #
+                    # else:
+                    #     print(filename + "," + " ")
+                    #     allerror.write (filename + "," + " " + "\n")
         tkMessageBox.showinfo(title="Fix Attribute Errors" + version, message="Done")
         allerror.close()
         exception_list.close()
