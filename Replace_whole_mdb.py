@@ -93,6 +93,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
         tkMessageBox.showinfo(title="Extent ReCalculation database" + version, message="Done")
 root = Tk()
-root.title("Recalculate Extent database " + version)
+root.title("Replace Mdb databases " + version)
 myapp = App(root)
 myapp.mainloop()
