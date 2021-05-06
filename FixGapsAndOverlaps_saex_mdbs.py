@@ -170,6 +170,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # Process: Append
                     arcpy.Append_management(DataCleanTemp + "\\Parcel1.shp", Data_Location + "\\Parcel", "NO_TEST")
 
+                    # Copu objectids to Ids field for parfid matching
                     # Process: Add Field (3)
                     arcpy.AddField_management(Data_Location + "\\Parcel", "Ids", "LONG", "", "", "", "", "NULLABLE",
                                               "NON_REQUIRED", "")
@@ -269,10 +270,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 print ("error for "+i)
         print ('The script took {0} second !'.format(time.time() - startTime))
         print("process complete")
-        tkMessageBox.showinfo(title="Clean Saex Mdb files" + version, message="Done")
+        tkMessageBox.showinfo(title="Clean Saex Mdb files " + version, message="Done")
 
 root = Tk()
-root.title("Clean Saex Mdb files"  + version)
+root.title("Clean Saex Mdb files " + version)
 myapp = App(root)
 myapp.mainloop()
 

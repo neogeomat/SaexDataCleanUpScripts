@@ -80,6 +80,18 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     arcpy.Append_management(i+"\\Segments",out_data+"\\Segments","NO_TEST")
                 else:
                     print("Segments Layer not found for, " + i)
+                arcpy.env.workspace=i;
+                point_features_list=arcpy.ListFeatureClasses("*","Point")
+                for pt_feature in point_features_list:
+                    arcpy.AddField_management(pt_feature,"Symbol_Type", "TEXT")
+                    layer_name = os.path.basename(pt_feature)
+                    expression=layer_name
+                    arcpy.CalculateField_management(pt_feature, "Symbol_Type", '"'+expression+'"', "PYTHON")
+                    arcpy.Append_management(pt_feature, out_data + "\\Other_Symbols", "NO_TEST")
+                # if arcpy.Exists(i+"\\Temple"):
+                #     arcpy.AddField_management(i + "\\Temple", "Symbol_Type", "TEXT")
+                #     arcpy.CalculateField_management(i+"\\Temple","Symbol_Type",'"""temple"""', "PYTHON")
+                #     arcpy.Append_management(i+"\\Temple",out_data+"\\Other_Symbols","NO_TEST")
                 #arcpy.Rename_management()
                 #arcpy.Delete_management(i)
                 arcpy.Copy_management(out_data,i)
