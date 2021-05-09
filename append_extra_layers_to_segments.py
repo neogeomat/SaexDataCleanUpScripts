@@ -76,7 +76,7 @@ class App (Frame):
         arcpy.env.workspace = DataCleanTemp
         arcpy.env.overwriteOutput = True
         # start geoprocess
-        extra_layers = ["foottrack"] # list of layers to be appended to segments
+        extra_layers = ["foottrack","Foot_Track"] # list of layers to be appended to segments
         count = 0
         for i in mdb_list:
             env.workspace = i
@@ -85,28 +85,24 @@ class App (Frame):
             Data_Location = i
             for l in extra_layers:
                 try:
-                    # Process: Add Field
-                    arcpy.AddField_management (Data_Location + "\\" + l, "Boundty", "SHORT", "", "", "", "", "NULLABLE",
-                                               "NON_REQUIRED", "")
-
-                    # Process: Calculate Field
-                    arcpy.CalculateField_management (Data_Location + "\\" + l, "Boundty", "Fix ( 1 )", "VB", "")
-
-                    # Process: Merge
-                    arcpy.Merge_management (
-                        Data_Location + "\\" + l + ";" + Data_Location + "\\Segments", Data_Location + "\\Track_Seg",
-                        "SHAPE_Length \"SHAPE_Length\" false true true 8 Double 0 0 ,First,#,"+Data_Location + "\\" + l +",SHAPE_Length,-1,-1,"+Data_Location + "\\Segments,Shape_Length,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"+Data_Location + "\\" + l +",Boundty,-1,-1,"+Data_Location + "\\Segments,Boundty,-1,-1;SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"+Data_Location + "\\Segments,SegNo,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"+Data_Location + "\\Segments,ParFID,-1,-1;MBoundTy \"MBoundTy\" true true false 2 Short 0 0 ,First,#,"+Data_Location + "\\Segments,MBoundTy,-1,-1;ABoundTy \"ABoundTy\" true true false 2 Short 0 0 ,First,#,"+Data_Location + "\\Segments,ABoundTy,-1,-1")
-
+                    arcpy.Append_management(Data_Location + "\\" + l, Data_Location + "\\Segments", "NO_TEST", "", "")
+                    arcpy.DeleteIdentical_management (Data_Location + "\\Segments", ["Shape"])
                     # Process: Intersect
                     arcpy.Intersect_analysis (
-                        [Data_Location + "\\Track_Seg", Data_Location + "\\Parcel"],
+                        [Data_Location + "\\Segments", Data_Location + "\\Parcel"],
                         Data_Location + "\\Segments1", "", "", "line")
 
                     # Process: Calculate Field (2)
                     arcpy.CalculateField_management (Data_Location + "\\Segments1", "ParFID", "[FID_Parcel]", "VB", "")
 
                     # Process: Delete Field
-                    arcpy.DeleteField_management (Data_Location + "\\Segments1","FID_Track_Seg;FID_Parcel;PARCELKEY;PARCELNO;DISTRICT;VDC;WARDNO;GRIDS1;PARCELTY;ParcelNote;circularity;suspicious")
+                    arcpy.DeleteField_management (Data_Location + "\\Segments1","FID_Parcel;PARCELKEY;PARCELNO;DISTRICT;VDC;WARDNO;GRIDS1;PARCELTY;ParcelNote;circularity;suspicious")
+
+                    # Delete FeatureClass
+                    arcpy.Delete_management (Data_Location + "\\Segments")
+
+                    # Rename Feature Class
+                    arcpy.Rename_management (Data_Location + "\\Segments1", Data_Location + "\\Segments")
 
                     # print(merged + l)
                     # arcpy.Merge_management(l, merged)
