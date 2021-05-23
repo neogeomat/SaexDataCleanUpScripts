@@ -9,10 +9,10 @@ import re
 #__location__ = sys.argv[0]
 #print __location__
 
-env.workspace = "D:\data\BHAKTAPUR\Bag"
+env.workspace = "D:\sankhu\Salkha\\1"
+path = env.workspace
 
 datasetList = arcpy.ListDatasets('*', 'Feature')
-
 mxd = arcpy.mapping.MapDocument('CURRENT')
 # mxd = arcpy.mapping.MapDocument('D:/data/new.mxd')
 df = arcpy.mapping.ListDataFrames(mxd)[0]
@@ -25,7 +25,16 @@ groupLayer = arcpy.mapping.Layer(env.workspace + r'\Group.lyr')
 parcelLayer = arcpy.mapping.Layer(env.workspace + r'\Parcel.lyr')
 ward_list = []
 count = 0
-total_list = arcpy.ListWorkspaces("*", "Access")
+# total_list = arcpy.ListWorkspaces("*", "Access") # doesn't loop inside folders
+mdb_list = []
+# exception_list= open(path+"\\exception_list_check_attr.csv","a")
+# exception_list.truncate(0)
+for root, dirnames, filenames in os.walk(path):
+    for filename in filenames:
+        if filename.endswith('.mdb'):
+            mdb_list.append(os.path.join(root, filename))
+total_list = mdb_list # imported folder traveser code of mdb_list into total_list
+print(total_list)
 total_count = len(total_list)
 for fc in total_list:
     arcpy.env.workspace = fc
