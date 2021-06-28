@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.0.0"
+version = "v1.1.0"
 
 class App(Frame):
     global version
@@ -33,7 +33,7 @@ class App(Frame):
 Input: Folder path
 
 Process:Input the folder location 
-Output: Recalculated Extent of all feature classes within Database.
+Output: Replace inconsistent mdb with consistent version. solves issue of error in features not moving. Adds missing layers.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
@@ -45,6 +45,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         import os
         import time
         arcpy.env.overwriteOutput = True
+        Folder_Location = "d:"
+        DataCleanTemp = Folder_Location + "\\DataCleanTemp"
         startTime = time.time ()
         path = self.sheetentry1.get()
         mdb_list = []
@@ -96,6 +98,65 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                 #arcpy.Delete_management(i)
                 arcpy.Copy_management(out_data,i)
                 arcpy.Delete_management(out_data)
+
+                # Copu objectids to Ids field for parfid matching
+                # Process: Add Field (3)
+                arcpy.AddField_management (i  + "\\Parcel", "Ids", "LONG", "", "", "", "", "NULLABLE",
+                                           "NON_REQUIRED", "")
+                # Process: Calculate Field (3)
+                arcpy.CalculateField_management (i + "\\Parcel", "IDS", "[OBJECTID]", "VB", "")
+                ## parfid in segments
+                # Process: Spatial Join
+                arcpy.Intersect_analysis ([i + "\\Segments", i + "\\Parcel"],
+                                          DataCleanTemp + "\\SegmentsParcelIntersect.shp", "", "", "line")
+                arcpy.SpatialJoin_analysis (DataCleanTemp + "\\SegmentsParcelIntersect.shp", i + "\\Parcel",
+                                            DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
+                                            "SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"
+                                            + i + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"
+                                            + i + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
+                                            + i + "\\Segments,ParFID,-1,-1;MBoundTy \"MBoundTy\" true true false 2 Short 0 0 ,First,#,"
+                                            + i + "\\Segments,MBoundTy,-1,-1;ABoundTy \"ABoundTy\" true true false 2 Short 0 0 ,First,#,"
+                                            + i + "\\Segments,ABoundTy,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                            + i + "\\Segments,Shape_Length,-1,-1;MarginName \"MarginName\" true true false 50 Text 0 0 ,First,#,"
+                                            + i + "\\Segments,MarginName,-1,-1;Ids \"Ids\" true true false 0 Long 0 0 ,First,#,"
+                                            + i + "\\Parcel,Ids,-1,-1", "INTERSECT", "", "")
+
+                # Process: Calculate Field (2)
+                arcpy.CalculateField_management (DataCleanTemp + "\\SegWithParFid.shp", "ParFID", "[ids]", "VB", "")
+
+                # Process: Delete Features
+                # arcpy.Delete_management (i + "\\Segments")
+                arcpy.CopyFeatures_management (blank_data + "\\Segments", i + "\\Segments", "", "0",
+                                               "0",
+                                               "0")
+
+                # Process: Append
+                arcpy.Append_management (DataCleanTemp + "\\SegWithParFid.shp", i + "\\Segments", "NO_TEST")
+
+                ## parfid in construction
+                # Process: Spatial Join
+
+                arcpy.Intersect_analysis ([i + "\\Construction", i + "\\Parcel"],
+                                          DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
+                arcpy.SpatialJoin_analysis (DataCleanTemp + "\\ConstructionParcelIntersect.shp",
+                                            i + "\\Parcel",
+                                            DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
+                                            "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
+                                            + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
+                                            + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
+                                            + DataCleanTemp + "\\ConstructionParcelIntersect.shp,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
+                                            + i + "\\Parcel,ids,-1,-1", "INTERSECT", "", "")
+
+                # Process: Calculate Field (2)
+                arcpy.CalculateField_management (DataCleanTemp + "\\ConsWithParFid.shp", "ParFID", "[ids]", "VB", "")
+
+                # arcpy.Delete_management (i + "\\Construction")
+                arcpy.CopyFeatures_management (blank_data + "\\Construction", i + "\\Construction",
+                                               "",
+                                               "0", "0", "0")
+                arcpy.Append_management (DataCleanTemp + "\\ConsWithParFid.shp", i + "\\Construction",
+                                         "NO_TEST")
+
             except:
                 exception_list.write("Replace Whole Mdb Error for ," + i + "\n")
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
