@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.0.0"
+version = "v1.0.1"
 
 class App(Frame):
     global version
@@ -22,18 +22,34 @@ class App(Frame):
         self.sheetentry1 = Entry(self, width=30)
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
+        self.Sheet = Label(self, text="Choose Central Meridian", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        options = [
+            "Blank.mdb",
+            "Blank87.mdb",
+            "Blank84.mdb",
+            "Blank81.mdb"
+        ]
+
+        self.variable = StringVar(self)
+        self.variable.set(options[1]) #default value
+        self.optionmenu = OptionMenu(self, self.variable, *options)
+        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+
         # create calculate button
         self.button4 = Button(self, text="Process", command=self.ReCalculateExtentDB, width=30)
-        self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.button4.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid(row=3, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n
 Input: Folder path
 
-Process:Input the folder location 
-Output: Recalculated Extent of all feature classes within Database.
+Process:Appends the data to the templete data andthen replaces the data 
+Output: Replaced data properties with templete data properties.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
@@ -51,13 +67,16 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         exception_list= open(path+"\\exception_list_whole_mdb_replace.csv","a")
         exception_list.truncate(0)
         count = 0
+
+        option_choosed=self.variable.get()
+        blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
+
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.endswith('.mdb'):
                     mdb_list.append(os.path.join(root, filename))
                     total_mdbs = len(mdb_list)
 
-        blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
 
         for i in mdb_list:
             try:
