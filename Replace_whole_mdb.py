@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.0.1"
+version = "v1.0.2"
 
 class App(Frame):
     global version
@@ -18,24 +18,24 @@ class App(Frame):
         self.Sheet = Label(self, text="Enter path to the main folder", width=30)
         self.Sheet.grid(row=0, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        # create entry.
+     # create entry.
         self.sheetentry1 = Entry(self, width=30)
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
-
-        self.Sheet = Label(self, text="Choose Central Meridian", width=30)
-        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
-
-        options = [
-            "Blank.mdb",
-            "Blank87.mdb",
-            "Blank84.mdb",
-            "Blank81.mdb"
-        ]
-
-        self.variable = StringVar(self)
-        self.variable.set(options[1]) #default value
-        self.optionmenu = OptionMenu(self, self.variable, *options)
-        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        #
+        # self.Sheet = Label(self, text="Choose Central Meridian", width=30)
+        # self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        #
+        # options = [
+        #     "Blank.mdb",
+        #     "Blank87.mdb",
+        #     "Blank84.mdb",
+        #     "Blank81.mdb"
+        # ]
+        #
+        # self.variable = StringVar(self)
+        # self.variable.set(options[1]) #default value
+        # self.optionmenu = OptionMenu(self, self.variable, *options)
+        # self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
 
         # create calculate button
@@ -70,8 +70,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         exception_list.truncate(0)
         count = 0
 
-        option_choosed=self.variable.get()
-        blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
+        # option_choosed=self.variable.get()
+        # blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
 
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -81,6 +81,16 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
 
         for i in mdb_list:
+            CentralMeridian = arcpy.Describe(i+"\\"+"Parcel").spatialReference.centralMeridian
+            if(int(CentralMeridian) == 81):
+                blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\Blank81.mdb"
+            elif (int(CentralMeridian) == 84):
+                blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\Blank84.mdb"
+            elif(int(CentralMeridian) == 87):
+                blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\Blank87.mdb"
+            else:
+                blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\Blank.mdb"
+
             try:
                 count +=1
                 out_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\test.mdb"
