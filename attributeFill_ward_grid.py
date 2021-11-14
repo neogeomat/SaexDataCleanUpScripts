@@ -137,8 +137,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             continue
                         if new_string_no=="":
                             new_string_no="0"
-                        else:
-                            new_string_no="0"
+
                         try:
                             print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
                             sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
