@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.3.1"
+version = "v2.3.2"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -137,6 +137,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                             continue
                         if new_string_no=="":
                             new_string_no="0"
+                        else:
+                            new_string_no="0"
                         try:
                             print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
                             sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
@@ -149,7 +151,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                                     TheRow.setValue("GRIDS1",sheet_code)
                                     TheRows.updateRow(TheRow)
                                 Ward = TheRow.getValue("WARDNO")
-                                if (Ward is None or len(Ward) == 0 or Ward == " " or Ward == "" or int(Ward) > 40):
+                                if (Ward is None or len(Ward) == 0 or int(Ward) == 0 or Ward == " " or Ward == "" or int(Ward) > 40):
                                     TheRow.setValue("WARDNO", int(x[0][0]))
                                     TheRows.updateRow(TheRow)
                             #arcpy.CalculateField_management(parcelfile,"GRIDS1",sheet_code,"PYTHON")
