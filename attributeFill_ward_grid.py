@@ -107,7 +107,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         for root, dirnames, filenames in os.walk(path):
             if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
                 break
-            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)] # To skip file if they contain file/trif in absolite path
+            [dirnames.remove(d) for d in dirnames if any(x in os.path.join(root,d).lower() for x in matches)] # To skip file if they contain file/trig in absolute path
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('file')!=-1]
             #[dirnames.remove(d) for d in dirnames if os.path.join(root,d).lower().find('trig')!=-1]
             for filename in filenames:
