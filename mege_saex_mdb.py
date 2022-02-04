@@ -82,6 +82,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
         # start geoprocess
         layers = ["Parcel","Segments","Construction","Parcel_History"]
+        arcpy.AddField_management(merged + "Parcel","source_file","TEXT",None,None,50,None,True,None,None)
         count = 0
         for i in mdb_list:
             env.workspace = i
@@ -94,6 +95,17 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # arcpy.Merge_management(l, merged)
                 except:
                     exception_list.write("Merge Database Error for ," + i + "\n")
+
+            # Calculate source_file
+            expression = "check(!source_file!)"
+
+            codeblock = """def check(source_file):
+                                       if(source_file is None):
+                                           return i
+                                           """
+            arcpy.CalculateField_management(merged + "\\Parcel", "source_file", expression, "PYTHON",
+                                            codeblock)
+
         print("process complete")
         tkMessageBox.showinfo(title="Merge Saex Mdb files" + version, message="Done")
             
