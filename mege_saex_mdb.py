@@ -62,6 +62,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
                 if filename.endswith('.mdb'):
+                    if (filename.startswith("Backup")):
+                        continue
                     mdb_list.append(os.path.join(root, filename))
         
         # print(mdb_list)
@@ -79,6 +81,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             exception_list.write("Unexpected Error for ," + path + "\n")
             print("Unexpected error:", sys.exc_info())
         merged = path+"\\"+path.split("\\")[-1]+"_merged.mdb\\"
+        arcpy.AddField_management(merged + "\\Parcel", "location", "TEXT")
 
         # start geoprocess
         layers = ["Parcel","Segments","Construction","Parcel_History"]
@@ -89,7 +92,15 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             print (env.workspace + " (" + str (count) + "/" + str (total_mdbs) + ")")
             for l in layers:
                 try:
+                    if (l == "Parcel"):
+                        arcpy.AddField_management(i + "\\Parcel", "location", "TEXT")
+                        head, tail = os.path.split(i)
+                        tail = tail.replace(" ", "")
+                        location_str = str(tail[:-4])
+                        arcpy.CalculateField_management(i + "\\Parcel", "location", "'" + location_str + "'", "PYTHON")
+
                     arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
+                    arcpy.DeleteField_management(l,["location"])
                     # print(merged + l)
                     # arcpy.Merge_management(l, merged)
                 except:
