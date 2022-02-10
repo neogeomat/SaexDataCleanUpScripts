@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.1"
+version = "v2.2.0"
 
 class App(Frame):
     global version
@@ -81,7 +81,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             exception_list.write("Unexpected Error for ," + path + "\n")
             print("Unexpected error:", sys.exc_info())
         merged = path+"\\"+path.split("\\")[-1]+"_merged.mdb\\"
-        arcpy.AddField_management(merged + "\\Parcel", "location", "TEXT")
+        arcpy.AddField_management(merged + "\\Parcel", "source_file", "TEXT")
 
         # start geoprocess
         layers = ["Parcel","Segments","Construction","Parcel_History"]
@@ -94,29 +94,18 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             for l in layers:
                 try:
                     if (l == "Parcel"):
-                        arcpy.AddField_management(i + "\\Parcel", "location", "TEXT")
+                        arcpy.AddField_management(i + "\\Parcel", "source_file", "TEXT")
                         head, tail = os.path.split(i)
                         tail = tail.replace(" ", "")
                         location_str = str(tail[:-4])
-                        arcpy.CalculateField_management(i + "\\Parcel", "location", "'" + location_str + "'", "PYTHON")
+                        arcpy.CalculateField_management(i + "\\Parcel", "source_file", "'" + location_str + "'", "PYTHON")
 
                     arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
-                    arcpy.DeleteField_management(l,["location"])
+                    arcpy.DeleteField_management(l,["source_file"])
                     # print(merged + l)
                     # arcpy.Merge_management(l, merged)
                 except:
                     exception_list.write("Merge Database Error for ," + i + "\n")
-
-            # Calculate source_file
-            expression = "check(!source_file!)"
-
-            codeblock = """def check(source_file):
-                                       if(source_file is None):
-                                           return i
-                                           """
-            arcpy.CalculateField_management(merged + "\\Parcel", "source_file", expression, "PYTHON",
-                                            codeblock)
-
         print("process complete")
         tkMessageBox.showinfo(title="Merge Saex Mdb files" + version, message="Done")
             

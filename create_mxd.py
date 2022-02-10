@@ -9,7 +9,7 @@ import re
 #__location__ = sys.argv[0]
 #print __location__
 
-env.workspace = "D:\sankhu\Salkha\\1"
+env.workspace = "D:\\Bhaktapur20771213\\phat_5\\Final_Dibyashwori"
 path = env.workspace
 
 datasetList = arcpy.ListDatasets('*', 'Feature')
@@ -72,4 +72,4 @@ for fc in total_list:
         mxd.save()
     print (fc + " (" + str(count) + "/" + str(total_count) + ")")
 
-# execfile(r'D:\Git\SaexDataCleanUpScripts\create_mdb_arc.py')
+# execfile(r'G:\My Drive\dosamritkarma\CAS\pravesh\pythonscript\DataCleanUpScripts\create_mxd.py')
