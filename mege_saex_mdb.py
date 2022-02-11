@@ -85,7 +85,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
         # start geoprocess
         layers = ["Parcel","Segments","Construction","Parcel_History"]
-        arcpy.AddField_management(merged + "Parcel","source_file","TEXT",None,None,50,None,True,None,None)
+        # arcpy.AddField_management(merged + "Parcel","source_file","TEXT",None,None,50,None,True,None,None)
         count = 0
         for i in mdb_list:
             env.workspace = i
