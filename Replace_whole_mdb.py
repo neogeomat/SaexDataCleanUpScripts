@@ -87,18 +87,22 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                 arcpy.Copy_management(blank_data,out_data)
                 if arcpy.Exists(i+"\\Parcel"):
                     arcpy.Append_management(i+"\\Parcel",out_data+"\\Parcel","NO_TEST")
+                    arcpy.RecalculateFeatureClassExtent_management(i+"\\Parcel")
                 else:
                     print("Parcel Layer not found for, "+i)
                 if arcpy.Exists(i+"\\Construction"):
                     arcpy.Append_management(i+"\\Construction",out_data+"\\Construction","NO_TEST")
+                    arcpy.RecalculateFeatureClassExtent_management(i+"\\Construction")
                 else:
                     print("Construction Layer not found for, " + i)
                 if arcpy.Exists(i + "\\Parcel_History"):
                     arcpy.Append_management(i+"\\Parcel_History",out_data+"\\Parcel_History","NO_TEST")
+                    arcpy.RecalculateFeatureClassExtent_management(i + "\\Parcel_History")
                 else:
                     print("Parcel_History Layer not found for, " + i)
                 if arcpy.Exists(i + "\\Segments"):
                     arcpy.Append_management(i+"\\Segments",out_data+"\\Segments","NO_TEST")
+                    arcpy.RecalculateFeatureClassExtent_management(i + "\\Segments")
                 else:
                     print("Segments Layer not found for, " + i)
                 arcpy.env.workspace=i;
@@ -180,23 +184,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                 exception_list.write("Replace Whole Mdb Error for ," + i + "\n")
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
         print("Replace Whole Mdb complete")
-        print("Extent ReCalculation process Started")
-        for i in mdb_list:
-            count +=1
-            feature_classes = []
-            walk = arcpy.da.Walk(i, datatype="FeatureClass")
-            for dirpath, dirnames, filenames in walk:
-                 for filename in filenames:
-                     feature_classes.append(os.path.join(dirpath, filename))
-            try:
-                for feature in feature_classes:
-                    # print feature
-                    arcpy.RecalculateFeatureClassExtent_management(feature)
-            except:
-                exception_list.write("Extent ReCalculation Error for ," + i + "\n")
-                print("Extent ReCalculation error for "+i)
-            print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
-        print("Extent ReCalculation process complete")
         exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
 
