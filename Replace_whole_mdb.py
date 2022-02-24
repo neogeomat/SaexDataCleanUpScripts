@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v1.0.1"
+version = "v1.1.1"
 
 class App(Frame):
     global version
@@ -179,7 +179,24 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             except:
                 exception_list.write("Replace Whole Mdb Error for ," + i + "\n")
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
-        print("Process complete")
+        print("Replace Whole Mdb complete")
+        print("Extent ReCalculation process Started")
+        for i in mdb_list:
+            count +=1
+            feature_classes = []
+            walk = arcpy.da.Walk(i, datatype="FeatureClass")
+            for dirpath, dirnames, filenames in walk:
+                 for filename in filenames:
+                     feature_classes.append(os.path.join(dirpath, filename))
+            try:
+                for feature in feature_classes:
+                    # print feature
+                    arcpy.RecalculateFeatureClassExtent_management(feature)
+            except:
+                exception_list.write("Extent ReCalculation Error for ," + i + "\n")
+                print("Extent ReCalculation error for "+i)
+            print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
+        print("Extent ReCalculation process complete")
         exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
 
