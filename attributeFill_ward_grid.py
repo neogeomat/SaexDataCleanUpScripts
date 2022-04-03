@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.3.1"
+version = "v2.3.2"
 dic_case_sen={
     "Ta": "11",
     "Tha": "12",
@@ -13,7 +13,7 @@ dic_case_sen={
     "dhha": "19",
     "sha": "30",
     "SHA": "31",
-    "sa": "32",
+    "sa": "32"
 }
 dic_case_insen = {
     "": "00",
@@ -53,6 +53,15 @@ dic_case_insen = {
     "gya": "36"
 }
 
+dict_scale={
+    "500"   :   "5554",
+    "1200"  :   "5555",
+    "1250"  :   "5556",
+    "2400"  :   "5557",
+    "2500"  :   "5558",
+    "4800"  :   "5559"
+}
+
 class App(Frame):
     global version
     global dic_case_sen
@@ -74,12 +83,34 @@ class App(Frame):
         self.sheetentry1 = Entry(self, width=30)
         self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
+        # create entry.
+        self.sheetentry1 = Entry(self, width=30)
+        self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+        self.Sheet = Label(self, text="Choose Mapped Scale", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        options = [
+            "500",
+            "1200",
+            "1250",
+            "2400",
+            "2500",
+            "4800"
+        ]
+
+        self.variable = StringVar(self)
+        self.variable.set(options[4]) #default value(2500)
+        self.optionmenu = OptionMenu(self, self.variable, *options)
+        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+
         # create calculate button
         self.button4 = Button(self, text="Process", command=self.attributeFillWardFrid, width=30)
-        self.button4.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.button4.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
         self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid(row=3, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n
 Input: Folder path
@@ -89,7 +120,7 @@ Output: Mdb file with grid sheet code and ward no column filled.
 
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
-        self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid(row=4, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
     def attributeFillWardFrid(self):  # sourcery skip
         import tkMessageBox
@@ -104,6 +135,13 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         allerror.truncate (0)
         exception_list.truncate(0)
         matches=["file","trig"]
+
+        mapped_scale = self.variable.get()
+        if mapped_scale in dict_scale:
+            scaled_value=dict_scale[mapped_scale]
+        else:
+            scaled_value="5555"
+
         for root, dirnames, filenames in os.walk(path):
             if any(x in root.lower() for x in matches): # To detect and skip file/trig folder
                 break
@@ -124,7 +162,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     x = re.findall ("^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
                     print(x)
                     if x:
-                        print(filename+","+x[0][0]+x[0][1]+x[0][2])
+                        #print(filename+","+x[0][0]+x[0][1]+x[0][2])
                         bad_chars = ['_', '-', '(', ")"," "]
                         new_string_name = ''.join(i for i in x[0][1] if not i in bad_chars)
                         if(new_string_name) in dic_case_sen:
@@ -138,16 +176,16 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                         if new_string_no=="":
                             new_string_no="0"
                         try:
-                            print("code=5555" + x[0][0].zfill(2) + dic_code + new_string_no)
-                            sheet_code="5555" + x[0][0].zfill(2) + dic_code + new_string_no
+                            print("code="+scaled_value + x[0][0].zfill(2) + dic_code + new_string_no)
+                            sheet_code=scaled_value + x[0][0].zfill(2) + dic_code + new_string_no
                             del dic_code
                             del new_string_no
                             TheRows = arcpy.UpdateCursor(parcelfile)
                             for TheRow in TheRows:
-                                Grid = TheRow.getValue("GRIDS1")
-                                if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == "" or len(Grid) > 9 or len(Grid) < 7):
-                                    TheRow.setValue("GRIDS1",sheet_code)
-                                    TheRows.updateRow(TheRow)
+                                #Grid = TheRow.getValue("GRIDS1")
+                                #if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == ""):
+                                TheRow.setValue("GRIDS1",sheet_code)
+                                TheRows.updateRow(TheRow)
                                 Ward = TheRow.getValue("WARDNO")
                                 if (Ward is None or len(Ward) == 0 or Ward == " " or Ward == "" or int(Ward) > 40):
                                     TheRow.setValue("WARDNO", int(x[0][0]))
