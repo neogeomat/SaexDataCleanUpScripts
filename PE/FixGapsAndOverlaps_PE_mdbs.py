@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Tkinter import *
 
-version = "v2.1.6"
+version = "v2.1.7"
 
 class App(Frame):
     global version
@@ -93,6 +93,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     arcpy.Delete_management("selection_parcel")
                 arcpy.CreateFolder_management(Folder_Location, "DataCleanTemp")
                 DataCleanTemp = Folder_Location + "\\DataCleanTemp"
+                test_data = DataCleanTemp+"\\test.mdb"
+                arcpy.Copy_management(BLANK84_Template, test_data)
 
                 arcpy.env.workspace = i
                 arcpy.env.overwriteOutput = True
@@ -111,18 +113,18 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
 
                 if (arcpy.Exists(Cadastre_Topology)):
-                    arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Parcel")
-                    arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Building")
-                    arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Line")
-                    arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Polygon")
+                    # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Parcel")
+                    # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Building")
+                    # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Line")
+                    # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Polygon")
                     arcpy.Delete_management(Cadastre_Topology)
                     arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.0001)
                 else:
                     print ("Create Topology layer")
                     arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.0001)
 
-                arcpy.FeatureClassToFeatureClass_conversion(Data_Location+"\\Cadastre\\Parcel", DataCleanTemp,
-                                                            "\\Parcel.shp","", "Region \"अञ्चल\" true true false 50 Text 0 0 ,First,#,"
+                arcpy.FeatureClassToFeatureClass_conversion(Data_Location+"\\Cadastre\\Parcel", test_data+"\\Cadastre",
+                                                            "Parcel2","", "Region \"अञ्चल\" true true false 50 Text 0 0 ,First,#,"
                                                                            + Data_Location + "\\Cadastre\\Parcel,Region,-1,-1;DistrictCode \"जिल्ला_कोड\" true true false 2 Text 0 0 ,First,#,"
                                                                            + Data_Location + "\\Cadastre\\Parcel,DistrictCode,-1,-1;District \"जिल्ला\" true true false 50 Text 0 0 ,First,#,"
                                                                            + Data_Location + "\\Cadastre\\Parcel,District,-1,-1;VDCCode \"गाविस_कोड\" true true false 6 Text 0 0 ,First,#,"
@@ -161,10 +163,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 # arcpy.EliminatePolygonPart_management(DataCleanTemp + "\\Parcel.shp", DataCleanTemp + "\\Parcel1.shp", "AREA", "0.005 SquareMeters", "0", "ANY")
 
+                # Repair Parcel Geometry
+                arcpy.RepairGeometry_management(test_data + "\\Cadastre\\Parcel2")
 
                 # Process: Feature To Point
-                arcpy.FeatureToPoint_management(DataCleanTemp + "\\Parcel.shp",
-                                                DataCleanTemp + "\\ParcelCentroid.shp",
+                arcpy.FeatureToPoint_management(test_data + "\\Cadastre\\Parcel2",
+                                                test_data + "\\Cadastre\\ParcelCentroid",
                                                 "INSIDE")
 
 
@@ -178,64 +182,69 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 # Process: Feature Class To Coverage
                 cov1 = DataCleanTemp + "\\cov1"
-                arcpy.FeatureclassToCoverage_conversion(DataCleanTemp + "\\Parcel.shp REGION", cov1,
-                                                        "0.005 Meters",
-                                                        "DOUBLE")
+                arcpy.FeatureclassToCoverage_conversion(test_data + "\\Cadastre\\Parcel2 REGION", cov1,"0.005 Meters","DOUBLE")
 
                 # Process: Copy Features
-                arcpy.CopyFeatures_management(DataCleanTemp + "\\cov1\\polygon", DataCleanTemp + "\\CleanPoly.shp", "",
+                arcpy.CopyFeatures_management(cov1 + "\\polygon", test_data + "\\Cadastre\\CleanPoly", "",
                                               "0",
                                               "0", "0")
 
                 # Process: Spatial Join
-                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\CleanPoly.shp",
-                                           DataCleanTemp + "\\ParcelCentroid.shp",
-                                           DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL")
+                arcpy.SpatialJoin_analysis(test_data + "\\Cadastre\\CleanPoly",
+                                           test_data + "\\Cadastre\\ParcelCentroid",
+                                           test_data + "\\Cadastre\\NewJoinedData", "JOIN_ONE_TO_ONE", "KEEP_ALL")
 
-                arcpy.MakeFeatureLayer_management(DataCleanTemp + "\\NewJoinedData.shp", "selection_parcel")
+                arcpy.MakeFeatureLayer_management(test_data + "\\Cadastre\\NewJoinedData", "selection_parcel")
 
-                arcpy.SelectLayerByAttribute_management("selection_parcel", "NEW_SELECTION", '"Area"<0.05')
-                arcpy.Eliminate_management("selection_parcel", DataCleanTemp + "\\Parcel1.shp", "LENGTH")
+                arcpy.SelectLayerByAttribute_management("selection_parcel", "NEW_SELECTION", "[AREA]<0.05")
+                arcpy.Eliminate_management("selection_parcel", test_data + "\\Cadastre\\Parcel1", "LENGTH")
                 arcpy.SelectLayerByAttribute_management("selection_parcel", "CLEAR_SELECTION")
                 if (arcpy.Exists("selection_parcel")):
                     arcpy.Delete_management("selection_parcel")
 
                 # Process: Append
-                arcpy.Append_management(DataCleanTemp + "\\Parcel1.shp", parcel_location,
+                arcpy.Append_management(test_data + "\\Cadastre\\Parcel1", parcel_location,
                                         "NO_TEST")
 
+                #Add Field for ParFID Later
+                arcpy.AddField_management(parcel_location, "Ids", "LONG", "", "", "", "", "NULLABLE",
+                                          "NON_REQUIRED", "")
+                arcpy.CalculateField_management(parcel_location, "IDS", "[OBJECTID]", "VB", "")
 
-                # ##########Construction_Polygon Intersect Parcels
-                # arcpy.Intersect_analysis([parcel_location, construction_polygon_location],
-                #                          DataCleanTemp + "\\cons_poly_ParcelIntersect.shp", "", "", "INPUT")
-                #
-                # # Process: Delete Features
-                # arcpy.Delete_management(construction_polygon_location)
-                # arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Construction_Polygon", construction_polygon_location, "",
-                #                               "0","0", "0")
-                # # Process: Append
-                # arcpy.Append_management(DataCleanTemp + "\\cons_poly_ParcelIntersect.shp", construction_polygon_location, "NO_TEST")
+                ###########Construction_Polygon Intersect Parcels
+
+                arcpy.Intersect_analysis([construction_polygon_location, parcel_location],test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", "", "", "INPUT")
+                # Process: Delete Features
+                arcpy.Delete_management(construction_polygon_location)
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Building", construction_polygon_location, "", "0","0","0")
+                # Process: Append
+                arcpy.Append_management(test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", building_location, "NO_TEST")
 
                 ##########Building Intersect Parcels
-                arcpy.Intersect_analysis([parcel_location, building_location],
-                                         DataCleanTemp + "\\BuildingParcelIntersect.shp", "", "", "line")
+                arcpy.Intersect_analysis([building_location, parcel_location],test_data + "\\Cadastre\\BuildingParcelIntersect", "", "", "INPUT")
 
-                arcpy.SpatialJoin_analysis(DataCleanTemp + "\\BuildingParcelIntersect.shp", parcel_location,
-                                           DataCleanTemp + "\\BuildingWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL","","INTERSECT","","")
+                arcpy.AddField_management(test_data+"\\Cadastre\\BuildingParcelIntersect","ParFID","LONG")
+
+                arcpy.SpatialJoin_analysis(test_data + "\\Cadastre\\BuildingParcelIntersect",
+                                           parcel_location,
+                                           test_data+"\\Cadastre\\Building_WithParFID","JOIN_ONE_TO_ONE","KEEP_ALL")
+
+                # Process: Calculate Field (2)
+                arcpy.CalculateField_management(test_data+"\\Cadastre\\Building_WithParFID", "ParFID", "[ids]", "VB", "")
 
                 # Process: Delete Features
                 arcpy.Delete_management(building_location)
-                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Building", building_location, "", "0",
-                                              "0",
-                                              "0")
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Building", building_location, "", "0","0","0")
                 # Process: Append
-                arcpy.Append_management(DataCleanTemp + "\\BuildingWithParFid.shp", building_location, "NO_TEST")
+                arcpy.Append_management(test_data + "\\Cadastre\\Building_WithParFID", building_location, "NO_TEST")
+
+
 
                 arcpy.Delete_management(DataCleanTemp, "Folder")
 
                 try:
                     arcpy.CalculateField_management(parcel_location, "PARCELKEY",
-                                                    "str( !GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
+                                                    "str(!GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
                                                     "PYTHON_9.3", "")
                 except:
                     exception_list.write("ParcelKey Error for ," + i + "\n")
