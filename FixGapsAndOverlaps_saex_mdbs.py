@@ -1,6 +1,6 @@
 from Tkinter import *
 
-version = "v2.1.6"
+version = "v2.1.7"
 
 class App(Frame):
     global version
@@ -13,20 +13,36 @@ class App(Frame):
     def create_widgets(self):
         """Create buttons that do nothing"""
 
-        #create label for sheet
-        self.Sheet=Label(self, text="Enter path to the main folder",width=30)
-        self.Sheet.grid(row=0, column=0,sticky=E+W+N+S)
+# create label for sheet
+        self.Sheet = Label(self, text="Enter path to the main folder", width=30)
+        self.Sheet.grid(row=0, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        #create entry.
-        self.sheetentry1= Entry(self,width=30)
-        self.sheetentry1.grid(row=0, column =1, sticky=E+W+N+S)
+        # create entry.
+        self.sheetentry1 = Entry(self, width=30)
+        self.sheetentry1.grid(row=0, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
-        #create calculate button
+        self.Sheet = Label(self, text="Choose Central Meridian", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        options = [
+            "Blank.mdb",
+            "Blank87.mdb",
+            "Blank84.mdb",
+            "Blank81.mdb"
+        ]
+
+        self.variable = StringVar(self)
+        self.variable.set(options[2]) #default value
+        self.optionmenu = OptionMenu(self, self.variable, *options)
+        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+
+        # create calculate button
         self.button4=Button(self, text="Process", command=self.fixGapsAndOverlaps, width=30)
-        self.button4.grid(row=1, column=1, sticky=E+W+N+S)
+        self.button4.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
-        self.Sheet = Label (self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid (row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet = Label(self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
+        self.Sheet.grid(row=3, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n Removes gaps and overlaps in parcel layer of mdb files. Circularuty and suspiciousness of the cleaned features ae calculated. This is to detect sliver polygons which needs to be merged to adjacent parcels. The segments and construction layer are populated with the corresponding parcelid. The mdb is compacted (compressed) to reduce file size.
 
@@ -34,7 +50,7 @@ Requires arcpy (available through arcgis 10.x) and saex. Python executable must 
 
 Input: Folder path
 
-Process: This scripts loops though each mdb file in the path recursively and fixes any gaps or overlaps in the parcel layer. BLANK84 template is used in processing so the final output is in this template. D:\\DataCleanTemp is created as temporary workspace and deleted at the end. If due to error this folder is not deleted, then it may have to be deleted manually.
+Process: This scripts loops though each mdb file in the path recursively and fixes any gaps or overlaps in the parcel layer. Blank template is used in processing so the final output is in this template. D:\\DataCleanTemp is created as temporary workspace and deleted at the end. If due to error this folder is not deleted, then it may have to be deleted manually.
 
 Output: mdbs in the folder do not have gaps or overlap in parcel layer. The mdbs then need to be processed for sliver polygons.
 
@@ -43,10 +59,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         self.Sheet = Label (self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid (row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
 
-    def fixGapsAndOverlaps (self):
+    def fixGapsAndOverlaps(self):
         import tkMessageBox
         import arcpy
         import os
+        import time
         # from arcpy import env
         path = self.sheetentry1.get()
         #print(path)
@@ -58,6 +75,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
         exception_list= open(path+"\\exception_list_gap_overlap.csv","a")
         exception_list.truncate(0)
+        option_choosed=self.variable.get()
+        print option_choosed
         mdb_list = []
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -73,8 +92,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
         startTime = time.time()
 
         for i in mdb_list:
-            # import arcpy
-            # import os
             try:
                 parcel_list=arcpy.GetCount_management(i+"\\Parcel")
                 no_of_attribute=int(parcel_list.getOutput(0))
@@ -88,8 +105,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # Data_Location = raw_input('location of mdb')
                     # Data_Location = 'D:\SATUNGAL\Santungal_1Ka\Santungal_1Ka.mdb'
                     Data_Location = i
-                    if (os.path.exists ("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
-                        BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
+                    if (os.path.exists ("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed)):
+                        Blank_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
                     else:
                         print("Blank Template database not found, install saex")
                         exit ()
@@ -126,7 +143,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     arcpy.Delete_management(Data_Location + "\\Parcel")
 
                     # Process: Copy Features
-                    arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0",
+                    arcpy.CopyFeatures_management(Blank_Template + "\\Parcel", Data_Location + "\\Parcel", "", "0", "0",
                                                   "0")
 
                     # Process: Feature Class To Coverage
@@ -199,7 +216,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                     # Process: Delete Features
                     arcpy.Delete_management(Data_Location + "\\Segments")
-                    arcpy.CopyFeatures_management(BLANK84_Template + "\\Segments", Data_Location + "\\Segments", "", "0",
+                    arcpy.CopyFeatures_management(Blank_Template + "\\Segments", Data_Location + "\\Segments", "", "0",
                                                   "0",
                                                   "0")
 
@@ -224,7 +241,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     arcpy.CalculateField_management(DataCleanTemp + "\\ConsWithParFid.shp", "ParFID", "[ids]", "VB", "")
 
                     arcpy.Delete_management(Data_Location + "\\Construction")
-                    arcpy.CopyFeatures_management(BLANK84_Template + "\\Construction", Data_Location + "\\Construction", "",
+                    arcpy.CopyFeatures_management(Blank_Template + "\\Construction", Data_Location + "\\Construction", "",
                                                   "0", "0", "0")
                     arcpy.Append_management(DataCleanTemp + "\\ConsWithParFid.shp", Data_Location + "\\Construction",
                                             "NO_TEST")
