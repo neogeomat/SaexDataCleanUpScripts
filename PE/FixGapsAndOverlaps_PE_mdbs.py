@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from Tkinter import *
 
-version = "v2.1.7"
+version = "v2.1.8"
 
 class App(Frame):
     global version
@@ -106,7 +106,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 construction_polygon_location=os.path.join(i,"Cadastre\\Construction_Polygon")
                 parcel_location=os.path.join(i,"Cadastre\\Parcel")
 
-                const_poly_location=os.path.join(i,"Cadastre\\Construction_Polygon")
+
                 Cadastre_Topology=os.path.join(i,"Cadastre\\Cadastre_Topology")
                 print i
                 print parcel_location
@@ -214,11 +214,38 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 ###########Construction_Polygon Intersect Parcels
 
                 arcpy.Intersect_analysis([construction_polygon_location, parcel_location],test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", "", "", "INPUT")
+                arcpy.AddField_management(test_data+"\\Cadastre\\Const_Poly_ParcelIntersect","ParFID","LONG")
+
+                arcpy.SpatialJoin_analysis(test_data + "\\Cadastre\\Const_Poly_ParcelIntersect",
+                                           parcel_location,
+                                           test_data+"\\Cadastre\\Const_Poly_WithParFID","JOIN_ONE_TO_ONE","KEEP_ALL")
+
+                # Process: Calculate Field (2)
+                arcpy.CalculateField_management(test_data+"\\Cadastre\\Const_Poly_WithParFID", "ParFID", "[ids]", "VB", "")
+
                 # Process: Delete Features
                 arcpy.Delete_management(construction_polygon_location)
-                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Building", construction_polygon_location, "", "0","0","0")
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Construction_Polygon", construction_polygon_location, "", "0","0","0")
                 # Process: Append
-                arcpy.Append_management(test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", building_location, "NO_TEST")
+                arcpy.Append_management(test_data + "\\Cadastre\\Const_Poly_WithParFID", construction_polygon_location, "NO_TEST")
+
+                ###########Construction_Polygon Intersect Parcels
+
+                arcpy.Intersect_analysis([construction_line_location, parcel_location],test_data + "\\Cadastre\\Const_Line_ParcelIntersect", "", "", "INPUT")
+                arcpy.AddField_management(test_data+"\\Cadastre\\Const_Line_ParcelIntersect","ParFID","LONG")
+
+                arcpy.SpatialJoin_analysis(test_data + "\\Cadastre\\Const_Line_ParcelIntersect",
+                                           parcel_location,
+                                           test_data+"\\Cadastre\\Const_Line_WithParFID","JOIN_ONE_TO_ONE","KEEP_ALL")
+
+                # Process: Calculate Field (2)
+                arcpy.CalculateField_management(test_data+"\\Cadastre\\Const_Line_WithParFID", "ParFID", "[ids]", "VB", "")
+
+                # Process: Delete Features
+                arcpy.Delete_management(construction_line_location)
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Cadastre\\Construction_Line", construction_line_location, "", "0","0","0")
+                # Process: Append
+                arcpy.Append_management(test_data + "\\Cadastre\\Const_Line_WithParFID", construction_line_location, "NO_TEST")
 
                 ##########Building Intersect Parcels
                 arcpy.Intersect_analysis([building_location, parcel_location],test_data + "\\Cadastre\\BuildingParcelIntersect", "", "", "INPUT")
