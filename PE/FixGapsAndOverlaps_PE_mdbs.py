@@ -106,7 +106,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 construction_polygon_location=os.path.join(i,"Cadastre\\Construction_Polygon")
                 parcel_location=os.path.join(i,"Cadastre\\Parcel")
 
-
+                const_poly_location=os.path.join(i,"Cadastre\\Construction_Polygon")
                 Cadastre_Topology=os.path.join(i,"Cadastre\\Cadastre_Topology")
                 print i
                 print parcel_location
