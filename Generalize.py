@@ -59,18 +59,39 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
             count +=1
             try:
-                arcpy.Generalize_edit(i+"\\Parcel",0.5)
+                Data_Location = i
+                if (os.path.exists("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb")):
+                    BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK84.mdb"
+                else:
+                    print("Blank Template database not found, install saex")
+                    exit()
+
+                # Process: Copy Features
+                arcpy.CopyFeatures_management(i + "\\Parcel", i + "\\Parcel_to_Simplify", "", "0", "0","0")
+
+                arcpy.cartography.SimplifyPolygon(i+"\\Parcel_to_Simplify",i+"\\Simplified_2","POINT_REMOVE",0.2)
+
+                arcpy.Delete_management(i + "\\Parcel")
+
+                # Process: Copy Features
+                arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", i + "\\Parcel", "", "0", "0","0")
+                # Process: Append
+                arcpy.Append_management(i + "\\Simplified_2", i + "\\Parcel", "NO_TEST")
+
+                arcpy.DeleteField_management(i + "\\Simplified_2")
+                arcpy.DeleteField_management(i + "\\Parcel_to_Simplify")
+
                 arcpy.Compact_management(i)
             except:
-                exception_list.write("Compact Error for ," + i + "\n")
-                print("Compact error for "+i)
+                exception_list.write("Generalize Error for ," + i + "\n")
+                print("Generalize error for "+i)
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
-        print(" Compact process complete")
+        print(" Generalize process complete")
         exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
 
-        tkMessageBox.showinfo(title="Compact database" + version, message="Done")
+        tkMessageBox.showinfo(title="Generalize database" + version, message="Done")
 root = Tk()
-root.title("Compact database " + version)
+root.title("Generalize database " + version)
 myapp = App(root)
 myapp.mainloop()
