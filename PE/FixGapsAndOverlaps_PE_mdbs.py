@@ -118,10 +118,10 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Line")
                     # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Polygon")
                     arcpy.Delete_management(Cadastre_Topology)
-                    arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.0001)
+                    arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.00000001)
                 else:
                     print ("Create Topology layer")
-                    arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.0001)
+                    arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.00000001)
 
                 arcpy.FeatureClassToFeatureClass_conversion(Data_Location+"\\Cadastre\\Parcel", test_data+"\\Cadastre",
                                                             "Parcel2","", "Region \"अञ्चल\" true true false 50 Text 0 0 ,First,#,"
@@ -182,7 +182,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 # Process: Feature Class To Coverage
                 cov1 = DataCleanTemp + "\\cov1"
-                arcpy.FeatureclassToCoverage_conversion(test_data + "\\Cadastre\\Parcel2 REGION", cov1,"0.005 Meters","DOUBLE")
+                arcpy.FeatureclassToCoverage_conversion(test_data + "\\Cadastre\\Parcel2 REGION", cov1,"0.008 Meters","DOUBLE")
 
                 # Process: Copy Features
                 arcpy.CopyFeatures_management(cov1 + "\\polygon", test_data + "\\Cadastre\\CleanPoly", "",
@@ -214,6 +214,17 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 ###########Construction_Polygon Intersect Parcels
 
                 arcpy.Intersect_analysis([construction_polygon_location, parcel_location],test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", "", "", "INPUT")
+
+                if (arcpy.Exists("selection_const")):
+                    arcpy.Delete_management("selection_const")
+
+                const_parcel_intersect = test_data + "\\Cadastre\\Const_Poly_ParcelIntersect"
+                arcpy.MakeFeatureLayer_management(const_parcel_intersect, "selection_const")
+                arcpy.SelectLayerByAttribute_management("selection_const", "NEW_SELECTION", "[SHAPE_Area]<0.05")
+                arcpy.management.DeleteFeatures("selection_const")
+
+
+
                 arcpy.AddField_management(test_data+"\\Cadastre\\Const_Poly_ParcelIntersect","ParFID","LONG")
 
                 arcpy.SpatialJoin_analysis(test_data + "\\Cadastre\\Const_Poly_ParcelIntersect",
@@ -249,6 +260,14 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 ##########Building Intersect Parcels
                 arcpy.Intersect_analysis([building_location, parcel_location],test_data + "\\Cadastre\\BuildingParcelIntersect", "", "", "INPUT")
+
+                if (arcpy.Exists("selection_build")):
+                    arcpy.Delete_management("selection_build")
+
+                biuilding_parcel_intersect = test_data + "\\Cadastre\\BuildingParcelIntersect"
+                arcpy.MakeFeatureLayer_management(biuilding_parcel_intersect, "selection_build")
+                arcpy.SelectLayerByAttribute_management("selection_build", "NEW_SELECTION", "[SHAPE_Area]<0.05")
+                arcpy.management.DeleteFeatures("selection_build")
 
                 arcpy.AddField_management(test_data+"\\Cadastre\\BuildingParcelIntersect","ParFID","LONG")
 
