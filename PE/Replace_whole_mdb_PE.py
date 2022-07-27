@@ -26,7 +26,7 @@ class App(Frame):
         self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         options = [
-            "Blank.mdb",
+            "Blank_.mdb",
             "Blank_87.mdb",
             "Blank_84.mdb",
             "Blank_81.mdb"
@@ -85,112 +85,96 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         for i in mdb_list:
             count += 1
             out_data = "D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\\test.mdb"
-            arcpy.Copy_management(blank_data, out_data)
-            if arcpy.Exists(i + "\\Cadastre\\Parcel"):
-                arcpy.Append_management(i + "\\Cadastre\\Parcel", out_data + "\\Cadastre\\Parcel", "NO_TEST")
-                arcpy.RecalculateFeatureClassExtent_management(i + "\\Cadastre\\Parcel")
-            else:
-                print("Parcel Layer not found for, " + i)
-            if arcpy.Exists(i + "\\Construction_Polygon"):
-                arcpy.Append_management(i + "\\Construction_Polygon", out_data + "\\Construction_Polygon", "NO_TEST")
-                arcpy.RecalculateFeatureClassExtent_management(i + "\\Construction_Polygon")
-            else:
-                print("Construction Layer not found for, " + i)
-            if arcpy.Exists(i + "\\Parcel_History"):
-                arcpy.Append_management(i + "\\Parcel_History", out_data + "\\Parcel_History", "NO_TEST")
-                arcpy.RecalculateFeatureClassExtent_management(i + "\\Parcel_History")
-            else:
-                print("Parcel_History Layer not found for, " + i)
-            if arcpy.Exists(i + "\\Segments"):
-                arcpy.Append_management(i + "\\Segments", out_data + "\\Segments", "NO_TEST")
-                arcpy.RecalculateFeatureClassExtent_management(i + "\\Segments")
-            else:
-                print("Segments Layer not found for, " + i)
-            arcpy.env.workspace = i;
-            #
-            # point_features_list = arcpy.ListFeatureClasses("*", "Point")
-            # for pt_feature in point_features_list:
-            #     arcpy.AddField_management(pt_feature, "Symbol_Type", "TEXT")
-            #     layer_name = os.path.basename(pt_feature)
-            #     expression = layer_name
-            #     arcpy.CalculateField_management(pt_feature, "Symbol_Type", '"' + expression + '"', "PYTHON")
-            #     arcpy.Append_management(pt_feature, out_data + "\\Other_Symbols", "NO_TEST")
-            #
 
-            # if arcpy.Exists(i+"\\Temple"):
-            #     arcpy.AddField_management(i + "\\Temple", "Symbol_Type", "TEXT")
-            #     arcpy.CalculateField_management(i+"\\Temple","Symbol_Type",'"""temple"""', "PYTHON")
-            #     arcpy.Append_management(i+"\\Temple",out_data+"\\Other_Symbols","NO_TEST")
-            # arcpy.Rename_management()
-            # arcpy.Delete_management(i)
+            feature_lists=[]
+
+            building="\\Cadastre\\Building"
+            const_line="\\Cadastre\\Construction_Line"
+            const_poly="\\Cadastre\\Construction_Polygon"
+            country="\\Cadastre\\Country"
+            district="\\Cadastre\\District"
+            parcel="\\Cadastre\\Parcel"
+            parcel_hist="\\Cadastre\\ParcelHistory"
+            parcel_line="\\Cadastre\\ParcelLine"
+            region="\\Cadastre\\Region"
+            VDCMunicipality="\\Cadastre\\VDCMunicipality"
+            ward="\\Cadastre\\Ward"
+
+            control_point="\\Topographic\\ControlPoint"
+            designatedArea="\\Topographic\\DesignatedArea"
+            geolocation="\\Topographic\\Geolocation"
+            hydrographic="\\Topographic\\Hydrographic"
+            hydropoint="\\Topographic\\HydroPoint"
+            landuse="\\Topographic\\LandUse"
+            topo="\\Topographic\\Topo"
+            transportation="\\Topographic\\Transportation"
+            utility="\\Topographic\\Utility"
+            utility_line="\\Topographic\\UtilityLine"
+            utility_point="\\Topographic\\UtilityPoint"
+
+            annotation="\\Annotation"
+            gridsheet="\\GridSheet"
+            legalParcel="\\LegalParcel"
+            master_table="\\MasterTable"
+            owner="\\Owner"
+            parcel_ref="\\ParcelReference"
+            temp_table="\\TempTable"
+            tenant="\\Tenant"
+            verticalparcel="\\VerticalParcel"
+
+            feature_lists.append(building)
+            feature_lists.append(const_line)
+            feature_lists.append(const_poly)
+            feature_lists.append(country)
+            feature_lists.append(district)
+            feature_lists.append(parcel)
+            feature_lists.append(parcel_hist)
+            feature_lists.append(parcel_line)
+            feature_lists.append(region)
+            feature_lists.append(VDCMunicipality)
+            feature_lists.append(ward)
+            feature_lists.append(control_point)
+            feature_lists.append(designatedArea)
+            feature_lists.append(geolocation)
+            feature_lists.append(hydrographic)
+            feature_lists.append(hydropoint)
+            feature_lists.append(landuse)
+            feature_lists.append(topo)
+            feature_lists.append(transportation)
+            feature_lists.append(utility)
+            feature_lists.append(utility_line)
+            feature_lists.append(utility_point)
+
+            feature_lists.append(annotation)
+            feature_lists.append(gridsheet)
+            feature_lists.append(legalParcel)
+            feature_lists.append(master_table)
+            feature_lists.append(owner)
+            feature_lists.append(parcel_ref)
+            feature_lists.append(temp_table)
+            feature_lists.append(tenant)
+            feature_lists.append(verticalparcel)
+
+
+            arcpy.Copy_management(blank_data, out_data)
+
+            for features in feature_lists:
+                if arcpy.Exists(i + features):
+                    arcpy.Append_management(i + features, out_data + features, "NO_TEST")
+                    if("Cadastre" in features):
+                        arcpy.RecalculateFeatureClassExtent_management(i + features)
+                else:
+                    print(features +" Layer not found for, " + i)
+
+            arcpy.env.workspace = i;
             arcpy.Copy_management(out_data, i)
             arcpy.Delete_management(out_data)
-
-            # # Copu objectids to Ids field for parfid matching
-            # # Process: Add Field (3)
-            # arcpy.AddField_management (i  + "\\Parcel", "Ids", "LONG", "", "", "", "", "NULLABLE",
-            #                            "NON_REQUIRED", "")
-            # # Process: Calculate Field (3)
-            # arcpy.CalculateField_management (i + "\\Parcel", "IDS", "[OBJECTID]", "VB", "")
-            # ## parfid in segments
-
-            #
-            # # Process: Spatial Join
-            # arcpy.Intersect_analysis ([i + "\\Segments", i + "\\Parcel"],
-            #                           DataCleanTemp + "\\SegmentsParcelIntersect.shp", "", "", "line")
-            # arcpy.SpatialJoin_analysis (DataCleanTemp + "\\SegmentsParcelIntersect.shp", i + "\\Parcel",
-            #                             DataCleanTemp + "\\SegWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
-            #                             "SegNo \"SegNo\" true true false 2 Short 0 0 ,First,#,"
-            #                             + i + "\\Segments,SegNo,-1,-1;Boundty \"Boundty\" true true false 2 Short 0 0 ,First,#,"
-            #                             + i + "\\Segments,Boundty,-1,-1;ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
-            #                             + i + "\\Segments,ParFID,-1,-1;MBoundTy \"MBoundTy\" true true false 2 Short 0 0 ,First,#,"
-            #                             + i + "\\Segments,MBoundTy,-1,-1;ABoundTy \"ABoundTy\" true true false 2 Short 0 0 ,First,#,"
-            #                             + i + "\\Segments,ABoundTy,-1,-1;Shape_Leng \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
-            #                             + i + "\\Segments,Shape_Length,-1,-1;MarginName \"MarginName\" true true false 50 Text 0 0 ,First,#,"
-            #                             + i + "\\Segments,MarginName,-1,-1;Ids \"Ids\" true true false 0 Long 0 0 ,First,#,"
-            #                             + i + "\\Parcel,Ids,-1,-1", "INTERSECT", "", "")
-            #
-            # # Process: Calculate Field (2)
-            # arcpy.CalculateField_management (DataCleanTemp + "\\SegWithParFid.shp", "ParFID", "[ids]", "VB", "")
-            #
-            # # Process: Delete Features
-            # # arcpy.Delete_management (i + "\\Segments")
-            # arcpy.CopyFeatures_management (blank_data + "\\Segments", i + "\\Segments", "", "0",
-            #                                "0",
-            #                                "0")
-            #
-            # # Process: Append
-            # arcpy.Append_management (DataCleanTemp + "\\SegWithParFid.shp", i + "\\Segments", "NO_TEST")
-
-            # ## parfid in construction
-            # # Process: Spatial Join
-            #
-            # arcpy.Intersect_analysis ([i + "\\Construction", i + "\\Parcel"],
-            #                           DataCleanTemp + "\\ConstructionParcelIntersect.shp", "", "", "")
-            # arcpy.SpatialJoin_analysis (DataCleanTemp + "\\ConstructionParcelIntersect.shp",
-            #                             i + "\\Parcel",
-            #                             DataCleanTemp + "\\ConsWithParFid.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
-            #                             "ParFID \"ParFID\" true true false 4 Long 0 0 ,First,#,"
-            #                             + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ParFID,-1,-1;ConsTy \"ConsTy\" true true false 2 Short 0 0 ,First,#,"
-            #                             + DataCleanTemp + "\\ConstructionParcelIntersect.shp,ConsTy,-1,-1;Shape_Length \"Shape_Length\" false true true 8 Double 0 0 ,First,#,"
-            #                             + DataCleanTemp + "\\ConstructionParcelIntersect.shp,Shape_Length,-1,-1;ids \"ids\" true true false 0 Long 0 0 ,First,#,"
-            #                             + i + "\\Parcel,ids,-1,-1", "INTERSECT", "", "")
-            #
-            # # Process: Calculate Field (2)
-            # arcpy.CalculateField_management (DataCleanTemp + "\\ConsWithParFid.shp", "ParFID", "[ids]", "VB", "")
-            #
-            # # arcpy.Delete_management (i + "\\Construction")
-            # arcpy.CopyFeatures_management (blank_data + "\\Construction", i + "\\Construction",
-            #                                "",
-            #                                "0", "0", "0")
-            # arcpy.Append_management (DataCleanTemp + "\\ConsWithParFid.shp", i + "\\Construction",
-            #                          "NO_TEST")
             print (i + " (" + str(count) + "/" + str(total_mdbs) + ")")
         print("Replace Whole Mdb complete")
         exception_list.close()
         print ('The script took {0} second !'.format(time.time() - startTime))
 
-        tkMessageBox.showinfo(title="Extent ReCalculation database" + version, message="Done")
+        tkMessageBox.showinfo(title="Replace Whole MDB" + version, message="Done")
 root = Tk()
 root.title("Replace Mdb databases " + version)
 myapp = App(root)

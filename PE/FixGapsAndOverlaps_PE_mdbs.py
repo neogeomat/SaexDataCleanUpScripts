@@ -22,12 +22,26 @@ class App(Frame):
         self.sheetentry1= Entry(self,width=30)
         self.sheetentry1.grid(row=0, column =1, sticky=E+W+N+S)
 
+        self.Sheet = Label(self, text="Choose Central Meridian", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        options = [
+            "Blank_87.mdb",
+            "Blank_84.mdb",
+            "Blank_81.mdb"
+        ]
+
+        self.variable = StringVar(self)
+        self.variable.set(options[1]) #default value
+        self.optionmenu = OptionMenu(self, self.variable, *options)
+        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
         #create calculate button
         self.button4=Button(self, text="Process", command=self.fixGapsAndOverlaps, width=30)
-        self.button4.grid(row=1, column=1, sticky=E+W+N+S)
+        self.button4.grid(row=2, column=1, sticky=E+W+N+S)
 
         self.Sheet = Label (self, text="Instruction", width=30, font=("Helvetica", 10, "bold italic"), fg="blue")
-        self.Sheet.grid (row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet.grid (row=3, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         instruction = """\n Removes gaps and overlaps in parcel layer of mdb files. Circularuty and suspiciousness of the cleaned features ae calculated. This is to detect sliver polygons which needs to be merged to adjacent parcels. The segments and construction layer are populated with the corresponding parcelid. The mdb is compacted (compressed) to reduce file size.
 
@@ -78,9 +92,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 # Local variables:
                 Folder_Location = "d:\\"
                 Data_Location = i
+                option_choosed = self.variable.get()
+                blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\" + option_choosed
 
-                if (os.path.exists("D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK_84.mdb")):
-                    BLANK84_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\BLANK_84.mdb"
+                if (os.path.exists(blank_data)):
+                    BLANK84_Template = blank_data
                 else:
                     print("Blank Template database not found, install PE")
                     exit()
@@ -264,8 +280,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                 if (arcpy.Exists("selection_build")):
                     arcpy.Delete_management("selection_build")
 
-                biuilding_parcel_intersect = test_data + "\\Cadastre\\BuildingParcelIntersect"
-                arcpy.MakeFeatureLayer_management(biuilding_parcel_intersect, "selection_build")
+                building_parcel_intersect = test_data + "\\Cadastre\\BuildingParcelIntersect"
+                arcpy.MakeFeatureLayer_management(building_parcel_intersect, "selection_build")
                 arcpy.SelectLayerByAttribute_management("selection_build", "NEW_SELECTION", "[SHAPE_Area]<0.05")
                 arcpy.management.DeleteFeatures("selection_build")
 
@@ -288,12 +304,12 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                 arcpy.Delete_management(DataCleanTemp, "Folder")
 
-                try:
-                    arcpy.CalculateField_management(parcel_location, "PARCELKEY",
-                                                    "str(!GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
-                                                    "PYTHON_9.3", "")
-                except:
-                    exception_list.write("ParcelKey Error for ," + i + "\n")
+                # try:
+                #     arcpy.CalculateField_management(parcel_location, "PARCELKEY",
+                #                                     "str(!GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
+                #                                     "PYTHON_9.3", "")
+                # except:
+                #     exception_list.write("ParcelKey Error for ," + i + "\n")
 
                 # Add Fields
                 arcpy.AddField_management(parcel_location, "circularity", "FLOAT")
