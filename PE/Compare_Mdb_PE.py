@@ -98,25 +98,52 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
         blank_fc=getFeatureClasses(blank_data)
 
+        def getLayerFields(path,layer):
+            arcpy.env.workspace = path
+            datasets = arcpy.ListDatasets(feature_type='feature')
+            datasets = [''] + datasets if datasets is not None else []
+            for ds in datasets:
+                for fc in arcpy.ListFeatureClasses(feature_dataset=ds):
+                    if(layer == fc):
+                        my_layer = os.path.join(arcpy.env.workspace, ds, fc)
+                        break
+            layer_fields=arcpy.ListFields(my_layer)
+            layer_names=[]
+            for ls in layer_fields:
+                layer_names.append(ls.name)
+
+            return layer_names
+
+
         blank_parcel = blank_data + "\\Cadastre\\Parcel"
+
+        blank_parcel_fields = getLayerFields(blank_data,"Parcel")
+
+
+        def ListDiff(input_data,blank_data,type):
+            more_in_path=list(set(input_data).difference(blank_data))
+            not_in_path=list(set(blank_data).difference(input_data))
+
+            report_list = open(i +"_"+type +".csv", "a")
+            report_list.truncate(0)
+            report_list.write("\n" + "Added Layers in Data" + "\n")
+            for j in more_in_path:
+                report_list.write(j.encode('utf8') + "\n")
+
+            report_list.write("\n" + "Layers not in Data" + "\n")
+            for k in not_in_path:
+                report_list.write(k.encode('utf8') + "\n")
+            report_list.close()
+
 
         for i in mdb_list:
             data_parcel=i + "\\Cadastre\\Parcel"
             report = arcpy.management.FeatureCompare(data_parcel,blank_parcel,'OBJECTID','SCHEMA_ONLY','','','','','','','CONTINUE_COMPARE',i+'_parcel_report.csv')
 
             path_fc=getFeatureClasses(i)
-            more_in_path=list(set(path_fc).difference(blank_fc))
-            not_in_path=list(set(blank_fc).difference(path_fc))
-
-            report_list = open(i + "_feature_classes.csv", "a")
-            report_list.truncate(0)
-            report_list.write("\n" + "Added Layers in Data" + "\n")
-            for j in more_in_path:
-                report_list.write(j + "\n")
-
-            report_list.write("\n" + "Layers not in Data" + "\n")
-            for k in not_in_path:
-                report_list.write(k + "\n")
+            ListDiff(path_fc,blank_fc,"feature_class")
+            data_parcel_fields = getLayerFields(i, "Parcel")
+            ListDiff(data_parcel_fields,blank_parcel_fields,"Parcel_Fields")
 
             # report_list.write("Parcel Layer Report"+"\n")
             # report_list.write(report[1])
