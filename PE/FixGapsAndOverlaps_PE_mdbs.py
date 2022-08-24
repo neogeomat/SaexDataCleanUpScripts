@@ -233,8 +233,15 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
                     ###########Construction_Polygon Intersect Parcels
 
-                    arcpy.Intersect_analysis([construction_polygon_location, parcel_location],test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", "", "0.00001", "INPUT")
-
+                    try:
+                        arcpy.Intersect_analysis([construction_polygon_location, parcel_location],test_data + "\\Cadastre\\Const_Poly_ParcelIntersect", "", "0.00005", "INPUT")
+                    except Exception as e:
+                        exception_list.write("Gap Overlap Error for ," + i + "\n")
+                        print ("error = " + str(e))
+                    except SystemExit as x:
+                        print ("error = " + str(x))
+                    except:
+                        print("error")
                     if (arcpy.Exists("selection_const")):
                         arcpy.Delete_management("selection_const")
 
