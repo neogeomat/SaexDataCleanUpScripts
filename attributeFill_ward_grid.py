@@ -55,6 +55,7 @@ dic_case_insen = {
 
 dict_scale={
     "500"   :   "5554",
+    "600"   :   "5553",
     "1200"  :   "5555",
     "1250"  :   "5556",
     "2400"  :   "5557",
@@ -92,6 +93,7 @@ class App(Frame):
 
         options = [
             "500",
+            "600",
             "1200",
             "1250",
             "2400",
@@ -100,7 +102,7 @@ class App(Frame):
         ]
 
         self.variable = StringVar(self)
-        self.variable.set(options[4]) #default value(2500)
+        self.variable.set(options[5]) #default value(2500)
         self.optionmenu = OptionMenu(self, self.variable, *options)
         self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
