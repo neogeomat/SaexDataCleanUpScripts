@@ -26,7 +26,7 @@ class App(Frame):
         self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
         options = [
-            "Blank.mdb",
+            "Blank_.mdb",
             "Blank_87.mdb",
             "Blank_84.mdb",
             "Blank_81.mdb"
