@@ -126,8 +126,8 @@ def correct_geometry(geometry):
     # Apply corrections step by step
     geometry1 = remove_overshoot(geometry)
     geometry2 = remove_duplicate_coordinates(geometry1)
-    polygon = wkt.loads(geometry2)
-    geometry3 = remove_duplicate_polygon_coordinates(polygon)
+    #polygon = wkt.loads(geometry2)
+    geometry3 = remove_duplicate_polygon_coordinates(geometry2)
 
     # Remove duplicate coordinates from the exterior of the polygon, excluding the endpoints
     coordinates = geometry3.exterior.coords
