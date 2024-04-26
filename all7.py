@@ -34,9 +34,26 @@ class PolygonShifter:
         self.frame2 = tk.Frame(master, borderwidth=2, relief="groove")
         self.frame2.grid(row=1, column=0, padx=10, pady=10)
 
-        # Create the second frame
+        # Create the third frame
         self.frame3 = tk.Frame(master, borderwidth=2, relief="groove")
         self.frame3.grid(row=2, column=0, padx=10, pady=10)
+        
+        # Create the third frame 1
+        self.frame3_1 = tk.Frame(self.frame3, borderwidth=2, relief="groove")
+        self.frame3_1.grid(row=2, column=0, padx=10, pady=10)
+
+        # Create the third frame 2
+        self.frame3_2 = tk.Frame(self.frame3, borderwidth=2, relief="groove")
+        self.frame3_2.grid(row=2, column=1, padx=10, pady=10)
+
+        # Label and Text Entry for Polygon 2
+        self.limitation_head = tk.Label(self.frame3_2, text="Limitations:", fg='blue')
+        self.limitation_head.grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.limitation_head.config(font=("TkDefaultFont", 12, "underline"))
+
+        self.limitation_text = tk.Label(self.frame3_2, text="1. Do not work for hollow polygons\n", fg='red')
+        self.limitation_text.grid(row=1, column=0, sticky="w", padx=5, pady=2)
+
 
         # Database connection status label
         self.connection_status_label = tk.Label(self.frame1, text="Not connected", fg="red", anchor="w")
@@ -109,27 +126,27 @@ class PolygonShifter:
         self.area_poly2_value.grid(row=6, column=0, sticky="w", padx=5, pady=2)
 
         # Radio Buttons to Choose Polygon
-        self.choose_polygon_label = tk.Label(self.frame3, text="Choose polygon to shift:", fg='blue')
+        self.choose_polygon_label = tk.Label(self.frame3_1, text="Choose polygon to shift:", fg='blue')
         self.choose_polygon_label.grid(row=0, column=0, sticky="w", padx=5, pady=2)
 
         self.selected_polygon = tk.IntVar()
         self.selected_polygon.set(1)
 
-        self.poly1_radio = tk.Radiobutton(self.frame3, text="Polygon 1", variable=self.selected_polygon, value=1)
+        self.poly1_radio = tk.Radiobutton(self.frame3_1, text="Polygon 1", variable=self.selected_polygon, value=1)
         self.poly1_radio.grid(row=1, column=0, sticky="w", padx=5, pady=2)
 
-        self.poly2_radio = tk.Radiobutton(self.frame3, text="Polygon 2", variable=self.selected_polygon, value=2)
+        self.poly2_radio = tk.Radiobutton(self.frame3_1, text="Polygon 2", variable=self.selected_polygon, value=2)
         self.poly2_radio.grid(row=2, column=0, sticky="w", padx=5, pady=2)
 
         # Buttons for Shifting and Plotting
-        self.shift_button = tk.Button(self.frame3, text="Shift Polygon", command=self.shift_polygon)
+        self.shift_button = tk.Button(self.frame3_1, text="Shift Polygon", command=self.shift_polygon)
         self.shift_button.grid(row=1, column=2, columnspan=2, padx=5, pady=2)
 
         # Button for Cleaning Polygon 1
-        self.clean_poly1_button = tk.Button(self.frame3, text="Clean Polygon 1", command=self.clean_polygon1)
+        self.clean_poly1_button = tk.Button(self.frame3_1, text="Clean Polygon 1", command=self.clean_polygon1)
         self.clean_poly1_button.grid(row=2, column=2, columnspan=2, padx=5, pady=2)
 
-        self.plot_button = tk.Button(self.frame3, text="Plot Polygons", command=self.plot_polygons, fg='green')
+        self.plot_button = tk.Button(self.frame3_1, text="Plot Polygons", command=self.plot_polygons, fg='green')
         self.plot_button.grid(row=3, column=3, sticky="w", padx=5, pady=2)
 
         # Initialize Checkbuttons for plot layers
@@ -473,4 +490,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# pyinstaller --onefile all6.py
+# pyinstaller --onefile all7.py

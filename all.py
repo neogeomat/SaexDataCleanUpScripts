@@ -215,6 +215,74 @@ def add_missing_vertices(polygon1, polygon2, common_vertex_index1, common_vertex
         new_polygon2_coords = polygon2_coords
     return Polygon(new_polygon2_coords)
 
+def reorder_based_on_common_vertex(poly1_wkt, poly2_wkt):
+    poly1 = wkt.loads(poly1_wkt)
+    poly2 = wkt.loads(poly2_wkt)
+
+    common_vertices = list(set(poly1.boundary.coords[:-1]).intersection(set(poly2.boundary.coords[:-1])))
+    reorder_poly1 = reorder_polygon(poly1_wkt,common_vertices)
+    reorder_poly2 = reorder_polygon(poly2_wkt,common_vertices)
+
+    return reorder_poly1,reorder_poly2
+
+
+
+from shapely.geometry import Polygon
+from shapely.wkt import loads as load_wkt
+
+
+from shapely.geometry import Point
+
+def get_vertex_index_within_tolerance(polygon_wkt, vertex, tolerance):
+    polygon = load_wkt(polygon_wkt)
+    point = Point(vertex)
+    for i, coord in enumerate(polygon.exterior.coords):
+        if point.distance(Point(coord)) <= tolerance:
+            return i
+    return None
+
+def get_vertex_index(polygon, vertex):
+    for i, coord in enumerate(polygon.exterior.coords):
+        if coord == vertex:
+            return i
+    return None
+def calculate_vertex_sum(polygon, vertex_list):
+    min_vertex_sum = float('inf')
+    min_start_index = 0
+
+    for i in range(len(polygon.exterior.coords) - 1):  # Iterate up to the second-to-last vertex
+        start_index = i
+        vertex_sum = 0
+        for vertex in vertex_list:
+            ver_index = get_vertex_index(polygon, vertex)
+            len_pol = len(polygon.exterior.coords)-1
+            vertex_sum += (ver_index - start_index) % len_pol
+        if vertex_sum < min_vertex_sum:
+            min_vertex_sum = vertex_sum
+            min_start_index = start_index
+
+    return min_start_index
+
+def reorder_polygon(wkt_polygon, vertex_list):
+    polygon = load_wkt(wkt_polygon)
+    start_index = calculate_vertex_sum(polygon, vertex_list)
+    new_poly2=change_starting_vertex(polygon,start_index)
+    return new_poly2.wkt
+
+
+def change_starting_vertex(polygon, new_start_index):
+    num_points = len(polygon.exterior.coords)
+
+    if new_start_index >= num_points or new_start_index < 0:
+        print("Invalid index!")
+        return None
+
+    new_coords = list(polygon.exterior.coords[:-1])
+    new_coords = new_coords[new_start_index:] + new_coords[:new_start_index]
+
+    new_polygon = Polygon(new_coords)
+    return new_polygon
+
 def count_coordinates(geometry):
     count = 0
     if isinstance(geometry, Polygon):
@@ -228,6 +296,12 @@ def count_coordinates(geometry):
                 count += len(interior.coords)
     return count
 
+
+def get_starting_vertex(wkt_polygon):
+    polygon = load_wkt(wkt_polygon)
+    exterior_ring = polygon.exterior
+    starting_vertex = exterior_ring.coords[0]  # First vertex of the exterior ring
+    return starting_vertex
 
 def modify_polygons(polygon1, polygon2,tolerance):
     polygon2 = Polygon(polygon2.exterior.coords[::-1])
@@ -261,7 +335,29 @@ def remove_duplicate_coordinates(geometry):
         return geometry
 
 
+def fix_ring_orientation(ring):
+    # Ensure the ring is oriented counter-clockwise
+    if ring.is_ccw:
+        return ring
+    else:
+        return ring.coords[::-1]
+
+def remove_small_interior_polygons(polygon, tolerance_area):
+    if isinstance(polygon, Polygon):
+        filtered_interior_rings = []
+        for hole in polygon.interiors:
+            fixed_hole = fix_ring_orientation(hole)
+            interior_polygon = Polygon(fixed_hole)
+            if interior_polygon.area <= tolerance_area:
+                filtered_interior_rings.append(hole)
+        filtered_polygon = Polygon(polygon.exterior, filtered_interior_rings)
+        return filtered_polygon
+    else:
+        raise ValueError("Input is not a polygon")
+
+
 def remove_duplicate_polygon_coordinates(polygon):
+
     exterior_coords = polygon.exterior.coords
     cleaned_exterior_coords = remove_duplicate_coords_except_ends(exterior_coords)
 
@@ -322,7 +418,92 @@ def clean_polygon_topological_errors(polygon):
         return polygon
 
 
-def remove_overshoot(polygon, vertex_distance_threshold=0.0001):
+from shapely.geometry import Polygon, Point
+import numpy as np
+from shapely import wkt
+
+from shapely.geometry import Point, Polygon
+import numpy as np
+import shapely.wkt as wkt
+
+
+def get_indexes_to_keep(total_indexes, indexes_to_remove):
+    indexes_to_keep = []
+    for i in range(total_indexes):
+        if i not in indexes_to_remove:
+            indexes_to_keep.append(i)
+    return indexes_to_keep
+
+
+def remove_overshoot(polygon, vertex_distance_threshold=0.0001, area_tolerance=0.01):
+    # Parse WKT polygon
+    initial_polygon = wkt.loads(polygon)
+    polygon = initial_polygon
+
+    # Calculate initial area
+    initial_area = polygon.area
+
+    # List to store indexes of vertices to be removed
+    indexes_to_remove = []
+
+    # Iterate over each pair of vertices in the polygon
+    for i in range(len(polygon.exterior.coords) - 1):
+        for j in range(i + 2, len(polygon.exterior.coords) - 2):
+            vertex1 = Point(polygon.exterior.coords[i])
+            vertex2 = Point(polygon.exterior.coords[j])
+            # If the distance between vertex i and j is within the threshold
+            if vertex1.distance(vertex2) < vertex_distance_threshold:
+                # Mark the indexes between i and j for removal
+                indexes_to_remove.extend(range(i + 1, j))
+                break  # No need to check further
+
+    # Remove duplicate indexes
+    indexes_to_remove = list(set(indexes_to_remove))
+
+    # Remove vertices marked for removal
+    if indexes_to_remove:
+        total_indexes = len(polygon.exterior.coords) - 1
+        indexes_to_keep = get_indexes_to_keep(total_indexes, indexes_to_remove)
+
+        # Check if there are at least four coordinates
+        if len(indexes_to_keep) >= 4:
+            # Create a new polygon
+            polygon_coords = np.array(polygon.exterior.coords[:-1])
+            polygon_coords = polygon_coords[indexes_to_keep]
+
+            # Ensure the new polygon has the same first and last vertex
+            polygon_coords = np.vstack([polygon_coords, polygon_coords[0]])
+
+            keep_polygon = Polygon(polygon_coords)
+
+            # Calculate new area
+            new_area = keep_polygon.area
+
+            # Check if area change is within tolerance
+            if abs(new_area - initial_area) <= area_tolerance:
+                return keep_polygon
+            else:
+                # Delete the indexes of vertices to keep instead of printing a message
+                # Create a new polygon
+                polygon_coords = np.array(polygon.exterior.coords[:-1])
+                polygon_coords = polygon_coords[indexes_to_remove]
+
+                # Ensure the new polygon has the same first and last vertex
+                polygon_coords = np.vstack([polygon_coords, polygon_coords[0]])
+
+                rem_polygon = Polygon(polygon_coords)
+
+                # Calculate new area
+                new_area = rem_polygon.area
+
+                # Check if area change is within tolerance
+                if abs(new_area - initial_area) <= area_tolerance:
+                    return rem_polygon
+
+    return polygon
+
+
+def remove_overshoot_old(polygon, vertex_distance_threshold=0.0001):
     # Parse WKT polygon
     polygon = wkt.loads(polygon)
 
@@ -439,3 +620,12 @@ def save_to_file(filename, parcelid, geometry,officename):
 
 # Define a global variable for the filename
 FILE_NAME = "parcel_data.txt"
+
+
+def revert_to_original_start_vertex(new_polygon_wkt,old_polygon_wkt,tolerance):
+    start_vertex = get_starting_vertex(old_polygon_wkt)
+    get_index_in_new = get_vertex_index_within_tolerance(new_polygon_wkt,start_vertex,tolerance)
+    new_polygon = load_wkt(new_polygon_wkt)
+    new_polygon_wkt = change_starting_vertex(new_polygon,get_index_in_new)
+
+    return Polygon(new_polygon_wkt)
