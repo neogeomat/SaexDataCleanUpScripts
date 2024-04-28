@@ -208,7 +208,7 @@ class PolygonShifter:
         # Username entry
         username_label = tk.Label(db_window, text="Username:")
         username_label.grid(row=0, column=0, padx=5, pady=2)
-        # self.db_username.set("dosit_suresh")  # Set the default value for the StringVar
+        self.db_username.set("dosit_suresh")  # Set the default value for the StringVar
         username_entry = tk.Entry(db_window, textvariable=self.db_username)
         username_entry.grid(row=0, column=1, padx=5, pady=2)
 
@@ -424,7 +424,39 @@ class PolygonShifter:
                 line.set_visible(visible)
             plt.draw()
 
+        def remove_legend(ax, label):
+            legend = ax.get_legend()  # Get the legend object
+            handles, labels = legend.legend_handles, [text.get_text() for text in
+                                                     legend.get_texts()]  # Get handles and labels
+
+            # Find the index of the label to remove
+            index_to_remove = None
+            for i, lbl in enumerate(labels):
+                if label in lbl:
+                    index_to_remove = i
+                    del handles[index_to_remove]  # Remove the handle associated with the label
+                    del labels[index_to_remove]  # Remove the label itself
+
+                    # Update the legend with the modified handles and labels
+                    legend.remove()  # Remove the existing legend
+                    ax.legend(handles, labels, loc='upper right')  # Create a new legend with updated handles and labels
+
+
+                # Update the remaining labels
+
+                for i, lbl in enumerate(labels):
+                    labels[i] = lbl.removesuffix("Exterior")
+
+                    # Update the legend with the modified labels
+                    legend.remove()  # Remove the existing legend
+                    ax.legend(handles, labels, loc='upper right')  # Create a new legend with updated labels
+
+            plt.draw()  # Redraw the plot
+
         check_buttons.on_clicked(func)
+        remove_legend(ax, "Interior")
+
+
         plt.show()
 
     def update_visibility_state(self, exterior, interiors):

@@ -1,9 +1,7 @@
 import psycopg2
-from shapely.geometry import Polygon, MultiPolygon
+from shapely.geometry import MultiPolygon
 from tkinter import messagebox
-from shapely.geometry import Point
 from shapely.wkt import loads
-import numpy as np
 from shapely.wkb import loads
 import tkinter as tk
 
@@ -92,7 +90,7 @@ def import_wkt(parcelid_widget,insert_txt_widget,conn):
         messagebox.showerror("Error", "Please enter a valid PID.")
         return None
 
-from shapely import wkb, wkt
+from shapely import wkb
 
 # Function to convert WKB to WKT with 10-digit precision
 from shapely.geometry import shape
@@ -105,15 +103,10 @@ def wkb_to_wkt_with_precision(wkb_representation, precision=10):
     wkt_geometry = shape(geom).wkt
     return wkt_geometry
 
-
 def wkb_to_wkt(wkb_bytes):
     geometry = wkb.loads(wkb_bytes)
     wkt_string = wkt.dumps(geometry)
     return wkt_string
-
-
-from shapely import wkt
-from shapely.geometry import Polygon
 
 def correct_geometry_old(geometry):
     # Load the geometry from the WKT string
