@@ -115,7 +115,7 @@ def wkb_to_wkt(wkb_bytes):
 from shapely import wkt
 from shapely.geometry import Polygon
 
-def correct_geometry(geometry):
+def correct_geometry_old(geometry):
     # Load the geometry from the WKT string
     geom = wkt.loads(geometry)
 
@@ -141,7 +141,7 @@ def correct_geometry(geometry):
     return geometry4, before_count, after_count, before_area, after_area
 
 
-def correct_geometry_new(geometry):
+def correct_geometry(geometry,tol_area = 0.1):
 
     threshold_area = 2
     # Load the geometry from the WKT string
@@ -156,32 +156,31 @@ def correct_geometry_new(geometry):
     polygon = geometry2
     geometry3 = remove_duplicate_polygon_coordinates(polygon)
 
-    # Remove duplicate coordinates from the exterior of the polygon, excluding the endpoints
-    ext_coordinates = geometry3.exterior.coords
-    ext_coord = remove_duplicate_coords_except_ends(ext_coordinates)
-
-    # Initialize list to store interior coordinates
-    int_coord = []
-
     # Check if there are interior rings and if their area exceeds the threshold
-    for interior in geometry3.interiors:
-        int_area = interior.area
-        if interior.area > threshold_area:
-            int_coord += remove_duplicate_coords_except_ends(interior.coords)
-
-    # Flatten the list of tuples into a single list of coordinates
-    flat_ext_coord = [coord for sublist in ext_coord for coord in sublist]
-    flat_int_coord = [coord for sublist in int_coord for coord in sublist]
-
-    # Create the Polygon geometry with exterior and selected interior rings
-    combined_coord = [flat_ext_coord] + [flat_int_coord] if flat_int_coord else [flat_ext_coord]
-    geometry4 = Polygon(combined_coord)
+    geometry4 = remove_small_interior_polygons(geometry3, tol_area)
 
     after_count = count_coordinates(geometry4)
     after_area = geometry4.area
 
     return geometry4, before_count, after_count, before_area, after_area
 
+
+def fix_ring_orientation(ring):
+    # Ensure the ring is oriented counter-clockwise
+    if ring.is_ccw:
+        return ring
+    else:
+        return ring.coords[::-1]
+
+def remove_small_interior_polygons(polygon, tolerance_area):
+    filtered_interior_rings = []
+    for hole in polygon.interiors:
+        fixed_hole = fix_ring_orientation(hole)
+        interior_polygon = Polygon(fixed_hole)
+        if interior_polygon.area >= tolerance_area:
+            filtered_interior_rings.append(hole)
+    filtered_polygon = Polygon(polygon.exterior, filtered_interior_rings)
+    return filtered_polygon
 
 def shift_polygons(poly1, poly2, tolerance):
     new_poly_points = []
@@ -341,20 +340,6 @@ def fix_ring_orientation(ring):
         return ring
     else:
         return ring.coords[::-1]
-
-def remove_small_interior_polygons(polygon, tolerance_area):
-    if isinstance(polygon, Polygon):
-        filtered_interior_rings = []
-        for hole in polygon.interiors:
-            fixed_hole = fix_ring_orientation(hole)
-            interior_polygon = Polygon(fixed_hole)
-            if interior_polygon.area <= tolerance_area:
-                filtered_interior_rings.append(hole)
-        filtered_polygon = Polygon(polygon.exterior, filtered_interior_rings)
-        return filtered_polygon
-    else:
-        raise ValueError("Input is not a polygon")
-
 
 def remove_duplicate_polygon_coordinates(polygon):
 

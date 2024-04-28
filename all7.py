@@ -51,7 +51,7 @@ class PolygonShifter:
         self.limitation_head.grid(row=0, column=0, sticky="w", padx=5, pady=2)
         self.limitation_head.config(font=("TkDefaultFont", 12, "underline"))
 
-        self.limitation_text = tk.Label(self.frame3_2, text="1. Do not work for hollow polygons\n", fg='red')
+        self.limitation_text = tk.Label(self.frame3_2, text="1. \n", fg='red')
         self.limitation_text.grid(row=1, column=0, sticky="w", padx=5, pady=2)
 
 
@@ -63,13 +63,22 @@ class PolygonShifter:
         self.connection_name.grid(row=0, column=0, padx=2, pady=2)
 
         # Label for Tolerance Input Field
-        self.tolerance_label_text = tk.Label(self.frame1, text="|  Shift Polygon Tolerance:")
+        self.tolerance_label_text = tk.Label(self.frame1, text="|  Tolerance: Distance")
         self.tolerance_label_text.grid(row=0, column=3, sticky="e", padx=5, pady=2)
 
         # Tolerance Input Field
         self.tolerance_entry = tk.Entry(self.frame1)
         self.tolerance_entry.insert(0, "0.0001")  # Insert default value
         self.tolerance_entry.grid(row=0, column=4, sticky="w", padx=5, pady=2)
+
+        # Label for Tolerance Input Field
+        self.tolerance_area_text = tk.Label(self.frame1, text="|  Area (Inner Polygon):")
+        self.tolerance_area_text.grid(row=0, column=5, sticky="e", padx=5, pady=2)
+
+        # Tolerance Input Field
+        self.tolerance_area = tk.Entry(self.frame1)
+        self.tolerance_area.insert(0, "0.1")  # Insert default value
+        self.tolerance_area.grid(row=0, column=6, sticky="w", padx=5, pady=2)
 
         # Label and Text Entry for Polygon 1
         self.poly1_label = tk.Label(self.frame2, text="Polygon 1      PID=", fg='blue')
@@ -173,6 +182,11 @@ class PolygonShifter:
                                                              self.db_connection))
         self.poly2_commit.grid(row=4, column=6, sticky="w", padx=5, pady=2)
 
+        self.poly1_line = None
+        self.poly2_line = None
+        self.shift_poly1_line = None
+        self.shift_poly2_line = None
+
     def create_menu(self):
         menubar = tk.Menu(self.master)
         self.master.config(menu=menubar)
@@ -271,8 +285,6 @@ class PolygonShifter:
         poly1_output_wkt = self.poly1_output_text.get("1.0", tk.END)
         poly2_output_wkt = self.poly2_output_text.get("1.0", tk.END)
 
-
-
         poly1_wkt,poly2_wkt = reorder_based_on_common_vertex(poly1_wkt,poly2_wkt)
 
         poly1 = wkt.loads(poly1_wkt)
@@ -282,14 +294,16 @@ class PolygonShifter:
 
         # Fetch tolerance value from entry widget
         tolerance_str = self.tolerance_entry.get()
+        tolerance_area = self.tolerance_area.get()
         try:
             tolerance = float(tolerance_str)
+            tolerance_area = float(tolerance_area)
         except ValueError:
             messagebox.showerror("Error", "Invalid tolerance value. Please enter a valid number.")
             return
 
-        poly1, before_count_poly1, after_count_poly1, before_area1, after_area1 = correct_geometry(poly1_wkt)
-        poly2, before_count_poly2, after_count_poly2, before_area2, after_area2 = correct_geometry(poly2_wkt)
+        poly1, before_count_poly1, after_count_poly1, before_area1, after_area1 = correct_geometry(poly1_wkt,tolerance_area)
+        poly2, before_count_poly2, after_count_poly2, before_area2, after_area2 = correct_geometry(poly2_wkt,tolerance_area)
 
         if self.selected_polygon.get() == 1:
             shifted_poly1 = shift_polygons(Polygon(poly1), Polygon(poly2), tolerance)
@@ -358,110 +372,83 @@ class PolygonShifter:
         shift_poly1_wkt = self.poly1_output_text.get("1.0", tk.END).strip()
         shift_poly2_wkt = self.poly2_output_text.get("1.0", tk.END).strip()
 
-        # Initialize poly2_line to None
-        self.poly1_line = None
-        self.poly2_line = None
-        self.shift_poly1_line = None
-        self.shift_poly2_line = None
+        self.plot_polygon(ax, poly1_wkt, 'blue', 'Polygon_1')
+        self.plot_polygon(ax, poly2_wkt, 'red', 'Polygon_2')
+        self.plot_polygon(ax, shift_poly1_wkt, 'green', 'Shifted_Polygon_1')
+        self.plot_polygon(ax, shift_poly2_wkt, 'orange', 'Shifted_Polygon_2')
 
-        if poly1_wkt:
-            try:
-                poly1 = wkt.loads(poly1_wkt)
-                poly1_color = 'blue'  # Default color for Polygon 1
-                self.poly1_line, = ax.plot(*poly1.exterior.xy, label='Polygon 1', color=poly1_color)
-            except Exception as e:
-                messagebox.showerror("Error", f"Error loading Polygon 1: {e}")
-
-        if poly2_wkt:
-            try:
-                poly2 = wkt.loads(poly2_wkt)
-                poly2_color = 'red'  # Default color for Polygon 2
-                self.poly2_line, = ax.plot(*poly2.exterior.xy, label='Polygon 2', color=poly2_color)
-            except Exception as e:
-                messagebox.showerror("Error", f"Error loading Polygon 2: {e}")
-
-        if shift_poly1_wkt:
-            try:
-                shift_poly1 = wkt.loads(shift_poly1_wkt)
-                shift_poly1_color = 'green'  # Default color for Shifted Polygon 1
-                self.shift_poly1_line, = ax.plot(*shift_poly1.exterior.xy, label='Shifted Polygon 1',
-                                                 color=shift_poly1_color)
-            except Exception as e:
-                messagebox.showerror("Error", f"Error loading Shifted Polygon 1: {e}")
-
-        if shift_poly2_wkt:
-            try:
-                shift_poly2 = wkt.loads(shift_poly2_wkt)
-                shift_poly2_color = 'orange'  # Default color for Shifted Polygon 2
-                self.shift_poly2_line, = ax.plot(*shift_poly2.exterior.xy, label='Shifted Polygon 2',
-                                                 color=shift_poly2_color)
-            except Exception as e:
-                messagebox.showerror("Error", f"Error loading Shifted Polygon 2: {e}")
-
-        # Set aspect ratio and legend
         ax.set_aspect('equal', 'box')
-        # Create legend with correct labels and colors
-        handles = [line for line in [self.poly1_line, self.poly2_line, self.shift_poly1_line, self.shift_poly2_line] if
-                   line is not None]
-        labels = ['Polygon 1', 'Polygon 2', 'Shifted Polygon 1', 'Shifted Polygon 2']
-        ax.legend(handles=handles, labels=labels)
-
-        # Create CheckButtons
+        ax.legend()
         self.create_check_buttons(ax)
 
         plt.subplots_adjust(right=0.8)
-
-        plt.draw()
-
-        # Show the plot
         plt.show()
+
+    def plot_polygon(self, ax, wkt_string, color, label):
+        if wkt_string:
+            try:
+                polygon = wkt.loads(wkt_string)
+                exterior = ax.plot(*polygon.exterior.xy, label=f"{label} Exterior", color=color)[0]
+                interiors = [ax.plot(*interior.xy, label=f"{label} Interior", color=color)[0]
+                             for interior in polygon.interiors]
+                self.update_visibility_state(exterior, interiors)
+            except Exception as e:
+                messagebox.showerror("Error", f"Error loading {label}: {e}")
 
     def create_check_buttons(self, ax):
-        # Define the position and size of the CheckButtons
         rax = plt.axes([0.85, 0.4, 0.1, 0.15])
 
-        # Create the CheckButtons
-        check_buttons = CheckButtons(rax, ('Polygon 1', 'Polygon 2', 'Shifted Polygon 1', 'Shifted Polygon 2'),
-                                     (True, True, True, True))
+        handles, labels = ax.get_legend_handles_labels()
+        combined_labels = []
+        combined_handles = []
 
-        # Function to handle the checkbox toggling
+        for label in labels:
+            combined_label = label.split()[0]  # Use only the first part of the label
+            if combined_label not in combined_labels:
+                combined_labels.append(combined_label)
+                combined_handles.append(
+                    [handle for handle, lbl in zip(handles, labels) if lbl.startswith(combined_label)])
+
+        print("Combined Labels:", combined_labels)
+        print("Combined Handles:", combined_handles)
+
+        combined_visibility = [all(line.get_visible() for line in handles) for handles in combined_handles]
+
+        check_buttons = CheckButtons(rax, combined_labels, combined_visibility)
+
         def func(label):
-            if label == 'Polygon 1':
-                self.poly1_line.set_visible(not self.poly1_line.get_visible())
-            elif label == 'Polygon 2':
-                self.poly2_line.set_visible(not self.poly2_line.get_visible())
-            elif label == 'Shifted Polygon 1':
-                self.shift_poly1_line.set_visible(not self.shift_poly1_line.get_visible())
-            elif label == 'Shifted Polygon 2':
-                self.shift_poly2_line.set_visible(not self.shift_poly2_line.get_visible())
+            index = combined_labels.index(label)
+            handles = combined_handles[index]
+            visible = not all(line.get_visible() for line in handles)
+            for line in handles:
+                line.set_visible(visible)
             plt.draw()
-            plt.show()
 
-        # Connect the checkbox function with the buttons
         check_buttons.on_clicked(func)
-
-        # Set initial visibility state for the lines
-        if self.poly1_line is not None:
-            self.poly1_line.set_visible(True)
-        if self.poly2_line is not None:
-            self.poly2_line.set_visible(True)
-        if self.shift_poly1_line is not None:
-            self.shift_poly1_line.set_visible(True)
-        if self.shift_poly2_line is not None:
-            self.shift_poly2_line.set_visible(True)
-
-        # Update the plot to reflect the initial visibility state
-        plt.draw()
-
         plt.show()
+
+    def update_visibility_state(self, exterior, interiors):
+        if exterior:
+            self.poly1_line = exterior
+        if interiors:
+            self.shift_poly1_line = interiors[0]  # Only updating for the first interior polygon, adjust as needed
 
     def open_plot(self):
         self.plot_polygons()
 
     def clean_polygon1(self):
         poly1_wkt = self.poly1_text.get("1.0", tk.END)
+
+        # Fetch tolerance value from entry widget
+        tolerance_area = self.tolerance_area.get()
+        try:
+            tolerance_area = float(tolerance_area)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid tolerance value. Please enter a valid number.")
+            return
+
         poly1 = wkt.loads(poly1_wkt)
-        poly1, before_count, after_count, before_area1, after_area1 = correct_geometry(poly1_wkt)
+        poly1, before_count, after_count, before_area1, after_area1 = correct_geometry(poly1_wkt,tolerance_area)
         self.poly1_output_text.delete("1.0", tk.END)
         self.poly1_output_text.insert(tk.END, poly1.wkt)
 
