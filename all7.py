@@ -152,7 +152,7 @@ class PolygonShifter:
         self.shift_button.grid(row=1, column=2, columnspan=2, padx=5, pady=2)
 
         # Button for Cleaning Polygon 1
-        self.clean_poly1_button = tk.Button(self.frame3_1, text="Clean Polygon 1", command=self.clean_polygon1)
+        self.clean_poly1_button = tk.Button(self.frame3_1, text="Clean Selected Polygon", command=self.clean_polygon)
         self.clean_poly1_button.grid(row=2, column=2, columnspan=2, padx=5, pady=2)
 
         self.plot_button = tk.Button(self.frame3_1, text="Plot Polygons", command=self.plot_polygons, fg='green')
@@ -285,13 +285,6 @@ class PolygonShifter:
         poly1_output_wkt = self.poly1_output_text.get("1.0", tk.END)
         poly2_output_wkt = self.poly2_output_text.get("1.0", tk.END)
 
-        poly1_wkt,poly2_wkt = reorder_based_on_common_vertex(poly1_wkt,poly2_wkt)
-
-        poly1 = wkt.loads(poly1_wkt)
-        poly2 = wkt.loads(poly2_wkt)
-
-
-
         # Fetch tolerance value from entry widget
         tolerance_str = self.tolerance_entry.get()
         tolerance_area = self.tolerance_area.get()
@@ -301,6 +294,23 @@ class PolygonShifter:
         except ValueError:
             messagebox.showerror("Error", "Invalid tolerance value. Please enter a valid number.")
             return
+
+
+        poly1, before_count_poly1, after_count_poly1, before_area1, after_area1 = correct_geometry(poly1_wkt,tolerance_area)
+        poly2, before_count_poly2, after_count_poly2, before_area2, after_area2 = correct_geometry(poly2_wkt,tolerance_area)
+
+        poly1_wkt = poly1.wkt
+        poly2_wkt = poly2.wkt
+
+
+
+        poly1_wkt,poly2_wkt = reorder_based_on_common_vertex(poly1_wkt,poly2_wkt)
+
+        poly1 = wkt.loads(poly1_wkt)
+        poly2 = wkt.loads(poly2_wkt)
+
+
+
 
         poly1, before_count_poly1, after_count_poly1, before_area1, after_area1 = correct_geometry(poly1_wkt,tolerance_area)
         poly2, before_count_poly2, after_count_poly2, before_area2, after_area2 = correct_geometry(poly2_wkt,tolerance_area)
@@ -395,8 +405,14 @@ class PolygonShifter:
             except Exception as e:
                 messagebox.showerror("Error", f"Error loading {label}: {e}")
 
+    def clean_polygon(self):
+        if self.selected_polygon.get() == 1:
+            self.clean_polygon1()
+        elif self.selected_polygon.get() == 2:
+            self.clean_polygon2()
+
     def create_check_buttons(self, ax):
-        rax = plt.axes([0.85, 0.4, 0.1, 0.15])
+        rax = plt.axes([0.85, 0.3, 0.1, 0.15])
 
         handles, labels = ax.get_legend_handles_labels()
         combined_labels = []
@@ -494,6 +510,32 @@ class PolygonShifter:
 
         self.poly1_vertex_label.config(text=f"Vertices: Before - {before_count}, After - {after_count}")
         self.area_poly1_value.config(text=f"Area: Before - {before_area1}, After - {after_area1}")
+    def clean_polygon2(self):
+        poly2_wkt = self.poly2_text.get("1.0", tk.END)
+
+        # Fetch tolerance value from entry widget
+        tolerance_area = self.tolerance_area.get()
+        try:
+            tolerance_area = float(tolerance_area)
+        except ValueError:
+            messagebox.showerror("Error", "Invalid tolerance value. Please enter a valid number.")
+            return
+
+        poly2 = wkt.loads(poly2_wkt)
+        poly2, before_count, after_count, before_area2, after_area2 = correct_geometry(poly2_wkt,tolerance_area)
+        self.poly2_output_text.delete("1.0", tk.END)
+        self.poly2_output_text.insert(tk.END, poly2.wkt)
+
+        # Compare the contents of poly1_text and poly1_output_text
+        if poly2_wkt.strip() != poly2.wkt.strip():
+            self.poly2_output_text.config(fg='red')
+        else:
+            self.poly2_output_text.config(fg='black')
+
+        messagebox.showinfo("Cleaned", "Polygon 2 cleaned successfully!")
+
+        self.poly2_vertex_label.config(text=f"Vertices: Before - {before_count}, After - {after_count}")
+        self.area_poly2_value.config(text=f"Area: Before - {before_area2}, After - {after_area2}")
 
     def copy_text(self, text_widget):
         text_to_copy = text_widget.get("1.0", "end-1c")  # Get text from text widget
