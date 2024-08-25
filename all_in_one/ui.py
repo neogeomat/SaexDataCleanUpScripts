@@ -45,8 +45,28 @@ class DataCleanup:
         self.show_filter.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
 
         # Section for database operations
+        cm_section = LabelFrame(self.master, text="Choose CM", padx=5, pady=5)
+        cm_section.grid(row=1, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
+
+        self.Sheet = Label(cm_section, text="Choose Central Meridian", width=30)
+        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        options = [
+            "Blank.mdb",
+            "Blank87.mdb",
+            "Blank84.mdb",
+            "Blank81.mdb"
+        ]
+
+        self.variable = StringVar(cm_section)
+        self.variable.set(options[1]) #default value
+        self.optionmenu = OptionMenu(cm_section, self.variable, *options)
+        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+
+        # Section for database operations
         db_section = LabelFrame(self.master, text="Apply Cleanup", padx=5, pady=5)
-        db_section.grid(row=1, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
+        db_section.grid(row=2, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
 
         self.compactdb = Button(db_section, text="Compact DB", command=lambda: compactDb(self), width=30)
         self.compactdb.grid(row=0, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
