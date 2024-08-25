@@ -7,6 +7,9 @@ from attribute_check import attributeChecker
 from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
 from attributeFill_ward_grid import Fill_Ward_Grid
+from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
+
+
 class DataCleanup:
     def __init__(self, master):
         self.master = master
@@ -69,8 +72,27 @@ class DataCleanup:
         self.optionmenu = OptionMenu(db_section, self.variable, *options)
         self.optionmenu.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
-        self.attr_check = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self), width=30)
-        self.attr_check.grid(row=2, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+        self.attr_fill1 = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self), width=30)
+        self.attr_fill1.grid(row=2, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+
+        # create label for District
+        self.Dist_code_label = Label(db_section, text="District Code", width=30)
+        self.Dist_code_label.grid(row=3, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create entry.
+        self.DistrictCode = Entry(db_section, width=30)
+        self.DistrictCode.grid(row=3, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create label for VDC
+        self.Vdc_code_label = Label(db_section, text="Enter VDC Code", width=30)
+        self.Vdc_code_label.grid(row=4, column=0, padx=5, pady=5, sticky=E + W + N + S)
+
+        # create entry.
+        self.VDCCode = Entry(db_section, width=30)
+        self.VDCCode.grid(row=4, column=1, padx=5, pady=5, sticky=E + W + N + S)
+
+        self.attr_fill2 = Button(db_section, text="Fill District VDC Code", command=lambda: Fill_VDC_Dist_Code(self,self.DistrictCode.get(),self.VDCCode.get()), width=30)
+        self.attr_fill2.grid(row=4, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
