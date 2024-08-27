@@ -9,6 +9,7 @@ from Generalize import Generalize
 from Recalculate_Extent import recalculate_extent
 from Remove_Identical_Feature import Remove_Identical_Feature
 from Repair_Layers_Geometry import Repair_Geometry
+from mege_saex_mdb import mergeSaexMdbs
 from attribute_check import attributeChecker
 from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
@@ -20,7 +21,6 @@ class DataCleanup:
     def __init__(self, master):
         self.master = master
         self.master.title("Data Clean Up Tools")
-
         self.create_widgets()
 
     def create_widgets(self):
@@ -96,7 +96,8 @@ class DataCleanup:
         ]
 
         self.variable_sc = StringVar(db_section)
-        self.variable_sc.set(options_sc[5]) #default value(2500)
+        self.variable_sc.set(options_sc[5]) #default value
+
         self.optionmenu_sc = OptionMenu(db_section, self.variable_sc, *options_sc)
         self.optionmenu_sc.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
@@ -144,6 +145,14 @@ class DataCleanup:
         self.repair_geometry = Button(db_section, text="Repair Geometry", command=lambda: Repair_Geometry(self), width=30)
         self.repair_geometry.grid(row=9, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
+
+        # Section for database operations
+        extra_section = LabelFrame(self.master, text="Extras", padx=5, pady=5)
+        extra_section.grid(row=3, column=0, padx=10, pady=10, sticky=E + W + N + S)
+
+        self.merge_all = Button(extra_section, text="Merge All", command=lambda: mergeSaexMdbs(self,self.variable_cm.get()), width=30)
+        self.merge_all.grid(row=0, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
         self.directory.delete(0, END)  # Clear the Entry widget
@@ -153,6 +162,22 @@ class DataCleanup:
         directory = self.directory.get()
         LoadDb(directory)  # Pass the directory to LoadDb function
 
+        # Update the OptionMenu based on the new central meridian
+        if hasattr(shared_data, 'initial_central_meridian'):
+            self.set_default_option(shared_data.initial_central_meridian)
+
+
+    def get_default_option(self, cm_value):
+        # Determine the default option based on cm_value
+        if cm_value in [81.0, 84.0, 87.0]:
+            return "BLANK{:.0f}.mdb".format(cm_value)
+        return "BLANK.mdb"
+
+    def set_default_option(self, cm_value):
+        # Set the default value for the OptionMenu
+        default_option = self.get_default_option(cm_value)
+        self.variable_cm.set(default_option)
+
     def open_filter_dialog(self):
         if not shared_data.mdb_files:
             print("No files to filter.")
@@ -161,6 +186,10 @@ class DataCleanup:
         directory = self.directory.get()  # Get the directory path
         filter_obj = FileFilter(shared_data.mdb_files)
         FilterDialog(self.master, filter_obj, directory,shared_data.mdb_files)  # Pass directory to the filter dialog
+        # Update the OptionMenu based on the new central meridian
+        if hasattr(shared_data, 'initial_central_meridian'):
+            self.set_default_option(shared_data.initial_central_meridian)
+
 
     def Correct_FID(self):
         for mdb in shared_data.filtered_mdb_files:

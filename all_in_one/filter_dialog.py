@@ -9,7 +9,7 @@ from file_filter import FileFilter
 import tkinter as tk
 from tkinter import Toplevel, Scrollbar, Listbox
 import shared_data
-
+from LoadDb import getCentralMeridian
 
 class FilterDialog(Toplevel):
     previous_options = None  # Class variable to store previous options
@@ -157,6 +157,11 @@ class FilterDialog(Toplevel):
 
         # Apply filter based on filter type and logic type
         shared_data.filtered_mdb_files = file_filter.filter_by_name(name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type)
+
+        for mdb in shared_data.filtered_mdb_files:
+            shared_data.initial_central_meridian = getCentralMeridian(mdb)
+            break
+
 
         self.destroy()
 
