@@ -1,5 +1,7 @@
 import tkMessageBox
 from Tkinter import *
+from ttk import Progressbar
+
 from CompactDb import compactDb
 from LoadDb import LoadDb
 import tkFileDialog
@@ -157,7 +159,7 @@ class DataCleanup:
         self.attr_fill2.grid(row=4, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill2"]).grid(row=4, column=5)
 
-        self.corr_fid = Button(db_section, text="Correct FID", command=self.Correct_FID, width=30, bg=colors["light_coral"])
+        self.corr_fid = Button(db_section, text="Correct FID", command=lambda: self.Correct_FID(), width=30, bg=colors["light_coral"])
         self.corr_fid.grid(row=5, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["corr_fid"]).grid(row=5, column=5)
 
@@ -184,9 +186,13 @@ class DataCleanup:
         self.repair_geometry.grid(row=9, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["repair_geometry"]).grid(row=9, column=5)
 
-        # Final button to run all checked commands
-        self.run_all_button = Button(db_section, text="Run Checked Actions", command=self.run_checked_actions, width=60, bg=colors["light_green"])
+        # Run all checked actions button
+        self.run_all_button = Button(db_section, text="Run Checked Actions", command=self.run_checked_actions, width=30, bg=colors["light_green"])
         self.run_all_button.grid(row=10, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=6)
+
+        # Add the progress bar
+        self.progress = Progressbar(self.master, orient=HORIZONTAL, length=200, mode='determinate')
+        self.progress.grid(row=3, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=2)
 
         # Section for extras
         extra_section = LabelFrame(self.master, text="Extras", padx=5, pady=5, bg=colors["light_green"])
@@ -199,25 +205,42 @@ class DataCleanup:
         self.merge_dummy.grid(row=0, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
 
     def run_checked_actions(self):
-        """Run all the commands associated with the checked checkbuttons."""
-        if self.check_vars["compactdb"].get():
-            compactDb(self)
-        if self.check_vars["attr_check"].get():
-            attributeChecker(self)
-        if self.check_vars["attr_fill1"].get():
-            Fill_Ward_Grid(self, self.variable_sc.get())
-        if self.check_vars["attr_fill2"].get():
-            Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get())
-        if self.check_vars["corr_fid"].get():
-            self.Correct_FID()
-        if self.check_vars["generalize"].get():
-            Generalize(self, self.tolerance_entry.get())
-        if self.check_vars["recalculate_extent"].get():
-            recalculate_extent(self)
-        if self.check_vars["remove_identical"].get():
-            Remove_Identical_Feature(self)
-        if self.check_vars["repair_geometry"].get():
-            Repair_Geometry(self)
+        """Run all checked actions"""
+        checked_actions = [key for key, var in self.check_vars.items() if var.get()]
+
+        if not checked_actions:
+            tkMessageBox.showinfo("Info", "Please select at least one action to run.")
+            return
+
+        total_actions = len(checked_actions)
+        progress_step = 100 / total_actions
+        current_progress = 0
+
+        for action in checked_actions:
+            if action == "compactdb":
+                compactDb(self)
+            elif action == "attr_check":
+                attributeChecker(self)
+            elif action == "attr_fill1":
+                Fill_Ward_Grid(self, self.variable_sc.get())
+            elif action == "attr_fill2":
+                Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get())
+            elif action == "corr_fid":
+                self.Correct_FID
+            elif action == "generalize":
+                Generalize(self, self.tolerance_entry.get())
+            elif action == "recalculate_extent":
+                recalculate_extent(self)
+            elif action == "remove_identical":
+                Remove_Identical_Feature(self)
+            elif action == "repair_geometry":
+                Repair_Geometry(self)
+
+            current_progress += progress_step
+            self.progress['value'] = current_progress
+            self.master.update_idletasks()
+
+        tkMessageBox.showinfo("Info", "All selected actions have been completed.")
 
 
     def browse_folder(self):

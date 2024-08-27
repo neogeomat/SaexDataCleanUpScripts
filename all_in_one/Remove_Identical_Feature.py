@@ -24,4 +24,4 @@ def Remove_Identical_Feature(self):  # sourcery skip
     exception_list.close()
     print ('The script took {0} second !'.format(time.time() - startTime))
 
-    tkMessageBox.showinfo(title="Remove Identical Feature" + version, message="Done")
+    tkMessageBox.showinfo(title="Remove Identical Feature", message="Done")
