@@ -8,6 +8,7 @@ from Replace_mdb import replaceMDb
 from Generalize import Generalize
 from Recalculate_Extent import recalculate_extent
 from Remove_Identical_Feature import Remove_Identical_Feature
+from Repair_Layers_Geometry import Repair_Geometry
 from attribute_check import attributeChecker
 from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
@@ -139,6 +140,9 @@ class DataCleanup:
 
         self.remove_identical = Button(db_section, text="Remove Identical Constructions", command=lambda: Remove_Identical_Feature(self), width=30)
         self.remove_identical.grid(row=8, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.repair_geometry = Button(db_section, text="Repair Geometry", command=lambda: Repair_Geometry(self), width=30)
+        self.repair_geometry.grid(row=9, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
