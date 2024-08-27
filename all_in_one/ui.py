@@ -6,13 +6,14 @@ import tkFileDialog
 import shared_data
 from Replace_mdb import replaceMDb
 from Generalize import Generalize
+from Recalculate_Extent import recalculate_extent
+from Remove_Identical_Feature import Remove_Identical_Feature
 from attribute_check import attributeChecker
 from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
 from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
 from Fill_FID import Fill_Par_FID
-
 
 class DataCleanup:
     def __init__(self, master):
@@ -135,6 +136,9 @@ class DataCleanup:
 
         self.recalculate_extent = Button(db_section, text="ReCalculate Extent", command=lambda: recalculate_extent(self), width=30)
         self.recalculate_extent.grid(row=7, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.remove_identical = Button(db_section, text="Remove Identical Constructions", command=lambda: Remove_Identical_Feature(self), width=30)
+        self.remove_identical.grid(row=8, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()

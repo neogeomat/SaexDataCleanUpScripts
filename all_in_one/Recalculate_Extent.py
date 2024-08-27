@@ -3,7 +3,7 @@ import arcpy
 import os
 import time
 import shared_data
-def ReCalculateExtentDB(self):  # sourcery skip
+def recalculate_extent(self):  # sourcery skip
     arcpy.env.overwriteOutput = True
     startTime = time.time ()
     path = shared_data.directory
