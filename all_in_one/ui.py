@@ -1,13 +1,17 @@
+import tkMessageBox
 from Tkinter import *
 from CompactDb import compactDb
 from LoadDb import LoadDb
 import tkFileDialog
 import shared_data
+from Replace_mdb import replaceMDb
+from Generalize import Generalize
 from attribute_check import attributeChecker
 from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
 from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
+from Fill_FID import Fill_Par_FID
 
 
 class DataCleanup:
@@ -45,39 +49,41 @@ class DataCleanup:
         self.show_filter.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
 
         # Section for database operations
-        cm_section = LabelFrame(self.master, text="Choose CM", padx=5, pady=5)
+        cm_section = LabelFrame(self.master, text="Replace Whole MDb", padx=5, pady=5)
         cm_section.grid(row=1, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
 
-        self.Sheet = Label(cm_section, text="Choose Central Meridian", width=30)
-        self.Sheet.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet_cm = Label(cm_section, text="Choose Central Meridian", width=30)
+        self.Sheet_cm.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        options = [
-            "Blank.mdb",
-            "Blank87.mdb",
-            "Blank84.mdb",
-            "Blank81.mdb"
+        options_cm = [
+            "BLANK.mdb",
+            "BLANK87.mdb",
+            "BLANK84.mdb",
+            "BLANK81.mdb"
         ]
 
-        self.variable = StringVar(cm_section)
-        self.variable.set(options[1]) #default value
-        self.optionmenu = OptionMenu(cm_section, self.variable, *options)
-        self.optionmenu.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.variable_cm = StringVar(cm_section)
+        self.variable_cm.set(options_cm[1]) #default value
+        self.optionmenu_cm = OptionMenu(cm_section, self.variable_cm, *options_cm)
+        self.optionmenu_cm.grid(row=1, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
+        self.compactdb = Button(cm_section, text="Replace", command=lambda: replaceMDb(self,self.variable_cm.get()), width=30)
+        self.compactdb.grid(row=1, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
 
         # Section for database operations
         db_section = LabelFrame(self.master, text="Apply Cleanup", padx=5, pady=5)
-        db_section.grid(row=2, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
+        db_section.grid(row=2, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=2)
 
         self.compactdb = Button(db_section, text="Compact DB", command=lambda: compactDb(self), width=30)
-        self.compactdb.grid(row=0, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+        self.compactdb.grid(row=0, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         self.attr_check = Button(db_section, text="Check Attributes", command=lambda: attributeChecker(self), width=30)
-        self.attr_check.grid(row=1, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+        self.attr_check.grid(row=1, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
-        self.Sheet = Label(db_section, text="Choose Mapped Scale", width=30)
-        self.Sheet.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
+        self.Sheet_sc = Label(db_section, text="Choose Mapped Scale", width=30)
+        self.Sheet_sc.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S)
 
-        options = [
+        options_sc = [
             "500",
             "600",
             "1200",
@@ -87,13 +93,13 @@ class DataCleanup:
             "4800"
         ]
 
-        self.variable = StringVar(db_section)
-        self.variable.set(options[5]) #default value(2500)
-        self.optionmenu = OptionMenu(db_section, self.variable, *options)
-        self.optionmenu.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.variable_sc = StringVar(db_section)
+        self.variable_sc.set(options_sc[5]) #default value(2500)
+        self.optionmenu_sc = OptionMenu(db_section, self.variable_sc, *options_sc)
+        self.optionmenu_sc.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
 
-        self.attr_fill1 = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self), width=30)
-        self.attr_fill1.grid(row=2, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+        self.attr_fill1 = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self,self.variable_sc.get()), width=30)
+        self.attr_fill1.grid(row=2, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         # create label for District
         self.Dist_code_label = Label(db_section, text="District Code", width=30)
@@ -109,10 +115,26 @@ class DataCleanup:
 
         # create entry.
         self.VDCCode = Entry(db_section, width=30)
-        self.VDCCode.grid(row=4, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.VDCCode.grid(row=4, column=1, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         self.attr_fill2 = Button(db_section, text="Fill District VDC Code", command=lambda: Fill_VDC_Dist_Code(self,self.DistrictCode.get(),self.VDCCode.get()), width=30)
-        self.attr_fill2.grid(row=4, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=3)
+        self.attr_fill2.grid(row=4, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.corr_fid = Button(db_section, text="Correct FID", command=self.Correct_FID, width=30)
+        self.corr_fid.grid(row=5, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.tolerance_label_text = Label(db_section, text="Tolerance(m)")
+        self.tolerance_label_text.grid(row=6, column=0, sticky="e", padx=5, pady=2)
+
+        self.tolerance_entry = Entry(db_section)
+        self.tolerance_entry.insert(0, "0.2")  # Insert default value
+        self.tolerance_entry.grid(row=6, column=1, sticky="w", padx=5, pady=2)
+
+        self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self,self.tolerance_entry.get()), width=30)
+        self.generalize.grid(row=6, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.recalculate_extent = Button(db_section, text="ReCalculate Extent", command=lambda: recalculate_extent(self), width=30)
+        self.recalculate_extent.grid(row=7, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
@@ -131,3 +153,10 @@ class DataCleanup:
         directory = self.directory.get()  # Get the directory path
         filter_obj = FileFilter(shared_data.mdb_files)
         FilterDialog(self.master, filter_obj, directory,shared_data.mdb_files)  # Pass directory to the filter dialog
+
+    def Correct_FID(self):
+        for mdb in shared_data.filtered_mdb_files:
+            Fill_Par_FID(self,mdb)
+        tkMessageBox.showinfo(title="FID Corrected", message="Done")
+
+

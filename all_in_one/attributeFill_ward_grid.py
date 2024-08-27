@@ -64,7 +64,7 @@ dict_scale={
     "4800"  :   "5559"
 }
 
-def Fill_Ward_Grid(self):  # sourcery skip
+def Fill_Ward_Grid(self,scale):  # sourcery skip
     import tkMessageBox
     import arcpy
     import os
@@ -77,7 +77,7 @@ def Fill_Ward_Grid(self):  # sourcery skip
     exception_list.truncate(0)
     matches=["file","trig"]
 
-    mapped_scale = self.variable.get()
+    mapped_scale = scale
     if mapped_scale in dict_scale:
         scaled_value=dict_scale[mapped_scale]
     else:
