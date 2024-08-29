@@ -20,6 +20,7 @@ from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
 from Fill_FID import Fill_Par_FID
 from tkinter import *
+from identical_parcels import Find_Identical_Feature,display_results
 
 class DataCleanup:
     def __init__(self, master):
@@ -204,6 +205,9 @@ class DataCleanup:
         self.merge_dummy = Button(extra_section, text="Merge Dummy Planning", command=lambda: merge_dummy_planning(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
         self.merge_dummy.grid(row=0, column=2, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
 
+        self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
+        self.identical_parcel.grid(row=0, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
+
     def run_checked_actions(self):
         """Run all checked actions"""
         checked_actions = [key for key, var in self.check_vars.items() if var.get()]
@@ -242,6 +246,9 @@ class DataCleanup:
 
         tkMessageBox.showinfo("Info", "All selected actions have been completed.")
 
+    def find_identical_parcels(self):
+        result = Find_Identical_Feature(self)
+        display_results(result)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
