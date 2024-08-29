@@ -1,5 +1,6 @@
 import tkMessageBox
 from Tkinter import *
+import tkinter as tk
 from ttk import Progressbar
 
 from CompactDb import compactDb
@@ -18,9 +19,9 @@ from file_filter import FileFilter  # Import the filter class
 from filter_dialog import FilterDialog, show_filter_list  # Import the filter dialog
 from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
-from Fill_FID import Fill_Par_FID
+from Fill_FID import Correct_FID
 from tkinter import *
-from identical_parcels import Find_Identical_Feature,display_results
+from identical_parcels import Find_Identical_Feature
 
 class DataCleanup:
     def __init__(self, master):
@@ -45,7 +46,7 @@ class DataCleanup:
 
         # Section for loading and filtering files
         file_section = LabelFrame(self.master, text="Choose Path and Filter", padx=5, pady=5, bg=colors["light_blue"])
-        file_section.grid(row=0, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=2)
+        file_section.grid(row=0, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         # Create label for sheet
         self.Sheet = Label(file_section, text="Choose Folder", width=30, bg=colors["light_gray"])
@@ -69,7 +70,7 @@ class DataCleanup:
 
         # Section for database operations
         cm_section = LabelFrame(self.master, text="Replace Whole MDb", padx=5, pady=5, bg=colors["light_blue"])
-        cm_section.grid(row=1, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=3)
+        cm_section.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         self.Sheet_cm = Label(cm_section, text="Choose Central Meridian", width=30, bg=colors["light_gray"])
         self.Sheet_cm.grid(row=1, column=0, padx=5, pady=5, sticky=E + W + N + S,columnspan=1)
@@ -92,7 +93,7 @@ class DataCleanup:
 
         # Section for database operations
         db_section = LabelFrame(self.master, text="Apply Cleanup", padx=5, pady=5, bg=colors["light_blue"])
-        db_section.grid(row=2, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=2)
+        db_section.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         # Store the checkbutton states
         self.check_vars = {
@@ -108,7 +109,7 @@ class DataCleanup:
         }
 
 
-        self.compactdb = Button(db_section, text="Compact DB", command=lambda: compactDb(self), width=30, bg=colors["light_coral"])
+        self.compactdb = Button(db_section, text="Compact DB", command=lambda: compactDb(self,status_update=None,show_messagebox=True), width=30, bg=colors["light_coral"])
         self.compactdb.grid(row=0, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section, bg=colors["check_button"],   variable=self.check_vars["compactdb"]).grid(row=0, column=5)
 
@@ -134,7 +135,7 @@ class DataCleanup:
 
         self.optionmenu_sc = OptionMenu(db_section, self.variable_sc, *options_sc)
         self.optionmenu_sc.config(bg=colors["white"])
-        self.optionmenu_sc.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S)
+        self.optionmenu_sc.grid(row=2, column=1, padx=5, pady=5, sticky=E + W + N + S,columnspan=1)
 
         self.attr_fill1 = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self, self.variable_sc.get()), width=30, bg=colors["light_coral"])
         self.attr_fill1.grid(row=2, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
@@ -160,7 +161,7 @@ class DataCleanup:
         self.attr_fill2.grid(row=4, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill2"]).grid(row=4, column=5)
 
-        self.corr_fid = Button(db_section, text="Correct FID", command=lambda: self.Correct_FID(), width=30, bg=colors["light_coral"])
+        self.corr_fid = Button(db_section, text="Correct FID", command=lambda: Correct_FID(self), width=30, bg=colors["light_coral"])
         self.corr_fid.grid(row=5, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["corr_fid"]).grid(row=5, column=5)
 
@@ -193,11 +194,11 @@ class DataCleanup:
 
         # Add the progress bar
         self.progress = Progressbar(self.master, orient=HORIZONTAL, length=200, mode='determinate')
-        self.progress.grid(row=3, column=0, padx=10, pady=10, sticky=E + W + N + S, columnspan=2)
+        self.progress.grid(row=3, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
         # Section for extras
         extra_section = LabelFrame(self.master, text="Extras", padx=5, pady=5, bg=colors["light_green"])
-        extra_section.grid(row=3, column=0, padx=10, pady=10, sticky=E + W + N + S,columnspan=3)
+        extra_section.grid(row=4, column=0, padx=5, pady=5, sticky=E + W + N + S,columnspan=3)
 
         self.merge_all = Button(extra_section, text="Merge All", command=lambda: mergeSaexMdbs(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
         self.merge_all.grid(row=0, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
@@ -208,9 +209,25 @@ class DataCleanup:
         self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
         self.identical_parcel.grid(row=0, column=3, padx=5, pady=5, sticky=E + W + N + S, columnspan=1)
 
+        # Add this to the end of the create_widgets method
+        self.status_label = Label(self.master, text="Ready", bg=colors["light_gray"], width=50)
+        self.status_label.grid(row=0, column=4, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
     def run_checked_actions(self):
-        """Run all checked actions"""
-        checked_actions = [key for key, var in self.check_vars.items() if var.get()]
+        """Run all checked actions serially in the order they appear in the UI"""
+        action_order = [
+            "compactdb",
+            "attr_check",
+            "attr_fill1",
+            "attr_fill2",
+            "corr_fid",
+            "generalize",
+            "recalculate_extent",
+            "remove_identical",
+            "repair_geometry"
+        ]
+
+        checked_actions = [action for action in action_order if self.check_vars[action].get()]
 
         if not checked_actions:
             tkMessageBox.showinfo("Info", "Please select at least one action to run.")
@@ -221,39 +238,53 @@ class DataCleanup:
         current_progress = 0
 
         for action in checked_actions:
-            if action == "compactdb":
-                compactDb(self)
-            elif action == "attr_check":
-                attributeChecker(self)
-            elif action == "attr_fill1":
-                Fill_Ward_Grid(self, self.variable_sc.get())
-            elif action == "attr_fill2":
-                Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get())
-            elif action == "corr_fid":
-                self.Correct_FID
-            elif action == "generalize":
-                Generalize(self, self.tolerance_entry.get())
-            elif action == "recalculate_extent":
-                recalculate_extent(self)
-            elif action == "remove_identical":
-                Remove_Identical_Feature(self)
-            elif action == "repair_geometry":
-                Repair_Geometry(self)
+            try:
+                # Update status label
+                self.update_status("Processing: {}".format(action.replace('_', ' ').title()))
 
-            current_progress += progress_step
-            self.progress['value'] = current_progress
-            self.master.update_idletasks()
+                if action == "compactdb":
+                    compactDb(self,self.update_status, show_messagebox=False)
+                elif action == "attr_check":
+                    attributeChecker(self, self.update_status,show_messagebox=False)
+                elif action == "attr_fill1":
+                    Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status,show_messagebox=False)
+                elif action == "attr_fill2":
+                    Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get(), self.update_status,show_messagebox=False)
+                elif action == "corr_fid":
+                    Correct_FID(self.update_status,show_messagebox=False)
+                elif action == "generalize":
+                    Generalize(self, self.tolerance_entry.get(), self.update_status,show_messagebox=False)
+                elif action == "recalculate_extent":
+                    recalculate_extent(self, self.update_status,show_messagebox=False)
+                elif action == "remove_identical":
+                    Remove_Identical_Feature(self, self.update_status,show_messagebox=False)
+                elif action == "repair_geometry":
+                    Repair_Geometry(self, self.update_status,show_messagebox=False)
 
+                # Update progress bar
+                current_progress += progress_step
+                self.progress['value'] = current_progress
+                self.master.update_idletasks()
+
+            except Exception as e:
+                # Show error message if any action fails
+                tkMessageBox.showerror("Error", "An error occurred while performing {}: {}".format(action, str(e)))
+                break  # Optionally stop the execution if an error occurs
+
+        # Show completion message
         tkMessageBox.showinfo("Info", "All selected actions have been completed.")
+        self.update_status("Completed")
 
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
-        display_results(result)
+        #display_results(result)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
-        self.directory.delete(0, END)  # Clear the Entry widget
-        self.directory.insert(0, folder_selected)  # Insert the selected folder path
+        if folder_selected:  # Check if a folder was selected
+            self.directory.delete(0, tk.END)  # Clear the Entry widget
+            self.directory.insert(0, folder_selected)  # Insert the selected folder path
+            shared_data.directory = folder_selected  # Update shared_data with the selected path
 
     def load_db(self):
         directory = self.directory.get()
@@ -263,6 +294,10 @@ class DataCleanup:
         if hasattr(shared_data, 'initial_central_meridian'):
             self.set_default_option(shared_data.initial_central_meridian)
 
+    def update_status(self, message):
+        """Update the status label with a message."""
+        self.status_label.config(text=message)
+        self.master.update_idletasks()
 
     def get_default_option(self, cm_value):
         # Determine the default option based on cm_value
@@ -286,11 +321,4 @@ class DataCleanup:
         # Update the OptionMenu based on the new central meridian
         if hasattr(shared_data, 'initial_central_meridian'):
             self.set_default_option(shared_data.initial_central_meridian)
-
-
-    def Correct_FID(self):
-        for mdb in shared_data.filtered_mdb_files:
-            Fill_Par_FID(self,mdb)
-        tkMessageBox.showinfo(title="FID Corrected", message="Done")
-
 

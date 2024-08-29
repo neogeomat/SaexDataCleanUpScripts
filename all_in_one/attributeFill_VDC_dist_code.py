@@ -1,47 +1,57 @@
-from Tkinter import *
+import tkMessageBox
+import arcpy
+import os
 import shared_data
-global dic_case_sen
+import time
 
-def Fill_VDC_Dist_Code(self,vdc_code='',district_code=''):
-    import tkMessageBox
-    import arcpy
-    import os
-
-    district_code=district_code
-    vdc_code=vdc_code
+def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, show_messagebox=True):
+    """Fill VDC and District codes in the database, update status using the provided function, and optionally show a message box."""
+    startTime = time.time()
     path = shared_data.directory
-    mdb_list = shared_data.filtered_mdb_files
-    exception_list= open(path+"\\exception_list_att_fill_vdc_dis_code.csv","a")
+    exception_list = open(os.path.join(path, "exception_list_att_fill_vdc_dis_code.csv"), "a")
+    allerror = open(os.path.join(path, "regex.csv"), "a")
     exception_list.truncate(0)
-    allerror = open (path + "\\regex.csv", "a")
-    allerror.truncate (0)
-    for mdb_file in mdb_list:
+    allerror.truncate(0)
+
+    # Update status to indicate the start of the process
+    if status_update:
+        status_update("Starting VDC and District code filling process...")
+
+    mdb_list = shared_data.filtered_mdb_files
+    for count, mdb_file in enumerate(mdb_list, start=1):
         parcelfile = os.path.join(mdb_file, "Parcel")
         print(parcelfile)
 
         filename = os.path.basename(mdb_file)
         try:
             arcpy.Compact_management(mdb_file)
-        except:
-            exception_list.write("Compact Error for ,"+filename+"\n")
-            print("Compact error for "+filename)
+        except Exception as e:
+            exception_list.write("Compact Error for: " + filename + "\n")
+            print("Compact error for " + filename)
+            if status_update:
+                status_update("Error compacting {}: {}".format(filename, str(e)))
 
         try:
-            if(district_code != '' and int(district_code)):
-                #print district_code
-                arcpy.CalculateField_management(parcelfile,"DISTRICT",int(district_code),"PYTHON")#FOR DISTRICT_CODE
-            if (vdc_code != '' and int(vdc_code)):
-                arcpy.CalculateField_management(parcelfile,"VDC",int(vdc_code),"PYTHON")#FOR VDC_CODE
+            if district_code and int(district_code):
+                arcpy.CalculateField_management(parcelfile, "DISTRICT", int(district_code), "PYTHON")
+            if vdc_code and int(vdc_code):
+                arcpy.CalculateField_management(parcelfile, "VDC", int(vdc_code), "PYTHON")
+        except Exception as e:
+            exception_list.write("Attribute fill Error for: " + filename + "\n")
+            allerror.write(filename + ",error\n")
+            if status_update:
+                status_update("Error filling attributes for {}: {}".format(filename, str(e)))
 
-        except:
-            exception_list.write("Attribute fill Error for ," + filename + "\n")
-            allerror.write(filename + "," + ",error" +"\n")
-        #
-        # else:
-        #     print(filename + "," + " ")
-        #     allerror.write (filename + "," + " " + "\n")
-    tkMessageBox.showinfo(title="Fix Attribute Errors", message="Done")
-    allerror.close()
+        if status_update:
+            status_update("Processed {} ({}/{})".format(filename, count, len(mdb_list)))
+
     exception_list.close()
+    allerror.close()
 
+    if show_messagebox:
+        tkMessageBox.showinfo(title="Fix Attribute Errors", message="Done")
 
+    if status_update:
+        status_update("VDC and District code filling process complete.")
+
+    print('The script took {0} seconds!'.format(time.time() - startTime))

@@ -1,169 +1,97 @@
 from Tkinter import *
+import tkMessageBox
+import arcpy
+import os
+import time
+from arcpy import env
 import shared_data
 
-def attributeChecker(self):
-    import tkMessageBox
-    import arcpy
-    import os
-    import time
-    from arcpy import env
-    starttime = time.time();
+
+def attributeChecker(self, status_update=None, show_messagebox=True):
+    """Check attributes in the database files and optionally show a message box upon completion."""
+    starttime = time.time()
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
-    exception_list= open(path+"\\exception_list_check_attr.csv","a")
+    exception_list = open(path + "\\exception_list_check_attr.csv", "a")
     exception_list.truncate(0)
 
     total_mdbs = len(mdb_list)
 
     layers = ["Parcel"]
-    allerror=open(path+"\\ALL_ERROR.csv","a")
+    allerror = open(path + "\\ALL_ERROR.csv", "a")
     allerror.truncate(0)
     count = 0
+
+    if status_update:
+        status_update("Starting attribute checking process...")
+
     for i in mdb_list:
         try:
-            arcpy.Compact_management(i)
-        except:
-            exception_list.write("Compact Error for ,"+i+"\n")
-            print("Compact error for " + i)
-        f = open(i + "_error.csv", "a")
-        f.truncate(0)
-        env.workspace = i
-        count += 1
-        print (env.workspace + " (" + str(count) + "/" + str(total_mdbs)+ ")")
-        for l in layers:
-            TheShapefile = i + "\\" + l
-            # print TheShapefile
-            try:
+            env.workspace = i
+            f = open(i + "_error.csv", "a")
+            f.truncate(0)
+            count += 1
+            print(env.workspace + " (" + str(count) + "/" + str(total_mdbs) + ")")
+
+            for l in layers:
+                TheShapefile = os.path.join(i, l)
                 if arcpy.Exists(TheShapefile):
                     TheRows = arcpy.SearchCursor(TheShapefile)
 
-                    #Check if Column exists
-                    isDistrict = arcpy.ListFields(TheShapefile, "DISTRICT")
-                    if (len(isDistrict)) != 1:
-                        f.write("District Column does not exist"+ "\n")
-                        allerror.write("District Column does not exist, ,"+i+ "\n")
-                        skipDistrict=True
-                    else:
-                        skipDistrict=False
+                    # Check if Columns exist and handle accordingly
+                    column_checks = {
+                        "DISTRICT": "District Column does not exist",
+                        "VDC": "VDC Column does not exist",
+                        "WARDNO": "Ward No Column does not exist",
+                        "GRIDS1": "Grid Sheet Column does not exist",
+                        "PARCELTY": "Parcel Type Column does not exist",
+                        "PARCELNO": "Parcel No Column does not exist",
+                        "suspicious": "Suspicious Column does not exist"
+                    }
 
-                    isVDC = arcpy.ListFields(TheShapefile, "VDC")
-                    if (len(isVDC)) != 1:
-                        f.write("VDC Column does not exist"+ "\n")
-                        allerror.write("VDC Column does not exist, ,"+i+ "\n")
-                        skipVDC=True
-                    else:
-                        skipVDC=False
-
-                    isWard = arcpy.ListFields(TheShapefile, "WARDNO")
-                    if (len(isWard)) != 1:
-                        f.write("Ward No Column does not exist"+ "\n")
-                        allerror.write("Ward No Column does not exist, ,"+i+ "\n")
-                        skipWard=True
-                    else:
-                        skipWard=False
-
-                    isGrid = arcpy.ListFields(TheShapefile, "GRIDS1")
-                    if (len(isGrid)) != 1:
-                        f.write("Grid Sheet Column does not exist"+ "\n")
-                        allerror.write("Grid Sheet Column does not exist, ,"+ i + "\n")
-                        skipGrid=True
-                    else:
-                        skipGrid=FALSE
-
-                    isParcelty = arcpy.ListFields(TheShapefile, "PARCELTY")
-                    if (len(isParcelty)) != 1:
-                        f.write("Parcel Type Column does not exist" + "\n")
-                        allerror.write("Parcel Type Column does not exist, ," + i + "\n")
-                        skipParcelty = True
-                    else:
-                        skipParcelty = False
-
-                    isParcelno = arcpy.ListFields(TheShapefile, "PARCELNO")
-                    if (len(isParcelty)) != 1:
-                        f.write("Parcel No Column does not exist" + "\n")
-                        allerror.write("Parcel No Column does not exist, ," + i + "\n")
-                        skipParcelno = True
-                    else:
-                        skipParcelno = False
-
-                    #Check if Suspicious Column exists
-                    isSuspicious = arcpy.ListFields(TheShapefile, "suspicious")
-                    if (len(isSuspicious)) != 1:
-                        f.write("Suspicious Column does not exist"+ "\n")
-                        allerror.write("Suspicious Column does not exist, ,"+ i + "\n")
-                        skipSuspicious=True
-                    else:
-                        skipSuspicious=False
+                    skips = {}
+                    for column, error_message in column_checks.items():
+                        if len(arcpy.ListFields(TheShapefile, column)) != 1:
+                            f.write(error_message + "\n")
+                            allerror.write(error_message + ",," + i + "\n")
+                            skips[column] = True
+                        else:
+                            skips[column] = False
 
                     # Loop through each row in the attributes
                     for TheRow in TheRows:
-                        if not skipDistrict:
-                            District = TheRow.getValue("DISTRICT")
-                            if District is None or District == "" or District == " ":
-                                f.write("District Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("District Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
-                            elif District > 75 or District == 0:
-                                f.write("District Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("District Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
+                        # Perform attribute checks and write errors
+                        checks = {
+                            "DISTRICT": lambda val: (val is None or val in ["", " ", 0] or val > 75),
+                            "VDC": lambda val: (val is None or val in ["", " ", 0] or val > 9999),
+                            "WARDNO": lambda val: (
+                                        val is None or val in ["", " ", 0] or not val.isdigit() or int(val) > 35),
+                            "GRIDS1": lambda val: (val is None or len(val) < 7 or len(val) > 9),
+                            "PARCELNO": lambda val: (val is None or val == 0),
+                            "PARCELTY": lambda val: (val is None),
+                            "suspicious": lambda val: (str(val).lower() == "yes")
+                        }
 
-                        if not skipVDC:
-                            VDC = TheRow.getValue("VDC")
-                            if VDC is None or VDC == "" or VDC == " ":
-                                f.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("VDC Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-                            elif VDC > 9999 or VDC == 0:
-                                f.write("VDC Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("VDC Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i + "\n")
-
-                        if not skipWard:
-                            Wardno = TheRow.getValue("WARDNO")
-                            if Wardno is None or Wardno == "" or Wardno == " ":
-                                f.write("Ward No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Ward No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-                            elif (not Wardno.isdigit()):
-                                f.write("Ward No in Digit and String at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + ", Check mapsheets_code for freesheets\n")
-                                allerror.write("Ward No in Digit and String at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + ", Check mapsheets_code for freesheets" + "," + i +"\n")
-                            elif (int(Wardno) == 0 or int(Wardno) > 35):
-                                f.write("Ward No Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Ward No Error at OBJECTID=," + str(TheRow.getValue("OBJECTID"))  + "," + i + "\n")
-
-                        if not skipGrid:
-                            Grid = TheRow.getValue("GRIDS1")
-                            if (Grid is None or len(Grid) == 0 or Grid == " " or Grid == ""):
-                                f.write("Grid Sheet Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Grid Sheet Code Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-                            elif (len(Grid) > 9 or len(Grid) < 7):
-                                f.write("Grid Sheet Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Grid Sheet Code Error at OBJECTID=," + str(TheRow.getValue("OBJECTID"))  + "," + i + "\n")
-
-                        if not skipParcelno:
-                            Parcelno = TheRow.getValue("PARCELNO")
-                            if (Parcelno is None or Parcelno is ""):
-                                f.write("Parcel No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel No Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-                            elif (int(Parcelno) == 0):
-                                f.write("Parcel No 0 at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel No 0 at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-
-                        if not skipParcelty:
-                            Parceltype = TheRow.getValue("PARCELTY")
-                            if (Parceltype == None):
-                                f.write("Parcel Type Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Parcel Type Blank at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
-
-                        if not skipSuspicious:
-                            Suspicioustype = TheRow.getValue("suspicious")
-                            if (str(Suspicioustype).lower() == "yes"):
-                                f.write("Suspicious Type YES at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "\n")
-                                allerror.write("Suspicious Type YES at OBJECTID=," + str(TheRow.getValue("OBJECTID")) + "," + i  + "\n")
+                        for column, check in checks.items():
+                            if not skips.get(column, False):
+                                value = TheRow.getValue(column)
+                                if check(value):
+                                    f.write("{} Error at OBJECTID={}\n".format(column, TheRow.getValue("OBJECTID")))
+                                    allerror.write(
+                                        "{} Error at OBJECTID={},{}\n".format(column, TheRow.getValue("OBJECTID"), i))
                 else:
-                    f.write("Parcel Layer not found for \n"+i)
-                    allerror.write("Parcel Layer not found for \n"+i)
-            except:
-                exception_list.write("Attribute Check Error for ,"+i+"\n")
-    print("process complete")
-    f.close()
+                    f.write("Parcel Layer not found for\n" + i)
+                    allerror.write("Parcel Layer not found for\n" + i)
+        except Exception as e:
+            exception_list.write("Attribute Check Error for," + i + "\n")
+            print("Attribute Check Error for " + i + ": " + str(e))
+
+    print("Process complete")
     endtime = time.time()
-    print("Time taken: " + str(endtime -starttime))
-    tkMessageBox.showinfo(title="Check Attribute Errors", message="Done")
+    print("Time taken: " + str(endtime - starttime))
+
+    exception_list.close()
     allerror.close()
+
+    if show_messagebox:
+        tkMessageBox.showinfo(title="Check Attribute Errors", message="Attribute checking process is complete.")
