@@ -23,6 +23,20 @@ from Fill_FID import Correct_FID
 from tkinter import *
 from identical_parcels import Find_Identical_Feature
 
+# Define colors
+colors = {
+    "light_blue": "#add8e6",
+    "check_button": "#add8e6",
+    "light_green": "#90ee90",
+    "light_yellow": "#ffffe0",
+    "light_coral": "#f08080",
+    "light_pink": "#ffb6c1",
+    "light_gray": "#d3d3d3",
+    "white": "#ffffff"
+    ""
+}
+
+
 class DataCleanup:
     def __init__(self, master):
         self.master = master
@@ -32,17 +46,6 @@ class DataCleanup:
     def create_widgets(self):
         """Create buttons with light, colorful background colors"""
 
-        # Define colors
-        colors = {
-            "light_blue": "#add8e6",
-            "check_button": "#add8e6",
-            "light_green": "#90ee90",
-            "light_yellow": "#ffffe0",
-            "light_coral": "#f08080",
-            "light_pink": "#ffb6c1",
-            "light_gray": "#d3d3d3",
-            "white": "#ffffff"
-        }
 
         # Section for loading and filtering files
         file_section = LabelFrame(self.master, text="Choose Path and Filter", padx=5, pady=5, bg=colors["light_blue"])
@@ -94,6 +97,12 @@ class DataCleanup:
         # Section for database operations
         db_section = LabelFrame(self.master, text="Apply Cleanup", padx=5, pady=5, bg=colors["light_blue"])
         db_section.grid(row=2, column=0, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
+
+        self.select_all_var = BooleanVar()
+        self.select_all_checkbutton = Checkbutton(db_section, text="Select All", variable=self.select_all_var,
+                                                  command=self.toggle_all_checkbuttons, bg=colors["light_green"])
+        self.select_all_checkbutton.grid(row=0, column=0, padx=5, pady=5, sticky=W)
+
 
         # Store the checkbutton states
         self.check_vars = {
@@ -213,6 +222,23 @@ class DataCleanup:
         self.status_label = Label(self.master, text="Ready", bg=colors["light_gray"], width=50)
         self.status_label.grid(row=0, column=4, padx=5, pady=5, sticky=E + W + N + S, columnspan=2)
 
+        # Bind the Shift-click event to the checkbuttons
+        for checkbutton_name, checkbutton_var in self.check_vars.items():
+            self.bind_shift_click(self.select_all_checkbutton, checkbutton_name)
+    def toggle_all_checkbuttons(self):
+        """Toggle all checkbuttons based on the state of the master checkbutton"""
+        for var in self.check_vars.values():
+            var.set(self.select_all_var.get())
+
+    def bind_shift_click(self, widget, checkbutton_name):
+        """Bind the Shift-click event to toggle all checkbuttons"""
+        def toggle(event):
+            if event.state & 0x1:  # Shift key is pressed
+                self.select_all_var.set(not self.select_all_var.get())
+                self.toggle_all_checkbuttons()
+
+        widget.bind("<Button-1>", toggle)
+
     def run_checked_actions(self):
         """Run all checked actions serially in the order they appear in the UI"""
         action_order = [
@@ -227,6 +253,31 @@ class DataCleanup:
             "repair_geometry"
         ]
 
+        action_buttons = {
+            "compactdb": self.compactdb,
+            "attr_check": self.attr_check,
+            "attr_fill1": self.attr_fill1,
+            "attr_fill2": self.attr_fill2,
+            "corr_fid": self.corr_fid,
+            "generalize": self.generalize,
+            "recalculate_extent": self.recalculate_extent,
+            "remove_identical": self.remove_identical,
+            "repair_geometry": self.repair_geometry
+        }
+
+        # Mapping of action keys to user-friendly display names
+        action_display_names = {
+            "compactdb": "Compact database",
+            "attr_check": "Attribute check",
+            "attr_fill1": "Fill Ward Grid",
+            "attr_fill2": "Fill VDC/District Code",
+            "corr_fid": "Correct Parcel ID",
+            "generalize": "Generalize",
+            "recalculate_extent": "Recalculate extent",
+            "remove_identical": "Remove identical const features",
+            "repair_geometry": "Repair geometry"
+        }
+
         checked_actions = [action for action in action_order if self.check_vars[action].get()]
 
         if not checked_actions:
@@ -234,46 +285,50 @@ class DataCleanup:
             return
 
         total_actions = len(checked_actions)
-        progress_step = 100 / total_actions
-        current_progress = 0
+        self.progress["maximum"] = total_actions
 
-        for action in checked_actions:
+        for i, action in enumerate(checked_actions, start=1):
             try:
-                # Update status label
-                self.update_status("Processing: {}".format(action.replace('_', ' ').title()))
-
-                if action == "compactdb":
-                    compactDb(self,self.update_status, show_messagebox=False)
-                elif action == "attr_check":
-                    attributeChecker(self, self.update_status,show_messagebox=False)
-                elif action == "attr_fill1":
-                    Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status,show_messagebox=False)
-                elif action == "attr_fill2":
-                    Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get(), self.update_status,show_messagebox=False)
-                elif action == "corr_fid":
-                    Correct_FID(self.update_status,show_messagebox=False)
-                elif action == "generalize":
-                    Generalize(self, self.tolerance_entry.get(), self.update_status,show_messagebox=False)
-                elif action == "recalculate_extent":
-                    recalculate_extent(self, self.update_status,show_messagebox=False)
-                elif action == "remove_identical":
-                    Remove_Identical_Feature(self, self.update_status,show_messagebox=False)
-                elif action == "repair_geometry":
-                    Repair_Geometry(self, self.update_status,show_messagebox=False)
-
-                # Update progress bar
-                current_progress += progress_step
-                self.progress['value'] = current_progress
+                display_name = action_display_names.get(action, action.replace('_', ' ').capitalize())
+                self.progress["value"] = i
+                self.status_label.config(text="Running {}... ({}/{})".format(display_name, i, total_actions))
                 self.master.update_idletasks()
 
-            except Exception as e:
-                # Show error message if any action fails
-                tkMessageBox.showerror("Error", "An error occurred while performing {}: {}".format(action, str(e)))
-                break  # Optionally stop the execution if an error occurs
+                button = action_buttons.get(action)
+                if button:
+                    original_color = self.update_button_color(button, "spring green")  # Change to a color (e.g., tomato)
+                    self.master.update_idletasks()
 
-        # Show completion message
-        tkMessageBox.showinfo("Info", "All selected actions have been completed.")
-        self.update_status("Completed")
+                if action == "compactdb":
+                    compactDb(self, self.update_status, show_messagebox=False)
+                elif action == "attr_check":
+                    attributeChecker(self, self.update_status, show_messagebox=False)
+                elif action == "attr_fill1":
+                    Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status, show_messagebox=False)
+                elif action == "attr_fill2":
+                    Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get(), self.update_status,
+                                       show_messagebox=False)
+                elif action == "corr_fid":
+                    Correct_FID(self.update_status, show_messagebox=False)
+                elif action == "generalize":
+                    Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False)
+                elif action == "recalculate_extent":
+                    recalculate_extent(self, self.update_status, show_messagebox=False)
+                elif action == "remove_identical":
+                    Remove_Identical_Feature(self, self.update_status, show_messagebox=False)
+                elif action == "repair_geometry":
+                    Repair_Geometry(self, self.update_status, show_messagebox=False)
+
+                if button:
+                    self.update_button_color(button, original_color)  # Revert to the original color
+
+            except Exception as e:
+                tkMessageBox.showerror("Error", "An error occurred while running {}: {}".format(display_name, str(e)))
+                return
+
+        # Final update and completion message
+        self.status_label.config(text="All selected actions completed!")
+        tkMessageBox.showinfo("Info", "All selected actions have been successfully completed.")
 
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
@@ -322,3 +377,8 @@ class DataCleanup:
         if hasattr(shared_data, 'initial_central_meridian'):
             self.set_default_option(shared_data.initial_central_meridian)
 
+    def update_button_color(self, button, color):
+        """Change the button color."""
+        original_color = button.cget('background')
+        button.config(bg=color)
+        return original_color
