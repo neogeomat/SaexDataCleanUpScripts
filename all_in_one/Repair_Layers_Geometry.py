@@ -17,16 +17,20 @@ def Repair_Geometry(self, status_update=None, show_messagebox=True):
         status_update("Starting geometry repair...")
 
     for count, mdb in enumerate(mdb_list, start=1):
+        filename = os.path.basename(mdb)
+        if status_update:
+            status_update("Processing {} \n({}/{})".format(filename, count, len(mdb_list)))
+
         try:
             arcpy.RepairGeometry_management(os.path.join(mdb, "Parcel"))
             arcpy.RepairGeometry_management(os.path.join(mdb, "Construction"))
             if status_update:
-                status_update("Repaired geometry for {} ({}/{})".format(mdb, count, total_files))
+                status_update("Repaired geometry for {} ({}/{})".format(filename, count, total_files))
         except Exception as e:
             exception_list.write("Repair Geometry Error for: " + mdb + "\n")
             print("Repair Geometry error for " + mdb + "\nError=\n\n", e)
             if status_update:
-                status_update("Error repairing geometry for {}: {}".format(mdb, str(e)))
+                status_update("Error repairing geometry for {}: {}".format(filename, str(e)))
 
     exception_list.close()
     print("Repair Geometry process complete")

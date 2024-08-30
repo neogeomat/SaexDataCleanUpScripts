@@ -2,8 +2,7 @@ import tkMessageBox
 import arcpy
 import time
 import shared_data
-
-
+import os
 def compactDb(self, status_update=None, show_messagebox=True):
     """Compact the database files, update status using the provided function, and optionally show a message box."""
     startTime = time.time()
@@ -18,15 +17,17 @@ def compactDb(self, status_update=None, show_messagebox=True):
 
     for i in shared_data.filtered_mdb_files:
         count += 1
+        filename = os.path.basename(i)
+
         try:
             arcpy.Compact_management(i)
             if status_update:
-                status_update("Compacting {} ({}/{})".format(i, count, total))
+                status_update("Compacting {} \n({}/{})".format(filename, count, total))
         except Exception as e:
             exception_list.write("Compact Error for: " + i + "\n")
             print("Compact error for " + i)
             if status_update:
-                status_update("Error compacting {}: {}".format(i, str(e)))
+                status_update("Error compacting {}: {}".format(filename, str(e)))
 
     print("Compact process complete")
     exception_list.close()

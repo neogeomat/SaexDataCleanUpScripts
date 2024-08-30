@@ -18,6 +18,10 @@ def recalculate_extent(self, status_update=None, show_messagebox=True):
         status_update("Starting extent recalculation process...")
 
     for count, mdb in enumerate(mdb_list, start=1):
+        filename = os.path.basename(mdb)
+        if status_update:
+            status_update("Processing {} \n({}/{})".format(filename, count, len(mdb_list)))
+
         feature_classes = []
         walk = arcpy.da.Walk(mdb, datatype="FeatureClass")
         for dirpath, dirnames, filenames in walk:
@@ -28,12 +32,12 @@ def recalculate_extent(self, status_update=None, show_messagebox=True):
             for feature in feature_classes:
                 arcpy.RecalculateFeatureClassExtent_management(feature)
             if status_update:
-                status_update("Recalculated extent for {} ({}/{})".format(mdb, count, total_files))
+                status_update("Recalculated extent for {} \n({}/{})".format(filename, count, total_files))
         except Exception as e:
             exception_list.write("Extent ReCalculation Error for: " + mdb + "\n")
             print("Extent ReCalculation error for " + mdb + "\nError=\n\n", e)
             if status_update:
-                status_update("Error recalculating extent for {}: {}".format(mdb, str(e)))
+                status_update("Error recalculating extent for {}: {}".format(filename, str(e)))
 
     exception_list.close()
     print("Extent ReCalculation process complete")

@@ -17,16 +17,20 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True):
         status_update("Starting removal of identical features...")
 
     for count, mdb in enumerate(mdb_list, start=1):
+        filename = os.path.basename(mdb)
+        if status_update:
+            status_update("Processing {} \n({}/{})".format(filename, count, len(mdb_list)))
+
         try:
             arcpy.DeleteIdentical_management(os.path.join(mdb, "Construction"), ["Shape_Area", "Shape_Length", "ParFID"])
             # arcpy.DeleteIdentical_management(os.path.join(mdb, "Parcel"), ["Shape_Area", "Shape_Length", "PARCELNO"])
             if status_update:
-                status_update("Removed identical features from {} ({}/{})".format(mdb, count, total_files))
+                status_update("Removed identical features from {} \n({}/{})".format(filename, count, total_files))
         except Exception as e:
             exception_list.write("Remove Identical Feature Error for: " + mdb + "\n")
             print("Remove Identical Feature error for " + mdb + "\nError=\n\n", e)
             if status_update:
-                status_update("Error removing identical features from {}: {}".format(mdb, str(e)))
+                status_update("Error removing identical features from {}: {}".format(filename, str(e)))
 
     exception_list.close()
     print("Remove Identical Feature process complete")

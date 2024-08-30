@@ -1,6 +1,5 @@
 import tkMessageBox
 from Tkinter import *
-import tkinter as tk
 from ttk import Progressbar
 
 from CompactDb import compactDb
@@ -20,7 +19,6 @@ from filter_dialog import FilterDialog, show_filter_list  # Import the filter di
 from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
 from Fill_FID import Correct_FID
-from tkinter import *
 from identical_parcels import Find_Identical_Feature
 
 # Define colors
@@ -288,6 +286,7 @@ class DataCleanup:
         self.progress["maximum"] = total_actions
 
         for i, action in enumerate(checked_actions, start=1):
+            #update_status = "show"
             try:
                 display_name = action_display_names.get(action, action.replace('_', ' ').capitalize())
                 self.progress["value"] = i
@@ -309,7 +308,7 @@ class DataCleanup:
                     Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get(), self.update_status,
                                        show_messagebox=False)
                 elif action == "corr_fid":
-                    Correct_FID(self.update_status, show_messagebox=False)
+                    Correct_FID(self,self.update_status, show_messagebox=False)
                 elif action == "generalize":
                     Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False)
                 elif action == "recalculate_extent":
@@ -337,7 +336,7 @@ class DataCleanup:
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()
         if folder_selected:  # Check if a folder was selected
-            self.directory.delete(0, tk.END)  # Clear the Entry widget
+            self.directory.delete(0, END)  # Clear the Entry widget
             self.directory.insert(0, folder_selected)  # Insert the selected folder path
             shared_data.directory = folder_selected  # Update shared_data with the selected path
 

@@ -12,6 +12,7 @@ def attributeChecker(self, status_update=None, show_messagebox=True):
     starttime = time.time()
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
+    total = len(mdb_list)
     exception_list = open(path + "\\exception_list_check_attr.csv", "a")
     exception_list.truncate(0)
 
@@ -26,6 +27,11 @@ def attributeChecker(self, status_update=None, show_messagebox=True):
         status_update("Starting attribute checking process...")
 
     for i in mdb_list:
+        filename = os.path.basename(i)
+        if status_update:
+                status_update("Checking Attribute for {} \n({}/{})".format(filename, count, total))
+
+
         try:
             env.workspace = i
             f = open(i + "_error.csv", "a")
@@ -89,6 +95,8 @@ def attributeChecker(self, status_update=None, show_messagebox=True):
     print("Process complete")
     endtime = time.time()
     print("Time taken: " + str(endtime - starttime))
+    if status_update:
+        status_update("Checking Attribute Completed.")
 
     exception_list.close()
     allerror.close()

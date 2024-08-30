@@ -43,7 +43,7 @@ def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, 
                 status_update("Error filling attributes for {}: {}".format(filename, str(e)))
 
         if status_update:
-            status_update("Processed {} ({}/{})".format(filename, count, len(mdb_list)))
+            status_update("Processed {} \n({}/{})".format(filename, count, len(mdb_list)))
 
     exception_list.close()
     allerror.close()

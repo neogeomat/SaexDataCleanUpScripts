@@ -17,10 +17,12 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True):
         status_update("Starting generalization process...")
 
     for i in mdb_list:
+        filename = os.path.basename(i)
+
         count += 1
         try:
             if status_update:
-                status_update("Processing file {0} ({1}/{2})".format(i, count, len(mdb_list)))
+                status_update("Processing file {0} \n({1}/{2})".format(filename, count, len(mdb_list)))
 
             Folder_Location = "d:"
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
@@ -37,7 +39,7 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True):
             if os.path.exists(blank_data):
                 BLANK84_Template = blank_data
             else:
-                raise FileNotFoundError("Blank Template database not found, install saex")
+                print("Blank Template database not found, install saex")
 
             # Process: Copy Features
             arcpy.CopyFeatures_management(i + "\\Parcel", DataCleanTemp + "\\Parcel_to_Simplify", "", "0", "0", "0")
@@ -61,10 +63,10 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True):
             exception_list.write("Generalize Error for: " + i + "\n")
             print("Generalize error for " + i + "\nError=\n\n", sys.exc_info())
             if status_update:
-                status_update("Error processing {}: {}".format(i, str(e)))
+                status_update("Error processing {}: {}".format(filename, str(e)))
 
         if status_update:
-            status_update("{} ({}/{}) processed".format(i, count, len(mdb_list)))
+            status_update("{} \n({}/{}) processed".format(filename, count, len(mdb_list)))
 
     print("Generalize process complete")
     exception_list.close()

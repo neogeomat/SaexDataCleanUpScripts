@@ -85,12 +85,17 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True):
         status_update("Starting the ward and grid fill process...")
 
     for count, mdb_file in enumerate(mdb_list, start=1):
+
         if any(x in mdb_file.lower() for x in ["file", "trig"]):
             continue
 
         parcelfile = os.path.join(mdb_file, "Parcel")
         base_file_name = os.path.basename(mdb_file)
         print parcelfile
+
+        if status_update:
+            status_update("Processing {} \n({}/{})".format(base_file_name, count, len(mdb_list)))
+
 
         try:
             arcpy.Compact_management(mdb_file)
@@ -112,6 +117,9 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True):
 
             if ward_code > 99:
                 continue
+
+            if new_string_no >= 10:
+                new_string_no = 0
 
             try:
                 sheet_code = scaled_value + x[0][0].zfill(2) + dic_code + new_string_no
