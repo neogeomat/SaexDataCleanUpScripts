@@ -3,6 +3,7 @@ import arcpy
 import time
 import shared_data
 import os
+import status_win
 def compactDb(self, status_update=None, show_messagebox=True):
     """Compact the database files, update status using the provided function, and optionally show a message box."""
     startTime = time.time()

@@ -33,7 +33,7 @@ def Correct_FID(self, status_update=None, show_messagebox=True):
     for mdb in shared_data.filtered_mdb_files:
         count += 1
         filename = os.path.basename(mdb)
-
+        print ("Correcting PID in {} \n({}/{})".format(filename, count, total))
         if status_update:  # Update status every 10 iterations
             status_update("Correcting PID in {} \n({}/{})".format(filename, count, total))
 

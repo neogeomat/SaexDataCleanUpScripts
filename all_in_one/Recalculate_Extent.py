@@ -19,6 +19,8 @@ def recalculate_extent(self, status_update=None, show_messagebox=True):
 
     for count, mdb in enumerate(mdb_list, start=1):
         filename = os.path.basename(mdb)
+        print ("Recalculating extent in {} \n({}/{})".format(filename, count, len(mdb_list)))
+
         if status_update:
             status_update("Processing {} \n({}/{})".format(filename, count, len(mdb_list)))
 

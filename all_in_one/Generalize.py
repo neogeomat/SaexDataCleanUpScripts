@@ -18,11 +18,11 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True):
 
     for i in mdb_list:
         filename = os.path.basename(i)
-
         count += 1
+        print ("Generalizing in {} \n({}/{})".format(filename, count, len(mdb_list)))
         try:
             if status_update:
-                status_update("Processing file {0} \n({1}/{2})".format(filename, count, len(mdb_list)))
+                status_update("Generalizing in {0} \n({1}/{2})".format(filename, count, len(mdb_list)))
 
             Folder_Location = "d:"
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
