@@ -67,8 +67,8 @@ dict_scale = {
     "2500": "5558",
     "4800": "5559"
 }
-
-def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True):
+#555501021 = 1200 scale map of 1 ward kha -1
+def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update_progress=None):
     """Fill Ward and Grid codes into the Parcel layers and handle errors."""
     startTime = time.time()
     path = shared_data.directory
@@ -142,6 +142,14 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True):
         else:
             print base_file_name + "," + " "
             allerror.write(base_file_name + "," + " " + "\n")
+
+
+        if update_progress:
+            x= count/float(len(mdb_list))
+            progress_value = (x) * 100
+            update_progress(progress_value, len(mdb_list))
+        self.master.update_idletasks()  # Ensure GUI updates
+
 
     allerror.close()
     exception_list.close()

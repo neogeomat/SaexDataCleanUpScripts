@@ -5,7 +5,7 @@ import time
 import os
 from csv_logging import create_csv_log_file, write_error_to_csv
 
-def Correct_FID(self, status_update=None, show_messagebox=True):
+def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=None):
     """Process feature classes, update status using the provided function, and optionally show a message box."""
     startTime = time.time()
     error_log_path = os.path.join(shared_data.directory, "error_log.csv")
@@ -102,6 +102,12 @@ def Correct_FID(self, status_update=None, show_messagebox=True):
 
         iteration_end_time = time.time()
         step_times["Total Iteration Time"] += (iteration_end_time - step_start_time)
+
+        if update_progress:
+            x= count/float(total)
+            progress_value = (x) * 100
+            update_progress(progress_value, total)
+        self.master.update_idletasks()  # Ensure GUI updates
 
     file_handler.close()
 

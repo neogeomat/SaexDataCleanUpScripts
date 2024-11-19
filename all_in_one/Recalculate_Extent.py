@@ -4,7 +4,7 @@ import os
 import time
 import shared_data
 
-def recalculate_extent(self, status_update=None, show_messagebox=True):
+def recalculate_extent(self, status_update=None, show_messagebox=True, update_progress=None):
     """Recalculate the extent of feature classes in the provided .mdb files, with status updates and optional message box."""
     arcpy.env.overwriteOutput = True
     startTime = time.time()
@@ -40,6 +40,11 @@ def recalculate_extent(self, status_update=None, show_messagebox=True):
             print("Extent ReCalculation error for " + mdb + "\nError=\n\n", e)
             if status_update:
                 status_update("Error recalculating extent for {}: {}".format(filename, str(e)))
+        if update_progress:
+            x= count/float(len(mdb_list))
+            progress_value = (x) * 100
+            update_progress(progress_value, len(mdb_list))
+        self.master.update_idletasks()  # Ensure GUI updates
 
     exception_list.close()
     print("Extent ReCalculation process complete")

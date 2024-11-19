@@ -4,7 +4,7 @@ import os
 import time
 import shared_data
 
-def Remove_Identical_Feature(self, status_update=None, show_messagebox=True):
+def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, update_progress=None):
     """Remove identical features from the specified feature classes, with status updates and optional message box."""
     startTime = time.time()
     path = shared_data.directory
@@ -32,6 +32,11 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True):
             print("Remove Identical Feature error for " + mdb + "\nError=\n\n", e)
             if status_update:
                 status_update("Error removing identical features from {}: {}".format(filename, str(e)))
+        if update_progress:
+            x= count/float(len(mdb_list))
+            progress_value = (x) * 100
+            update_progress(progress_value, len(mdb_list))
+        self.master.update_idletasks()  # Ensure GUI updates
 
     exception_list.close()
     print("Remove Identical Feature process complete")

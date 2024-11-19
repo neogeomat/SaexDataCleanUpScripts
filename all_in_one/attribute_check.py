@@ -7,16 +7,13 @@ from arcpy import env
 import shared_data
 
 
-def attributeChecker(self, status_update=None, show_messagebox=True):
+def attributeChecker(self, status_update=None, show_messagebox=True, update_progress=None):
     """Check attributes in the database files and optionally show a message box upon completion."""
     starttime = time.time()
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
-    total = len(mdb_list)
     exception_list = open(path + "\\exception_list_check_attr.csv", "a")
     exception_list.truncate(0)
-
-    total_mdbs = len(mdb_list)
 
     layers = ["Parcel"]
     allerror = open(path + "\\ALL_ERROR.csv", "a")
@@ -25,13 +22,12 @@ def attributeChecker(self, status_update=None, show_messagebox=True):
 
     if status_update:
         status_update("Starting attribute checking process...")
+    total = len(mdb_list)
 
-    for i in mdb_list:
+    for progress, i in enumerate(shared_data.filtered_mdb_files, start=1):
         filename = os.path.basename(i)
         if status_update:
                 status_update("Checking Attribute for {} \n({}/{})".format(filename, count, total))
-
-
         try:
             env.workspace = i
             f = open(i + "_error.csv", "a")
@@ -91,6 +87,12 @@ def attributeChecker(self, status_update=None, show_messagebox=True):
         except Exception as e:
             exception_list.write("Attribute Check Error for," + i + "\n")
             print("Attribute Check Error for " + i + ": " + str(e))
+
+        if update_progress:
+            x= progress/float(total)
+            progress_value = (x) * 100
+            update_progress(progress_value, total)
+        self.master.update_idletasks()  # Ensure GUI updates
 
     print("Process complete")
     endtime = time.time()

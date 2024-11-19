@@ -4,7 +4,7 @@ import os
 import shared_data
 import time
 
-def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, show_messagebox=True):
+def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, show_messagebox=True, update_progress=None):
     """Fill VDC and District codes in the database, update status using the provided function, and optionally show a message box."""
     startTime = time.time()
     path = shared_data.directory
@@ -44,6 +44,12 @@ def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, 
 
         if status_update:
             status_update("Processed {} \n({}/{})".format(filename, count, len(mdb_list)))
+
+        if update_progress:
+            x= count/float(len(mdb_list))
+            progress_value = (x) * 100
+            update_progress(progress_value, len(mdb_list))
+        self.master.update_idletasks()  # Ensure GUI updates
 
     exception_list.close()
     allerror.close()

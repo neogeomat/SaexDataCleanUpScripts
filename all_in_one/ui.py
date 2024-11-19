@@ -1,3 +1,4 @@
+import threading
 import tkMessageBox
 from Tkinter import *
 from ttk import Progressbar
@@ -20,6 +21,7 @@ from attributeFill_ward_grid import Fill_Ward_Grid
 from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
 from Fill_FID import Correct_FID
 from identical_parcels import Find_Identical_Feature
+from Change_Parcel_No import Change_parcel_no
 
 # Define colors
 colors = {
@@ -215,12 +217,23 @@ class DataCleanup:
         self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
         self.identical_parcel.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
 
+        self.p_no_label = Label(extra_section, text="Enter Max Parcel No \n to Change to zero", width=30, bg=colors["light_gray"])
+        self.p_no_label.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S)
+
+        # Create entry
+        self.max_p_no = Entry(extra_section, width=30, bg=colors["white"])
+        self.max_p_no.grid(row=1, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        self.max_p_no.insert(0,"9999")
+
+        self.change_p_no = Button(extra_section, text="Change Parcel No to 0", command=lambda: self.change_parcel_no(self.max_p_no.get()), width=30, bg=colors["light_coral"])
+        self.change_p_no.grid(row=1, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+
         # Section for status updates
         self.status_section = LabelFrame(self.master, text="Status", padx=2, pady=3, bg=colors["light_blue"])
         self.status_section.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
         self.status_label = Label(self.status_section, text="", bg=colors["light_yellow"], anchor='w')
-        self.status_label.grid(row=0, column=0, padx=2, pady=3, sticky=W)
+        self.status_label.grid(row=0, column=0, padx=2, pady=3, sticky=W, columnspan=6)
         self.hide_status()  # Hide the status_label initially
 
     def toggle_all_checkbuttons(self):
@@ -280,7 +293,7 @@ class DataCleanup:
             #update_status = "show"
             try:
                 display_name = action_display_names.get(action, action.replace('_', ' ').capitalize())
-                self.progress["value"] = i
+                #self.progress["value"] = i
                 # Show the status_label and update its text
                 self.status_label.pack(side="bottom", fill="x")  # Adjust as needed for your layout
                 self.status_label.config(text="Running {}... ({}/{})".format(display_name, i, total_actions))
@@ -291,25 +304,33 @@ class DataCleanup:
                     original_color = self.update_button_color(button, "spring green")  # Change to a color (e.g., tomato)
                     self.master.update_idletasks()
 
+                def progress_callback(current, total):
+                    """Function to update progress bar from action functions"""
+                    # Ensure float division
+                    progress_fraction = current / float(len(shared_data.filtered_mdb_files))
+                    self.progress["value"] = (i - 1) + progress_fraction * (1.0 / total_actions)
+                    self.master.update_idletasks()
+
+
                 if action == "compactdb":
-                    compactDb(self, self.update_status, show_messagebox=False)
+                    compactDb(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_check":
-                    attributeChecker(self, self.update_status, show_messagebox=False)
+                    attributeChecker(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_fill1":
-                    Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status, show_messagebox=False)
+                    Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_fill2":
                     Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get(), self.update_status,
-                                       show_messagebox=False)
+                                       show_messagebox=False,update_progress=progress_callback)
                 elif action == "corr_fid":
-                    Correct_FID(self,self.update_status, show_messagebox=False)
+                    Correct_FID(self,self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "generalize":
-                    Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False)
+                    Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "recalculate_extent":
-                    recalculate_extent(self, self.update_status, show_messagebox=False)
+                    recalculate_extent(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "remove_identical":
-                    Remove_Identical_Feature(self, self.update_status, show_messagebox=False)
+                    Remove_Identical_Feature(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "repair_geometry":
-                    Repair_Geometry(self, self.update_status, show_messagebox=False)
+                    Repair_Geometry(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
 
                 if button:
                     self.update_button_color(button, original_color)  # Revert to the original color
@@ -322,12 +343,19 @@ class DataCleanup:
         self.status_label.config(text="All selected actions completed!")
         tkMessageBox.showinfo("Info", "All selected actions have been successfully completed.")
 
-        # Hide the status_label after all actions are complete
-        self.status_label.pack_forget()
+        # Hide the status_section after all actions are complete
+        self.status_section.pack_forget()
 
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
         #display_results(result)
+
+    def change_parcel_no(self, parcel_no_str):
+        max_parcel_no=int(parcel_no_str)
+        if not isinstance(max_parcel_no, int):
+            tkMessageBox.showerror("Invalid Input", "max_parcel_no must be an integer.")
+            return None  # Exit the function gracefully
+        Change_parcel_no(self,max_parcel_no)
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()

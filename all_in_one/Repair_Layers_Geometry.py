@@ -4,7 +4,7 @@ import os
 import time
 import shared_data
 
-def Repair_Geometry(self, status_update=None, show_messagebox=True):
+def Repair_Geometry(self, status_update=None, show_messagebox=True, update_progress=None):
     """Repair geometry of the specified feature classes, with status updates and optional message box."""
     startTime = time.time()
     path = shared_data.directory
@@ -32,6 +32,11 @@ def Repair_Geometry(self, status_update=None, show_messagebox=True):
             print("Repair Geometry error for " + mdb + "\nError=\n\n", e)
             if status_update:
                 status_update("Error repairing geometry for {}: {}".format(filename, str(e)))
+        if update_progress:
+            x= count/float(total_files)
+            progress_value = (x) * 100
+            update_progress(progress_value, total_files)
+        self.master.update_idletasks()  # Ensure GUI updates
 
     exception_list.close()
     print("Repair Geometry process complete")

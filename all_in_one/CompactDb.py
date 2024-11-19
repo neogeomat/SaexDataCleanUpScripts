@@ -3,12 +3,13 @@ import arcpy
 import time
 import shared_data
 import os
-import status_win
-def compactDb(self, status_update=None, show_messagebox=True):
+
+
+def compactDb(self, status_update=None, show_messagebox=True, update_progress=None):
     """Compact the database files, update status using the provided function, and optionally show a message box."""
     startTime = time.time()
     path = shared_data.directory
-    exception_list = open(path + "\\exception_list_compact.csv", "a")
+    exception_list = open(os.path.join(path, "exception_list_compact.csv"), "a")
     count = 0
     total = len(shared_data.filtered_mdb_files)
 
@@ -16,7 +17,7 @@ def compactDb(self, status_update=None, show_messagebox=True):
     if status_update:
         status_update("Starting compacting process...")
 
-    for i in shared_data.filtered_mdb_files:
+    for progress, i in enumerate(shared_data.filtered_mdb_files, start=1):
         count += 1
         filename = os.path.basename(i)
 
@@ -29,6 +30,12 @@ def compactDb(self, status_update=None, show_messagebox=True):
             print("Compact error for " + i)
             if status_update:
                 status_update("Error compacting {}: {}".format(filename, str(e)))
+
+        if update_progress:
+            x= progress/float(total)
+            progress_value = (x) * 100
+            update_progress(progress_value, total)
+        self.master.update_idletasks()  # Ensure GUI updates
 
     print("Compact process complete")
     exception_list.close()
