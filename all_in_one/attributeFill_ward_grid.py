@@ -122,7 +122,7 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
                 new_string_no = 0
 
             try:
-                sheet_code = scaled_value + x[0][0].zfill(2) + dic_code + new_string_no
+                sheet_code = scaled_value + x[0][0].zfill(2) + dic_code + str(new_string_no)
                 print "code=" + sheet_code
                 TheRows = arcpy.UpdateCursor(parcelfile)
                 for TheRow in TheRows:
