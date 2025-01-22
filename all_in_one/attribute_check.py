@@ -33,7 +33,7 @@ def attributeChecker(self, status_update=None, show_messagebox=True, update_prog
             f = open(i + "_error.csv", "a")
             f.truncate(0)
             count += 1
-            print(env.workspace + " (" + str(count) + "/" + str(total_mdbs) + ")")
+            print(env.workspace + " (" + str(count) + "/" + str(total) + ")")
 
             for l in layers:
                 TheShapefile = os.path.join(i, l)

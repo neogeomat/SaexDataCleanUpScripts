@@ -1,3 +1,4 @@
+import os
 import threading
 import tkMessageBox
 from Tkinter import *
@@ -12,6 +13,7 @@ from Generalize import Generalize
 from Recalculate_Extent import recalculate_extent
 from Remove_Identical_Feature import Remove_Identical_Feature
 from Repair_Layers_Geometry import Repair_Geometry
+from FixGapsAndOverlaps_saex_mdbs import Fix_Gap_Overlap
 from merge_dummy_planning import merge_dummy_planning
 from mege_saex_mdb import mergeSaexMdbs
 from attribute_check import attributeChecker
@@ -102,6 +104,11 @@ class DataCleanup:
                                                   command=self.toggle_all_checkbuttons, bg=colors["light_green"])
         self.select_all_checkbutton.grid(row=0, column=0, padx=2, pady=3, sticky=W)
 
+        self.run_on_error = BooleanVar()
+        self.run_on_error_checkbutton = Checkbutton(db_section, text="Run On Error Files Only", variable=self.run_on_error,
+                                                  command=self.select_error_mdbs, bg=colors["light_green"])
+        self.run_on_error_checkbutton.grid(row=0, column=1, padx=2, pady=3, sticky=W)
+
 
         # Store the checkbutton states
         self.check_vars = {
@@ -110,6 +117,7 @@ class DataCleanup:
             "attr_fill1": BooleanVar(),
             "attr_fill2": BooleanVar(),
             "corr_fid": BooleanVar(),
+            "fix_gap_overlap": BooleanVar(),
             "generalize": BooleanVar(),
             "recalculate_extent": BooleanVar(),
             "remove_identical": BooleanVar(),
@@ -173,32 +181,36 @@ class DataCleanup:
         self.corr_fid.grid(row=5, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["corr_fid"]).grid(row=5, column=5)
 
+        self.fix_gap_overlap = Button(db_section, text="Fix Gap and Overlap", command=lambda: Fix_Gap_Overlap(self,self.variable_cm.get()), width=30, bg=colors["light_coral"])
+        self.fix_gap_overlap.grid(row=6, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["fix_gap_overlap"]).grid(row=6, column=5)
+
         self.tolerance_label_text = Label(db_section, text="Tolerance(m)", bg=colors["light_gray"])
-        self.tolerance_label_text.grid(row=6, column=0, sticky="e", padx=2, pady=3)
+        self.tolerance_label_text.grid(row=7, column=0, sticky="e", padx=2, pady=3)
 
         self.tolerance_entry = Entry(db_section, bg=colors["white"])
         self.tolerance_entry.insert(0, "0.2")  # Insert default value
-        self.tolerance_entry.grid(row=6, column=1, sticky="w", padx=2, pady=3)
+        self.tolerance_entry.grid(row=8, column=1, sticky="w", padx=2, pady=3)
 
         self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self, self.tolerance_entry.get()), width=30, bg=colors["light_coral"])
-        self.generalize.grid(row=6, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["generalize"]).grid(row=6, column=5)
+        self.generalize.grid(row=7, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["generalize"]).grid(row=7, column=5)
 
         self.recalculate_extent = Button(db_section, text="ReCalculate Extent", command=lambda: recalculate_extent(self), width=30, bg=colors["light_coral"])
-        self.recalculate_extent.grid(row=7, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["recalculate_extent"]).grid(row=7, column=5)
+        self.recalculate_extent.grid(row=8, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["recalculate_extent"]).grid(row=8, column=5)
 
         self.remove_identical = Button(db_section, text="Remove Identical Constructions", command=lambda: Remove_Identical_Feature(self), width=30, bg=colors["light_coral"])
-        self.remove_identical.grid(row=8, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["remove_identical"]).grid(row=8, column=5)
+        self.remove_identical.grid(row=9, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["remove_identical"]).grid(row=9, column=5)
 
         self.repair_geometry = Button(db_section, text="Repair Geometry", command=lambda: Repair_Geometry(self), width=30, bg=colors["light_coral"])
-        self.repair_geometry.grid(row=9, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["repair_geometry"]).grid(row=9, column=5)
+        self.repair_geometry.grid(row=10, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["repair_geometry"]).grid(row=10, column=5)
 
         # Run all checked actions button
         self.run_all_button = Button(db_section, text="Run Checked Actions", command=self.run_checked_actions, width=30, bg=colors["light_green"])
-        self.run_all_button.grid(row=10, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=6)
+        self.run_all_button.grid(row=11, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=6)
 
         # Add the progress bar
         self.progress = Progressbar(self.master, orient=HORIZONTAL, length=200, mode='determinate')
@@ -236,6 +248,23 @@ class DataCleanup:
         self.status_label.grid(row=0, column=0, padx=2, pady=3, sticky=W, columnspan=6)
         self.hide_status()  # Hide the status_label initially
 
+    def select_error_mdbs(self):
+        mdb_files = shared_data.filtered_mdb_files  # Assuming this contains the list of .mdb file paths
+        error_mdbs = []
+
+        for mdb_path in mdb_files:
+            # Get the directory and base file name (without extension) of the .mdb file
+            directory, mdb_filename = os.path.split(mdb_path)
+            base_filename = os.path.splitext(mdb_filename)[0]
+
+            # Check if any .csv file in the directory contains the base file name
+            for file_name in os.listdir(directory):
+                if file_name.endswith('.csv') and base_filename in file_name:
+                    error_mdbs.append(mdb_path)
+                    break
+
+        shared_data.filtered_mdb_files = error_mdbs
+
     def toggle_all_checkbuttons(self):
         """Toggle all checkbuttons based on the state of the master checkbutton"""
         for var in self.check_vars.values():
@@ -249,6 +278,7 @@ class DataCleanup:
             "attr_fill1",
             "attr_fill2",
             "corr_fid",
+            "fix_gap_overlap",
             "generalize",
             "recalculate_extent",
             "remove_identical",
@@ -261,6 +291,7 @@ class DataCleanup:
             "attr_fill1": self.attr_fill1,
             "attr_fill2": self.attr_fill2,
             "corr_fid": self.corr_fid,
+            "fix_gap_overlap": self.fix_gap_overlap,
             "generalize": self.generalize,
             "recalculate_extent": self.recalculate_extent,
             "remove_identical": self.remove_identical,
@@ -274,6 +305,7 @@ class DataCleanup:
             "attr_fill1": "Fill Ward Grid",
             "attr_fill2": "Fill VDC/District Code",
             "corr_fid": "Correct Parcel ID",
+            "fix_gap_overlap": "Fix Gap And Overlap",
             "generalize": "Generalize",
             "recalculate_extent": "Recalculate extent",
             "remove_identical": "Remove identical const features",
@@ -323,6 +355,8 @@ class DataCleanup:
                                        show_messagebox=False,update_progress=progress_callback)
                 elif action == "corr_fid":
                     Correct_FID(self,self.update_status, show_messagebox=False,update_progress=progress_callback)
+                elif action == "fix_gap_overlap":
+                    Fix_Gap_Overlap(self,self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "generalize":
                     Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "recalculate_extent":

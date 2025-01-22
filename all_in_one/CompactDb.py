@@ -20,6 +20,7 @@ def compactDb(self, status_update=None, show_messagebox=True, update_progress=No
     for progress, i in enumerate(shared_data.filtered_mdb_files, start=1):
         count += 1
         filename = os.path.basename(i)
+        print (i + " (" + str(count) + "/" + str(total) + ")")
 
         try:
             arcpy.Compact_management(i)

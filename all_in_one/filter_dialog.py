@@ -69,6 +69,15 @@ class FilterDialog(Toplevel):
         self.apply_button = tk.Button(self, text="Apply Filters", command=self.apply_filters)
         self.apply_button.grid(row=4, column=1, padx=5, pady=5, sticky='e')
 
+        # Match type selection (Correct/Incorrect)
+        self.match_type_label = tk.Label(self, text="Match Type:")
+        self.match_type_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
+
+        self.match_type_var = StringVar()
+        self.match_type_var.set("Correct Matches")  # Default value
+
+        self.match_type_menu = OptionMenu(self, self.match_type_var, "Correct Matches", "Incorrect Matches")
+        self.match_type_menu.grid(row=5, column=1, padx=5, pady=5, sticky='w')
 
     def restore_previous_options(self):
         """Restore the previous filter options if available."""
@@ -138,6 +147,7 @@ class FilterDialog(Toplevel):
         name_filter_input = self.name_entry.get().strip()
         filter_type = self.filter_type_var.get()
         logic_type = self.logic_type_var.get()
+        match_type = self.match_type_var.get()
 
         # Save the filter options before applying the filter
         self.save_filter_options()
@@ -156,12 +166,19 @@ class FilterDialog(Toplevel):
         filtered_by_folder = file_filter.filter_by_folder([selected_folder])
 
         # Apply filter based on filter type and logic type
-        shared_data.filtered_mdb_files = file_filter.filter_by_name(name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type)
+        if match_type == "Correct Matches":
+            shared_data.filtered_mdb_files = file_filter.filter_by_name(
+                name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type
+            )
+        else:  # Incorrect Matches
+            all_filtered = file_filter.filter_by_name(
+                name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type
+            )
+            shared_data.filtered_mdb_files = [file for file in filtered_by_folder if file not in all_filtered]
 
         for mdb in shared_data.filtered_mdb_files:
             shared_data.initial_central_meridian = getCentralMeridian(mdb)
             break
-
 
         self.destroy()
 
