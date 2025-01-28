@@ -82,6 +82,8 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
             print("Unexpected error:", sys.exc_info())
         merged = path+"\\"+path.split("\\")[-1]+"_merged.mdb\\"
         arcpy.AddField_management(merged + "\\Parcel", "source_file", "TEXT")
+        arcpy.AddField_management(merged + "\\Segments", "source_file", "TEXT")
+        arcpy.AddField_management(merged + "\\Construction", "source_file", "TEXT")
 
         # start geoprocess
         layers = ["Parcel","Segments","Construction","Parcel_History"]
@@ -99,6 +101,18 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                         tail = tail.replace(" ", "")
                         location_str = str(tail[:-4])
                         arcpy.CalculateField_management(i + "\\Parcel", "source_file", "'" + location_str + "'", "PYTHON")
+                    if (l == "Segments"):
+                        arcpy.AddField_management(i + "\\Segments", "source_file", "TEXT")
+                        head, tail = os.path.split(i)
+                        tail = tail.replace(" ", "")
+                        location_str = str(tail[:-4])
+                        arcpy.CalculateField_management(i + "\\Segments", "source_file", "'" + location_str + "'", "PYTHON")
+                    if (l == "Construction"):
+                        arcpy.AddField_management(i + "\\Construction", "source_file", "TEXT")
+                        head, tail = os.path.split(i)
+                        tail = tail.replace(" ", "")
+                        location_str = str(tail[:-4])
+                        arcpy.CalculateField_management(i + "\\Construction", "source_file", "'" + location_str + "'", "PYTHON")
 
                     arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
                     arcpy.DeleteField_management(l,["source_file"])
