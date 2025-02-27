@@ -239,8 +239,8 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
             print ("error for "+i)
             if status_update:
                 status_update("Error during processing: {}".format(str(e)))
-            if show_messagebox:
-                tkMessageBox.showerror(title="Error", message="An error occurred: {}".format(str(e)))
+            # if show_messagebox:
+            #     tkMessageBox.showerror(title="Error", message="An error occurred: {}".format(str(e)))
 
         if update_progress:
             x= progress/float(total_mdbs)

@@ -1,5 +1,4 @@
 import os
-import threading
 import tkMessageBox
 from Tkinter import *
 from ttk import Progressbar
