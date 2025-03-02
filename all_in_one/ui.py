@@ -189,7 +189,7 @@ class DataCleanup:
 
         self.tolerance_entry = Entry(db_section, bg=colors["white"])
         self.tolerance_entry.insert(0, "0.2")  # Insert default value
-        self.tolerance_entry.grid(row=8, column=1, sticky="w", padx=2, pady=3)
+        self.tolerance_entry.grid(row=7, column=1, sticky="w", padx=2, pady=3)
 
         self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self, self.tolerance_entry.get()), width=30, bg=colors["light_coral"])
         self.generalize.grid(row=7, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
