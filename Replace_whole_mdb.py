@@ -1,4 +1,6 @@
+import os
 from Tkinter import *
+import urllib2
 
 version = "v1.1.1"
 
@@ -47,13 +49,21 @@ class App(Frame):
 
         instruction = """\n
 Input: Folder path
-
 Process:Appends the data to the templete data andthen replaces the data 
 Output: Replaced data properties with templete data properties.
-
 For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         self.Sheet = Label(self, text=instruction, width=50, justify=LEFT, wraplength=400)
         self.Sheet.grid(row=3, columnspan=2, padx=5, pady=5, sticky=E + W + N + S)
+
+
+    import os
+    import urllib
+
+
+    
+
+
+
 
     def ReCalculateExtentDB(self):  # sourcery skip
         import tkMessageBox
@@ -71,7 +81,42 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         count = 0
 
         option_choosed=self.variable.get()
-        blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
+        
+        
+        def download_file_from_github(github_url, local_filename=None):
+            """
+            Download a file from GitHub to the script's location or a specified local path.
+
+            Args:
+                github_url (str): The GitHub raw file URL.
+                local_filename (str, optional): The local filename to save the downloaded file. 
+                    If not provided, the filename from the URL will be used.
+            """
+            if local_filename is None:
+                local_filename = github_url.split("/")[-1]
+
+            local_path = os.path.join(os.path.dirname(__file__), local_filename)
+
+            response = urllib2.urlopen(github_url)
+            
+            with open(local_path, "wb") as file:
+                file.write(response.read())
+        
+        
+        
+        #blank_data="D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
+            # Example usage:
+        github_url = "https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/"
+        download_file_from_github(github_url)
+        blank_data="https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/"+option_choosed
+        print ("option choosed " + blank_data)
+        feature_classes = arcpy.ListFeatureClasses(blank_data)
+        if feature_classes:
+            # Print the names of feature classes
+            for fc in feature_classes:
+                print(fc)
+        else:
+            print("No feature classes found in the specified location.")
 
         for root, dirnames, filenames in os.walk(path):
             for filename in filenames:

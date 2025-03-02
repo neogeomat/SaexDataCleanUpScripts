@@ -260,9 +260,21 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     except:
                         exception_list.write("ParcelKey Error for ,"+i+"\n")
 
-                    # Add Fields
-                    arcpy.AddField_management(Data_Location + "\\Parcel", "circularity", "FLOAT")
-                    arcpy.AddField_management(Data_Location + "\\Parcel", "suspicious", "TEXT", field_length=5)
+                    parcel_path = Data_Location + "\\Parcel"
+
+                    # Function to add a field if it doesn't exist
+                    def add_field_if_not_exists(field_name, field_type, field_length=None):
+                        fields = arcpy.ListFields(parcel_path, field_name)
+                        if not fields:
+                            arcpy.AddField_management(parcel_path, field_name, field_type, field_length=field_length)
+                        else:
+                            print("Field '{field_name}' already exists.")
+
+                    # Check and add the "suspicious" field if it doesn't exist
+                    add_field_if_not_exists("suspicious", "TEXT", field_length=5)
+
+                    # Check and add the "circularity" field if it doesn't exist
+                    add_field_if_not_exists("circularity", "FLOAT")
 
                     # Calculate Circularity
                     arcpy.CalculateField_management(Data_Location + "\\Parcel", "circularity",

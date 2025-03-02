@@ -113,7 +113,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                         arcpy.Delete_management("selection_parcel")
                     arcpy.CreateFolder_management(Folder_Location, "DataCleanTemp")
                     DataCleanTemp = Folder_Location + "\\DataCleanTemp"
-                    test_data = DataCleanTemp+"\\test.mdb"
+                    test_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates"+"\\test.mdb"
                     arcpy.Copy_management(BLANK84_Template, test_data)
 
                     arcpy.env.workspace = i
@@ -133,10 +133,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
 
 
                     if (arcpy.Exists(Cadastre_Topology)):
-                        # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Parcel")
-                        # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Building")
-                        # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Line")
-                        # arcpy.management.RemoveFeatureClassFromTopology(Cadastre_Topology, "Construction_Polygon")
                         arcpy.Delete_management(Cadastre_Topology)
                         arcpy.CreateTopology_management(cadastre_dataset,"Cadastre_Topology",0.00000001)
                     else:
@@ -311,17 +307,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # Process: Append
                     arcpy.Append_management(test_data + "\\Cadastre\\Building_WithParFID", building_location, "NO_TEST")
 
-
-
-                    arcpy.Delete_management(DataCleanTemp, "Folder")
-
-                    # try:
-                    #     arcpy.CalculateField_management(parcel_location, "PARCELKEY",
-                    #                                     "str(!GRIDS1!).ljust(9,'a') + str( !PARCELNO!).zfill(6) + str( !DISTRICT!).zfill(2) + str( !VDC! ).zfill(4) + str( !WARDNO!).zfill(2)",
-                    #                                     "PYTHON_9.3", "")
-                    # except:
-                    #     exception_list.write("ParcelKey Error for ," + i + "\n")
-
                     # Add Fields
                     arcpy.AddField_management(parcel_location, "circularity", "FLOAT")
                     arcpy.AddField_management(parcel_location, "suspicious", "TEXT", field_length=5)
@@ -360,6 +345,17 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     arcpy.ValidateTopology_management(Cadastre_Topology)
 
                     arcpy.Compact_management(Data_Location)
+
+                    #Delete the temp files
+                    if arcpy.Exists("selection_parcel"):
+                        arcpy.Delete_management("selection_parcel")
+                    if arcpy.Exists("selection_const"):
+                        arcpy.Delete_management("selection_const")
+                    if arcpy.Exists("selection_build"):
+                        arcpy.Delete_management("selection_build")
+                    arcpy.env.workspace = None
+                    arcpy.Delete_management(DataCleanTemp, "Folder")
+
                     print(Data_Location + " cleaning process complete")
             except Exception as e:
                 exception_list.write("Gap Overlap Error for ," + i + "\n")

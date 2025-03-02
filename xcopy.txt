@@ -1,1 +1,1 @@
-xcopy /s D:\Phantwise_Data\organize\*.mdb E:\Data_Backup\Chabahil_bu_2021_01_02 /y
+xcopy /s "\\10.70.36.246\d\NEW DIGITAL DATABASE\PEdata20231005\*.mdb" Y:\palpa\2024_12_03 /y

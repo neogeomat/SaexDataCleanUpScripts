@@ -9,7 +9,7 @@ import re
 #__location__ = sys.argv[0]
 #print __location__
 
-env.workspace = "D:\\Bhaktapur20771213\\phat_5\\Final_Dibyashwori"
+env.workspace = "D:\\Temp\\bhaktapur"
 path = env.workspace
 
 datasetList = arcpy.ListDatasets('*', 'Feature')
@@ -61,7 +61,7 @@ for fc in total_list:
         # print('\n'.join(map(str, targetSubGroupLayer)))
         pathToFC = arcpy.env.workspace + '/' + feature
         newlayer = arcpy.mapping.Layer(pathToFC)
-        #if str(feature).startswith("Parce") and str(feature).endswith("arcel"):
+        #if str(feature).startswith("Parce") and str(feature).endswith("Parcel"):
             # print "Apply"+feature
             #arcpy.ApplySymbologyFromLayer_management(newlayer, parcelLayer)
         arcpy.mapping.AddLayerToGroup(df, targetSubGroupLayer[0], newlayer, "BOTTOM")
@@ -72,4 +72,4 @@ for fc in total_list:
         mxd.save()
     print (fc + " (" + str(count) + "/" + str(total_count) + ")")
 
-# execfile(r'G:\My Drive\dosamritkarma\CAS\pravesh\pythonscript\DataCleanUpScripts\create_mxd.py')
+# execfile(r'D:\pythonprogram\SaexDataCleanUpScripts\create_mxd.py')
