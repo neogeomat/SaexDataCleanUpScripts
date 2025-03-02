@@ -4,7 +4,7 @@ import os
 import shared_data
 import time
 
-def Fill_VDC_Dist_Code(self, vdc_code='', district_code='', status_update=None, show_messagebox=True, update_progress=None):
+def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, show_messagebox=True, update_progress=None):
     """Fill VDC and District codes in the database, update status using the provided function, and optionally show a message box."""
     startTime = time.time()
     path = shared_data.directory
