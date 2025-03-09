@@ -42,15 +42,16 @@ def replaceMDb(self, central_meridian, status_update=None, show_messagebox=True)
 
     option_choosed = central_meridian
     local_cm_loc = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"
+    blank_data = os.path.join(local_cm_loc, option_choosed)
 
-    if not os.path.exists(local_cm_loc):
-        github_url = "https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/" + option_choosed
-        local_filename = github_url.split("/")[-1]
-        local_path = os.path.join(os.path.dirname(__file__), local_filename)
-        download_file_from_github(github_url, local_path)
-        blank_data = "https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/" + option_choosed
-    else:
-        blank_data = os.path.join(local_cm_loc, option_choosed)
+    # if not os.path.exists(local_cm_loc):
+    #     github_url = "https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/" + option_choosed
+    #     local_filename = github_url.split("/")[-1]
+    #     local_path = os.path.join(os.path.dirname(__file__), local_filename)
+    #     download_file_from_github(github_url, local_path)
+    #     blank_data = "https://github.com/neogeomat/SaexDataCleanUpScripts/blob/master/templates/" + option_choosed
+    # else:
+    #     blank_data = os.path.join(local_cm_loc, option_choosed)
 
     print("Option chosen: " + blank_data)
     feature_classes = arcpy.ListFeatureClasses(blank_data)
