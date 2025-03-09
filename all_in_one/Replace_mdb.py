@@ -54,7 +54,9 @@ def replaceMDb(self, central_meridian, status_update=None, show_messagebox=True)
     #     blank_data = os.path.join(local_cm_loc, option_choosed)
 
     print("Option chosen: " + blank_data)
-    feature_classes = arcpy.ListFeatureClasses(blank_data)
+    arcpy.env.workspace = blank_data
+
+    feature_classes = arcpy.ListFeatureClasses()
 
     if feature_classes:
         for fc in feature_classes:
