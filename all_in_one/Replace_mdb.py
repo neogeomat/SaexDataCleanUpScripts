@@ -1,3 +1,4 @@
+import shutil
 import tkMessageBox
 import arcpy
 import os
@@ -167,6 +168,10 @@ def replaceMDb(self, central_meridian, status_update=None, show_messagebox=True)
                                           "0", "0", "0")
             arcpy.Append_management(os.path.join(DataCleanTemp, "ConsWithParFid.shp"), os.path.join(i, "Construction"),
                                     "NO_TEST")
+
+            # Delete the folder and all its contents
+            if os.path.exists(DataCleanTemp) and os.path.isdir(DataCleanTemp):
+                shutil.rmtree(DataCleanTemp)
 
             if status_update:
                 status_update("Processed {} ({}/{})".format(i, count, len(mdb_list)))
