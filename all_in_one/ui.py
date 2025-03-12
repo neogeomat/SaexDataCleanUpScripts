@@ -128,7 +128,12 @@ class DataCleanup:
         self.compactdb.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section, bg=colors["check_button"],   variable=self.check_vars["compactdb"]).grid(row=0, column=5)
 
-        self.attr_check = Button(db_section, text="Check Attributes", command=lambda: attributeChecker(self), width=30, bg=colors["light_coral"])
+        self.run_on_parcel_0 = BooleanVar()
+        self.run_on_parcel_0_check = Checkbutton(db_section, text="Exclude Parcel No 0", variable=self.run_on_parcel_0, bg=colors["light_green"])
+        self.run_on_parcel_0_check.grid(row=1, column=1, padx=2, pady=3, sticky=W)
+
+
+        self.attr_check = Button(db_section, text="Check Attributes", command=lambda: attributeChecker(self,self.run_on_parcel_0.get()), width=30, bg=colors["light_coral"])
         self.attr_check.grid(row=1, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_check"]).grid(row=1, column=5)
 

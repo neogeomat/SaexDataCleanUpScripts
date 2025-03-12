@@ -7,7 +7,7 @@ from arcpy import env
 import shared_data
 
 
-def attributeChecker(self, status_update=None, show_messagebox=True, update_progress=None):
+def attributeChecker(self,check_state, status_update=None, show_messagebox=True, update_progress=None):
     """Check attributes in the database files and optionally show a message box upon completion."""
     starttime = time.time()
     path = shared_data.directory
@@ -69,7 +69,7 @@ def attributeChecker(self, status_update=None, show_messagebox=True, update_prog
                             "WARDNO": lambda val: (
                                         val is None or val in ["", " ", 0] or not val.isdigit() or int(val) > 35),
                             "GRIDS1": lambda val: (val is None or len(val) < 7 or len(val) > 9),
-                            "PARCELNO": lambda val: (val is None or val == 0),
+                            "PARCELNO": lambda val: (val is None) if check_state else (val is None or val == 0),
                             "PARCELTY": lambda val: (val is None),
                             "suspicious": lambda val: (str(val).lower() == "yes")
                         }

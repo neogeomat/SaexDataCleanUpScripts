@@ -10,7 +10,10 @@ def replaceMDb(self, central_meridian, status_update=None, show_messagebox=True)
     """Replace MDB files with updated data from specified templates, with status updates and optional message box."""
     arcpy.env.overwriteOutput = True
     Folder_Location = "d:"
-    DataCleanTemp = os.path.join(Folder_Location, "DataCleanTemp")
+    DataCleanTemp = os.path.join(Folder_Location, "\\DataCleanTemp")
+    # Check if the directory exists, and create it if it does not
+    if not os.path.exists(DataCleanTemp):
+        os.makedirs(DataCleanTemp)
     startTime = time.time()
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
