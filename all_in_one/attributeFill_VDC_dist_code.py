@@ -53,6 +53,7 @@ def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, 
 
     exception_list.close()
     allerror.close()
+    print("Attribute Fill of VDC District Process complete")
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Fix Attribute Errors", message="Done")

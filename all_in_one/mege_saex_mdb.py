@@ -60,7 +60,7 @@ def mergeSaexMdbs(self,choosen_meridian):
                         exception_list.write("Merge Database Error for {}\n".format(i))
                         print("Error processing layer {} from {}: {}".format(l, i, e))
 
-        print("Process complete")
+        print("Merge all data Process complete")
         tkMessageBox.showinfo(title="Merge Saex Mdb files", message="Done")
     except Exception as e:
         print("Failed to write to exception file: {}".format(e))

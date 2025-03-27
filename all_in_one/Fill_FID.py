@@ -117,3 +117,4 @@ def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=
         print "{}: {:.2f} seconds".format(step, duration)
 
     print 'The script took {0} seconds!'.format(time.time() - startTime)
+    print("Fill Parcel FID complete")

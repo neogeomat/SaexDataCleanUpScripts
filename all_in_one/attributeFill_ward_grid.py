@@ -153,6 +153,7 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
 
     allerror.close()
     exception_list.close()
+    print("Attribute Fill of ward and Grid Process complete")
 
     if status_update:
         status_update("Fill Ward No and Grid process complete.")

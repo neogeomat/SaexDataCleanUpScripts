@@ -86,5 +86,5 @@ def merge_dummy_planning(self,choosen_meridian):
     except Exception as e:
         print("Failed to write to exception file: {}".format(e))
 
-    print("process complete")
+    print("merge Dummy Planning process complete")
     tkMessageBox.showinfo(title="Merge DUmmy Parcels Saex Mdb files " , message="Done")

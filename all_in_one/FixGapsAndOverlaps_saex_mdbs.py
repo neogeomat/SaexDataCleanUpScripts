@@ -248,7 +248,7 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
             update_progress(progress_value, total_mdbs)
         self.master.update_idletasks()  # Ensure GUI updates
 
-    print("Process complete")
+    print("Fix Gap and Overlap Process complete")
     endtime = time.time()
     print("Time taken: " + str(endtime - starttime))
     if status_update:

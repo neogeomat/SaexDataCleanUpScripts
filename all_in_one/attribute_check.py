@@ -94,7 +94,7 @@ def attributeChecker(self,check_state, status_update=None, show_messagebox=True,
             update_progress(progress_value, total)
         self.master.update_idletasks()  # Ensure GUI updates
 
-    print("Process complete")
+    print("Attribute Check Process complete")
     endtime = time.time()
     print("Time taken: " + str(endtime - starttime))
     if status_update:

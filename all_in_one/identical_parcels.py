@@ -96,6 +96,7 @@ def Find_Identical_Feature(self, status_update=None, show_messagebox=True):
         result_text.insert(tk.END, "No identical parcels found.")
 
     result_text.config(state=tk.DISABLED)
+    print("Identical Parcels Removal Process complete")
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Identical Parcels Report", message="Process is complete. Check the results.")
