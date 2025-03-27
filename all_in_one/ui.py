@@ -351,7 +351,7 @@ class DataCleanup:
                 if action == "compactdb":
                     compactDb(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_check":
-                    attributeChecker(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
+                    attributeChecker(self,self.run_on_parcel_0.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_fill1":
                     Fill_Ward_Grid(self, self.variable_sc.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "attr_fill2":
