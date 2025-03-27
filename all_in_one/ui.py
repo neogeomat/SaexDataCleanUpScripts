@@ -360,7 +360,7 @@ class DataCleanup:
                 elif action == "corr_fid":
                     Correct_FID(self,self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "fix_gap_overlap":
-                    Fix_Gap_Overlap(self,self.update_status, show_messagebox=False,update_progress=progress_callback)
+                    Fix_Gap_Overlap(self,self.variable_cm.get(),self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "generalize":
                     Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "recalculate_extent":
