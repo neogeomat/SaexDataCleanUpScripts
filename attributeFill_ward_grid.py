@@ -2,13 +2,8 @@ from Tkinter import *
 
 version = "v2.3.2"
 dic_case_sen={
-    "Ta": "11",
-    "Tha": "12",
-    "Da": "13",
-    "Dha": "14",
     "tta": "16",
     "ttha": "17",
-    "dda": "18",
     "ddha": "19",
     "dhha": "19",
     "sha": "30",
@@ -34,7 +29,13 @@ dic_case_insen = {
     "jha": "09",
     "yna": "10",
     "yan": "10",
+    "Ta": "11",
+    "Tha": "12",
+    "Da": "13",
+    "Dha": "14",
     "ana": "15",
+    "dda": "18",
+    "daa": "18",
     "na": "20",
     "pa": "21",
     "pha": "22",

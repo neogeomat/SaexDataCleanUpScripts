@@ -9,7 +9,7 @@ import re
 #__location__ = sys.argv[0]
 #print __location__
 
-env.workspace = "D:\\Temp\\bhaktapur"
+env.workspace = r"Y:\Khotang\Backup_2025_09_03\Backup_2025_09_03"
 path = env.workspace
 
 datasetList = arcpy.ListDatasets('*', 'Feature')

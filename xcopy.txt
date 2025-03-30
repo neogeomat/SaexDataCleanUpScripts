@@ -1,1 +1,1 @@
-xcopy /s "\\10.70.36.246\d\NEW DIGITAL DATABASE\PEdata20231005\*.mdb" Y:\palpa\2024_12_03 /y
+xcopy /s "D:\FINAL KHOTANG DATA-2070\Ward Data\*.mdb" "D:\Data Back-up\2025_03_16" /y
