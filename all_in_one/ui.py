@@ -1,7 +1,10 @@
 import os
+import subprocess
 import tkMessageBox
 from Tkinter import *
 from ttk import Progressbar
+
+import psutil
 
 from CompactDb import compactDb
 from LoadDb import LoadDb
@@ -120,7 +123,8 @@ class DataCleanup:
             "generalize": BooleanVar(),
             "recalculate_extent": BooleanVar(),
             "remove_identical": BooleanVar(),
-            "repair_geometry": BooleanVar()
+            "repair_geometry": BooleanVar(),
+            "merge_dummy": BooleanVar()
         }
 
 
@@ -138,7 +142,7 @@ class DataCleanup:
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_check"]).grid(row=1, column=5)
 
         self.Sheet_sc = Label(db_section, text="Choose Mapped Scale", width=30, bg=colors["light_gray"])
-        self.Sheet_sc.grid(row=2, column=0, padx=2, pady=3, sticky=E + W + N + S)
+        self.Sheet_sc.grid(row=3, column=0, padx=2, pady=3, sticky=E + W + N + S)
 
         options_sc = [
             "500",
@@ -155,66 +159,70 @@ class DataCleanup:
 
         self.optionmenu_sc = OptionMenu(db_section, self.variable_sc, *options_sc)
         self.optionmenu_sc.config(bg=colors["white"])
-        self.optionmenu_sc.grid(row=2, column=1, padx=2, pady=3, sticky=E + W + N + S,columnspan=1)
+        self.optionmenu_sc.grid(row=3, column=1, padx=2, pady=3, sticky=E + W + N + S,columnspan=1)
 
         self.attr_fill1 = Button(db_section, text="Fill Ward and Grid (Free)", command=lambda: Fill_Ward_Grid(self, self.variable_sc.get()), width=30, bg=colors["light_coral"])
-        self.attr_fill1.grid(row=2, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill1"]).grid(row=2, column=5)
+        self.attr_fill1.grid(row=3, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill1"]).grid(row=3, column=5)
 
         # Create label for District
         self.Dist_code_label = Label(db_section, text="Enter District Code", width=30, bg=colors["light_gray"])
-        self.Dist_code_label.grid(row=3, column=0, padx=2, pady=3, sticky=E + W + N + S)
+        self.Dist_code_label.grid(row=4, column=0, padx=2, pady=3, sticky=E + W + N + S)
 
         # Create entry
         self.DistrictCode = Entry(db_section, width=30, bg=colors["white"])
-        self.DistrictCode.grid(row=3, column=1, padx=2, pady=3, sticky=E + W + N + S)
+        self.DistrictCode.grid(row=4, column=1, padx=2, pady=3, sticky=E + W + N + S)
 
         # Create label for VDC
         self.Vdc_code_label = Label(db_section, text="Enter VDC Code", width=30, bg=colors["light_gray"])
-        self.Vdc_code_label.grid(row=4, column=0, padx=2, pady=3, sticky=E + W + N + S)
+        self.Vdc_code_label.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S)
 
         # Create entry
         self.VDCCode = Entry(db_section, width=30, bg=colors["white"])
-        self.VDCCode.grid(row=4, column=1, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        self.VDCCode.grid(row=5, column=1, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
         self.attr_fill2 = Button(db_section, text="Fill District VDC Code", command=lambda: Fill_VDC_Dist_Code(self, self.DistrictCode.get(), self.VDCCode.get()), width=30, bg=colors["light_coral"])
-        self.attr_fill2.grid(row=4, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill2"]).grid(row=4, column=5)
+        self.attr_fill2.grid(row=5, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["attr_fill2"]).grid(row=5, column=5)
 
         self.corr_fid = Button(db_section, text="Correct FID", command=lambda: Correct_FID(self), width=30, bg=colors["light_coral"])
-        self.corr_fid.grid(row=5, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["corr_fid"]).grid(row=5, column=5)
+        self.corr_fid.grid(row=6, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["corr_fid"]).grid(row=6, column=5)
 
         self.fix_gap_overlap = Button(db_section, text="Fix Gap and Overlap", command=lambda: Fix_Gap_Overlap(self,self.variable_cm.get()), width=30, bg=colors["light_coral"])
-        self.fix_gap_overlap.grid(row=6, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["fix_gap_overlap"]).grid(row=6, column=5)
+        self.fix_gap_overlap.grid(row=7, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["fix_gap_overlap"]).grid(row=7, column=5)
 
         self.tolerance_label_text = Label(db_section, text="Tolerance(m)", bg=colors["light_gray"])
-        self.tolerance_label_text.grid(row=7, column=0, sticky="e", padx=2, pady=3)
+        self.tolerance_label_text.grid(row=8, column=0, sticky="e", padx=2, pady=3)
 
         self.tolerance_entry = Entry(db_section, bg=colors["white"])
         self.tolerance_entry.insert(0, "0.2")  # Insert default value
-        self.tolerance_entry.grid(row=7, column=1, sticky="w", padx=2, pady=3)
+        self.tolerance_entry.grid(row=8, column=1, sticky="w", padx=2, pady=3)
 
         self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self, self.tolerance_entry.get()), width=30, bg=colors["light_coral"])
-        self.generalize.grid(row=7, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["generalize"]).grid(row=7, column=5)
+        self.generalize.grid(row=8, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["generalize"]).grid(row=8, column=5)
 
         self.recalculate_extent = Button(db_section, text="ReCalculate Extent", command=lambda: recalculate_extent(self), width=30, bg=colors["light_coral"])
-        self.recalculate_extent.grid(row=8, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["recalculate_extent"]).grid(row=8, column=5)
+        self.recalculate_extent.grid(row=9, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["recalculate_extent"]).grid(row=9, column=5)
 
         self.remove_identical = Button(db_section, text="Remove Identical Constructions", command=lambda: Remove_Identical_Feature(self), width=30, bg=colors["light_coral"])
-        self.remove_identical.grid(row=9, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["remove_identical"]).grid(row=9, column=5)
+        self.remove_identical.grid(row=10, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["remove_identical"]).grid(row=10, column=5)
 
         self.repair_geometry = Button(db_section, text="Repair Geometry", command=lambda: Repair_Geometry(self), width=30, bg=colors["light_coral"])
-        self.repair_geometry.grid(row=10, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["repair_geometry"]).grid(row=10, column=5)
+        self.repair_geometry.grid(row=11, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["repair_geometry"]).grid(row=11, column=5)
+
+        self.merge_dummy = Button(db_section, text="Merge Dummy Planning", command=lambda: merge_dummy_planning(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
+        self.merge_dummy.grid(row=2, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["merge_dummy"]).grid(row=2, column=5)
 
         # Run all checked actions button
         self.run_all_button = Button(db_section, text="Run Checked Actions", command=self.run_checked_actions, width=30, bg=colors["light_green"])
-        self.run_all_button.grid(row=11, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=6)
+        self.run_all_button.grid(row=12, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=6)
 
         # Add the progress bar
         self.progress = Progressbar(self.master, orient=HORIZONTAL, length=200, mode='determinate')
@@ -227,11 +235,12 @@ class DataCleanup:
         self.merge_all = Button(extra_section, text="Merge All", command=lambda: mergeSaexMdbs(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
         self.merge_all.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
 
-        self.merge_dummy = Button(extra_section, text="Merge Dummy Planning", command=lambda: merge_dummy_planning(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
-        self.merge_dummy.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
-
         self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
-        self.identical_parcel.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        self.identical_parcel.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+
+        self.move_data = Button(extra_section, text="Move Data", command=self.move_data, width=30, bg=colors["light_coral"])
+        self.move_data.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+
 
         self.p_no_label = Label(extra_section, text="Enter Max Parcel No \n to Change to zero", width=30, bg=colors["light_gray"])
         self.p_no_label.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S)
@@ -279,6 +288,7 @@ class DataCleanup:
         action_order = [
             "compactdb",
             "attr_check",
+            "merge_dummy",
             "attr_fill1",
             "attr_fill2",
             "corr_fid",
@@ -292,6 +302,7 @@ class DataCleanup:
         action_buttons = {
             "compactdb": self.compactdb,
             "attr_check": self.attr_check,
+            "merge_dummy": self.merge_dummy,
             "attr_fill1": self.attr_fill1,
             "attr_fill2": self.attr_fill2,
             "corr_fid": self.corr_fid,
@@ -305,6 +316,7 @@ class DataCleanup:
         # Mapping of action keys to user-friendly display names
         action_display_names = {
             "compactdb": "Compact database",
+            "merge_dummy": "Merge Dummy Plannings",
             "attr_check": "Attribute check",
             "attr_fill1": "Fill Ward Grid",
             "attr_fill2": "Fill VDC/District Code",
@@ -331,7 +343,7 @@ class DataCleanup:
                 display_name = action_display_names.get(action, action.replace('_', ' ').capitalize())
                 #self.progress["value"] = i
                 # Show the status_label and update its text
-                self.status_label.pack(side="bottom", fill="x")  # Adjust as needed for your layout
+                self.status_label.pack(side="right", fill="x")  # Adjust as needed for your layout
                 self.status_label.config(text="Running {}... ({}/{})".format(display_name, i, total_actions))
                 self.master.update_idletasks()
 
@@ -369,6 +381,8 @@ class DataCleanup:
                     Remove_Identical_Feature(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "repair_geometry":
                     Repair_Geometry(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
+                elif action == "merge_dummy":
+                    merge_dummy_planning(self,self.variable_cm.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
 
                 if button:
                     self.update_button_color(button, original_color)  # Revert to the original color
@@ -386,7 +400,23 @@ class DataCleanup:
 
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
-        #display_results(result)
+
+    def is_script_running(self,script_name):
+        """Check if the script is already running."""
+        for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
+            try:
+                if proc.info["cmdline"] and script_name in proc.info["cmdline"]:
+                    return True  # Script is already running
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+        return False
+
+    def move_data(self):
+        script_name = "Move_data.py"
+        if not self.is_script_running(script_name):
+            subprocess.Popen(["python",script_name])
+        else:
+            print("{} is already running.".format(script_name))
 
     def change_parcel_no(self, parcel_no_str):
         max_parcel_no=int(parcel_no_str)
