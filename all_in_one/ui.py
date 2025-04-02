@@ -4,8 +4,6 @@ import tkMessageBox
 from Tkinter import *
 from ttk import Progressbar
 
-import psutil
-
 from CompactDb import compactDb
 from LoadDb import LoadDb
 import tkFileDialog
@@ -26,6 +24,17 @@ from attributeFill_VDC_dist_code import Fill_VDC_Dist_Code
 from Fill_FID import Correct_FID
 from identical_parcels import Find_Identical_Feature
 from Change_Parcel_No import Change_parcel_no
+
+psutil_available = True
+try:
+    import psutil
+except ImportError:
+    print("psutil not found. Trying to install...")
+    try:
+        subprocess.call(["python", "-m", "pip", "install", "psutil"])
+        import psutil  # Try importing again after installation
+    except ImportError:
+        psutil_available = False  # If installation fails, disable the button
 
 # Define colors
 colors = {
@@ -48,7 +57,6 @@ class DataCleanup:
 
     def create_widgets(self):
         """Create buttons with light, colorful background colors"""
-
 
         # Section for loading and filtering files
         file_section = LabelFrame(self.master, text="Choose Path and Filter", padx=2, pady=3, bg=colors["light_blue"])
@@ -237,9 +245,11 @@ class DataCleanup:
 
         self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
         self.identical_parcel.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
-
-        self.move_data = Button(extra_section, text="Move Data", command=self.move_data, width=30, bg=colors["light_coral"])
-        self.move_data.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        if psutil_available:
+            self.move_data = Button(extra_section, text="Move Data", command=self.move_data, width=30, bg=colors["light_coral"])
+            self.move_data.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        else:
+            print("psutil installation failed. 'Move Data' button is disabled.")
 
 
         self.p_no_label = Label(extra_section, text="Enter Max Parcel No \n to Change to zero", width=30, bg=colors["light_gray"])
@@ -401,20 +411,21 @@ class DataCleanup:
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
 
-    def is_script_running(self,script_name):
-        """Check if the script is already running."""
-        for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
+    def is_script_running(script_name):
+        """Check if a script is already running."""
+        for proc in psutil.process_iter():
             try:
-                if proc.info["cmdline"] and script_name in proc.info["cmdline"]:
+                cmdline = proc.cmdline()  # Get command line arguments
+                if cmdline and script_name in " ".join(cmdline):
                     return True  # Script is already running
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            except:
                 pass
         return False
 
     def move_data(self):
         script_name = "Move_data.py"
         if not self.is_script_running(script_name):
-            subprocess.Popen(["python",script_name])
+            subprocess.Popen(["python", script_name])
         else:
             print("{} is already running.".format(script_name))
 
