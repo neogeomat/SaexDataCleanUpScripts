@@ -66,7 +66,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     if arcpy.ListFields(i+"\\Parcel", "mother_parcel"):
                         print("mother_parcel field already exists")
                     else:
-                        arcpy.management.AddField(i+"\\Parcel", "mother_parcel","TEXT")
+                        arcpy.AddField_management(i+"\\Parcel", "mother_parcel","TEXT")
                         print("Field Added")
                 else:
                     print("Parcel Layer not found for, "+i)                
