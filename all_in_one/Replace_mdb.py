@@ -27,6 +27,10 @@ def replaceMDb(self, central_meridian, status_update=None, show_messagebox=True)
             out_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\test.mdb"
             arcpy.Copy_management(blank_data, out_data)
 
+            print ("\nReplacing Whole Mdb in : ")
+            print (i + " (" + str(count) + "/" + str(len(mdb_list)) + ")")
+
+
             if arcpy.Exists(os.path.join(i, "Parcel")):
                 arcpy.Append_management(os.path.join(i, "Parcel"), os.path.join(out_data, "Parcel"), "NO_TEST")
                 arcpy.RecalculateFeatureClassExtent_management(os.path.join(i, "Parcel"))

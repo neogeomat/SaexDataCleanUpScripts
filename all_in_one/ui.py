@@ -411,7 +411,7 @@ class DataCleanup:
     def find_identical_parcels(self):
         result = Find_Identical_Feature(self)
 
-    def is_script_running(script_name):
+    def is_script_running(self,script_name):
         """Check if a script is already running."""
         for proc in psutil.process_iter():
             try:
