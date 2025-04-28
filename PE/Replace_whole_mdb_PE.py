@@ -122,9 +122,6 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             temp_table="\\TempTable"
             tenant="\\Tenant"
             verticalparcel="\\VerticalParcel"
-            SDB_4__Point = "\\SDB_4__Point"
-            SDB_4__Coordinate = "\\SDB_4__Coordinate"
-            SDB_4__Device = "\\SDB_4__Device"
 
             feature_lists.append(building)
             feature_lists.append(const_line)
