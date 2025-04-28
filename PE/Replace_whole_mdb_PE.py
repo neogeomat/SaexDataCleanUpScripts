@@ -28,9 +28,9 @@ class App(Frame):
 
         options = [
             "Blank_.mdb",
-            "Blank_87.mdb",
+            "Blank_81.mdb",
             "Blank_84.mdb",
-            "Blank_81.mdb"
+            "Blank_87.mdb"
         ]
 
         self.variable = StringVar(self)
@@ -122,6 +122,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             temp_table="\\TempTable"
             tenant="\\Tenant"
             verticalparcel="\\VerticalParcel"
+            SDB_4__Point = "\\SDB_4__Point"
+            SDB_4__Coordinate = "\\SDB_4__Coordinate"
+            SDB_4__Device = "\\SDB_4__Device"
 
             feature_lists.append(building)
             feature_lists.append(const_line)
@@ -160,8 +163,37 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
             arcpy.Copy_management(blank_data, out_data)
 
             for features in feature_lists:
+                feature_path = i+features  # Source feature
+                target_path = out_data+features  # Target for append
+                print("For"+features)
+                desc = arcpy.Describe(feature_path)
+                print("Dataset Type:", desc.datasetType)
+                print("Shape Type:", getattr(desc, "shapeType", "No Shape"))  # Avoids errors if no shape
+
                 if arcpy.Exists(i + features):
-                    arcpy.Append_management(i + features, out_data + features, "NO_TEST")
+                    if "SDB_4__" in features:  # If it's an SDB layer
+                        arcpy.RegisterWithGeodatabase_management(feature_path)
+
+                        try:
+                            print("Processing:", feature_path)
+
+                            temp_fc = os.path.join("in_memory", features + "_fc")  # Convert to FC
+                            arcpy.FeatureClassToFeatureClass_conversion(feature_path, "in_memory", features + "_fc")
+
+                            arcpy.Append_management(temp_fc, target_path, "NO_TEST")
+
+                            # Recalculate Extent for spatial correctness
+                            desc = arcpy.Describe(temp_fc)
+                            if desc.shapeType in ["Point", "Polyline", "Polygon"]:
+                                arcpy.RecalculateFeatureClassExtent_management(temp_fc)
+
+                            # Cleanup temporary in-memory FC
+                            arcpy.Delete_management(temp_fc)
+                        except Exception as e:
+                            print("Error appending SDB Layer:", features, e)
+
+                    else:
+                        arcpy.Append_management(i + features, out_data + features, "NO_TEST")
                     if("Cadastre" in features):
                         arcpy.RecalculateFeatureClassExtent_management(i + features)
                 else:

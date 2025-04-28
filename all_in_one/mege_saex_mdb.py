@@ -1,12 +1,14 @@
+# -*- coding: utf-8 -*-
 import os
 import shutil
 import arcpy
 import shared_data
-import sys
-import Tkinter as tk
 import tkMessageBox as tkMessageBox
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
+import time
 
 def mergeSaexMdbs(self,choosen_meridian):
+    startTime = time.time()
     path = shared_data.directory
     exception_file_path = os.path.join(path, "exception_list_merge.csv")
     merged_file_name = "{}_merged.mdb".format(os.path.basename(path))
@@ -59,8 +61,29 @@ def mergeSaexMdbs(self,choosen_meridian):
                     except Exception as e:
                         exception_list.write("Merge Database Error for {}\n".format(i))
                         print("Error processing layer {} from {}: {}".format(l, i, e))
+                        # Send Telegram notification for error
+                        error_message = "⚠️ Merge Database Error!\n\n" \
+                                        "🗂 Path: {}\n" \
+                                        "📜 Script: Merge_Database\n" \
+                                        "🗂 File: {}\n" \
+                                        "❌ Error: {}".format(path, mdb_list, str(e))
+                        send_telegram_message(error_message)
 
         print("Merge all data Process complete")
         tkMessageBox.showinfo(title="Merge Saex Mdb files", message="Done")
     except Exception as e:
         print("Failed to write to exception file: {}".format(e))
+        # Send Telegram notification for error
+        error_message = "⚠️ Merge Database Error!\n\n" \
+                        "🗂 Path: {}\n" \
+                        "📜 Script: Merge_Database\n" \
+                        "🗂 File: {}\n" \
+                        "❌ Error: {}".format(path, mdb_list, str(e))
+        send_telegram_message(error_message)
+
+    # Send Telegram notification for successful processing
+    success_message = "✅ Merge Database Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Merge_Database\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from Tkinter import *
 import tkMessageBox
 import arcpy
@@ -5,6 +6,7 @@ import os
 import re
 import shared_data
 import time
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 dic_case_sen = {
     "ddha": "19",
@@ -135,13 +137,19 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
                     if not Ward or len(Ward) == 0 or Ward == " " or int(Ward) > 40:
                         TheRow.setValue("WARDNO", ward_code)
                         TheRows.updateRow(TheRow)
-                allerror.write(base_file_name + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + "\n")
                 if status_update:
                     status_update("Processed {} ({}/{})".format(base_file_name, count, len(mdb_list)))
             except Exception as e:
                 exception_list.write("Attribute fill Error for ," + base_file_name + "\n")
-                allerror.write(base_file_name + "," + x[0][0] + "," + x[0][1] + "," + x[0][2] + ",error" + "\n")
                 print "Attribute fill Error for " + base_file_name + ": " + str(e)
+                # Send Telegram notification for error
+                error_message = "⚠️ Attribute Fill Ward and Grid Error!\n\n" \
+                                "🗂 Path: {}\n" \
+                                "📜 Script: AttributeFill_ward_grid\n" \
+                                "🗂 File: {}\n" \
+                                "❌ Error: {}".format(path, mdb_file, str(e))
+                send_telegram_message(error_message)
+
         else:
             print base_file_name + "," + " "
             allerror.write(base_file_name + "," + " " + "\n")
@@ -163,5 +171,12 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Fill Ward No and Grid in freesheet", message="Done")
+
+    # Send Telegram notification for successful processing
+    success_message = "✅ Attribute Fill Ward and Grid Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: AttributeFill_ward_grid\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     print 'The script took {0} seconds!'.format(time.time() - startTime)

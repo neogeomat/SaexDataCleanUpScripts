@@ -1,17 +1,20 @@
+# -*- coding: utf-8 -*-
 import sys
 import tkMessageBox
 import arcpy
 import shared_data
 import os
 import time
+from send_notif_telegram import send_telegram_message  # <- import your function here
 
 def Generalize(self, tolerance, status_update=None, show_messagebox=True, update_progress=None):
-    """Generalize the features in the database files, update status using the provided function, and optionally show a message box."""
+
     startTime = time.time()
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
     exception_list = open(path + "\\exception_list_generalize.csv", "a")
     count = 0
+    exception_occurred = False  # Flag to track errors
 
     if status_update:
         status_update("Starting generalization process...")
@@ -60,16 +63,25 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True, update
             arcpy.Compact_management(i)
 
         except Exception as e:
+            exception_occurred = True
             exception_list.write("Generalize Error for: " + i + "\n")
             print("Generalize error for " + i + "\nError=\n\n", sys.exc_info())
             if status_update:
                 status_update("Error processing {}: {}".format(filename, str(e)))
 
+            # 🛑 Send Telegram notification for the error
+            error_message = "⚠️ Generalize Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: Generalize\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, filename, str(e))
+            send_telegram_message(error_message)
+
         if status_update:
             status_update("{} \n({}/{}) processed".format(filename, count, len(mdb_list)))
 
         if update_progress:
-            x= count/float(len(mdb_list))
+            x = count / float(len(mdb_list))
             progress_value = (x) * 100
             update_progress(progress_value, len(mdb_list))
         self.master.update_idletasks()  # Ensure GUI updates
@@ -80,7 +92,17 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True, update
     if status_update:
         status_update("Generalize process complete. Check exception_list_generalize.csv for errors.")
 
-    print('The script took {0} seconds!'.format(time.time() - startTime))
+    duration = time.time() - startTime
+    print('The script took {0} seconds!'.format(duration))
+
+    # Final notification based on success or failure
+    if exception_occurred:
+        final_message = "⚠️ Generalization Process completed with errors.\n\nCheck exception_list_generalize.csv for details."
+    else:
+        final_message = "✅ Generalization Process completed successfully."
+
+    # Send the success or error message to Telegram
+    send_telegram_message(final_message + "\n🗂 Path: {}\n📜 Script: Generalize\n⏱ Duration: {:.2f} seconds".format(path, duration))
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Generalize database", message="Generalization process is complete.")

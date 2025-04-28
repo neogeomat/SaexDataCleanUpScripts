@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import tkMessageBox
 import arcpy
 import shared_data
 import time
 import os
 from csv_logging import create_csv_log_file, write_error_to_csv
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=None):
     """Process feature classes, update status using the provided function, and optionally show a message box."""
@@ -11,6 +13,7 @@ def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=
     error_log_path = os.path.join(shared_data.directory, "error_log.csv")
     count = 0
     total = len(shared_data.filtered_mdb_files)
+    path = shared_data.directory
 
     # Create and open the CSV file for error logging
     file_handler, csv_writer = create_csv_log_file(error_log_path)
@@ -81,6 +84,14 @@ def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=
         except Exception as e:
             # Log the error to the CSV file
             write_error_to_csv(csv_writer, os.path.basename(mdb), str(e))
+            # Send Telegram notification for error
+            error_message = "⚠️ Correct ParcelID Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: Correct_ParcelID\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, mdb, str(e))
+            send_telegram_message(error_message)
+
             if status_update:
                 status_update("Error during processing: {}".format(str(e)))
             if show_messagebox:
@@ -96,6 +107,12 @@ def Correct_FID(self, status_update=None, show_messagebox=True, update_progress=
 
     file_handler.close()
 
+    # Send Telegram notification for successful processing
+    success_message = "✅ Correct Parcel ID Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Correct_ParcelID\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     print 'The script took {0} seconds!'.format(time.time() - startTime)
     print("Fill Parcel FID complete")

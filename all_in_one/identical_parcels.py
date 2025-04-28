@@ -1,13 +1,17 @@
+# -*- coding: utf-8 -*-
 import csv
 import tkMessageBox
-
 import arcpy
 import shared_data
 import tkinter as tk
 from tkinter import scrolledtext
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
+import time
 
 def Find_Identical_Feature(self, status_update=None, show_messagebox=True):
     """Find and report identical features in the provided .mdb files, with status updates and optional message box."""
+    startTime = time.time()
+    path = shared_data.directory
     results = {}
     fields = ['DISTRICT', 'VDC', 'WARDNO', 'GRIDS1', 'PARCELNO', 'OBJECTID']
 
@@ -62,6 +66,13 @@ def Find_Identical_Feature(self, status_update=None, show_messagebox=True):
             results[mdb] = "Error processing file: {}".format(str(e))
             if status_update:
                 status_update("Error processing {}: {}".format(mdb, str(e)))
+            # Send Telegram notification for error
+            error_message = "⚠️ Remove Identical Parcels Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: Remove_Identical_Parcels\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, mdb, str(e))
+            send_telegram_message(error_message)
 
     if status_update:
         status_update("Finding identical features complete. Check the results.")
@@ -97,6 +108,12 @@ def Find_Identical_Feature(self, status_update=None, show_messagebox=True):
 
     result_text.config(state=tk.DISABLED)
     print("Identical Parcels Removal Process complete")
+    # Send Telegram notification for successful processing
+    success_message = "✅ Remove Identical Parcels Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Remove_Identical_Parcels\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Identical Parcels Report", message="Process is complete. Check the results.")

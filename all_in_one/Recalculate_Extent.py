@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import tkMessageBox
 import arcpy
 import os
 import time
 import shared_data
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 def recalculate_extent(self, status_update=None, show_messagebox=True, update_progress=None):
     """Recalculate the extent of feature classes in the provided .mdb files, with status updates and optional message box."""
@@ -38,6 +40,14 @@ def recalculate_extent(self, status_update=None, show_messagebox=True, update_pr
         except Exception as e:
             exception_list.write("Extent ReCalculation Error for: " + mdb + "\n")
             print("Extent ReCalculation error for " + mdb + "\nError=\n\n", e)
+            # Send Telegram notification for error
+            error_message = "⚠️ Recalculate Extent Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: Recalculate_Extent\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, mdb, str(e))
+            send_telegram_message(error_message)
+
             if status_update:
                 status_update("Error recalculating extent for {}: {}".format(filename, str(e)))
         if update_progress:
@@ -49,6 +59,12 @@ def recalculate_extent(self, status_update=None, show_messagebox=True, update_pr
     exception_list.close()
     print("Extent ReCalculation process complete")
     print('The script took {0} seconds!'.format(time.time() - startTime))
+    # Send Telegram notification for successful processing
+    success_message = "✅ Recalculate Extent Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Recalculate_Extent\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Extent ReCalculation", message="Extent recalculation process is complete.")

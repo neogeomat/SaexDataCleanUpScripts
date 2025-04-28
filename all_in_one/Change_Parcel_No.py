@@ -1,12 +1,16 @@
+# -*- coding: utf-8 -*-
 from Tkinter import *
 import tkMessageBox
 import arcpy
 import os
 import shared_data
+import time
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 version = "v2.1.6"
 
 def Change_parcel_no(self, max_parcel_no):
+    startTime = time.time()
     path = shared_data.directory
     exception_file_path = open(path + "\\exception_list_max_parcel_no.csv", "a")
     mdb_list = shared_data.filtered_mdb_files
@@ -46,6 +50,13 @@ def update_parcelno(mdb, max_parcelno):
     except Exception as e:
         print "Error processing {}: {}".format(mdb, str(e))
         raise  # Re-raise the error so it can be caught in fix_gaps_and_overlaps
+        # Send Telegram notification for error
+        error_message = "⚠️ Change Parcel No to 0 Error!\n\n" \
+                        "🗂 Path: {}\n" \
+                        "📜 Script: Change_Parcel_No_to_0\n" \
+                        "🗂 File: {}\n" \
+                        "❌ Error: {}".format(path, mdb_file, str(e))
+        send_telegram_message(error_message)
 
     finally:
         if arcpy.Exists("parcel_layer"):
@@ -53,4 +64,10 @@ def update_parcelno(mdb, max_parcelno):
 
         # Compact the database after processing
         arcpy.Compact_management(mdb)
+    # Send Telegram notification for successful processing
+    success_message = "✅ Change Parcel No to 0 Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Change_Parcel_No_to_0\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 

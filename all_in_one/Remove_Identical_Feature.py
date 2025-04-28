@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import tkMessageBox
 import arcpy
 import os
 import time
 import shared_data
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, update_progress=None):
     """Remove identical features from the specified feature classes, with status updates and optional message box."""
@@ -30,6 +32,14 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, upd
         except Exception as e:
             exception_list.write("Remove Identical Feature Error for: " + mdb + "\n")
             print("Remove Identical Feature error for " + mdb + "\nError=\n\n", e)
+            # Send Telegram notification for error
+            error_message = "⚠️ Remove Identical Construction Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: Remove_Identical_Construction\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, mdb, str(e))
+            send_telegram_message(error_message)
+
             if status_update:
                 status_update("Error removing identical features from {}: {}".format(filename, str(e)))
         if update_progress:
@@ -41,6 +51,12 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, upd
     exception_list.close()
     print("Remove Identical Feature process complete")
     print('The script took {0} seconds!'.format(time.time() - startTime))
+    # Send Telegram notification for successful processing
+    success_message = "✅ Remove Identical Construction Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Remove_Identical_Construction\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Remove Identical Feature", message="Removal of identical features is complete.")

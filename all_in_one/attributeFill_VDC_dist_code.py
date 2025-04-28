@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import tkMessageBox
 import arcpy
 import os
 import shared_data
 import time
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, show_messagebox=True, update_progress=None):
     """Fill VDC and District codes in the database, update status using the provided function, and optionally show a message box."""
@@ -11,7 +13,6 @@ def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, 
     exception_list = open(os.path.join(path, "exception_list_att_fill_vdc_dis_code.csv"), "a")
     allerror = open(os.path.join(path, "regex.csv"), "a")
     exception_list.truncate(0)
-    allerror.truncate(0)
 
     # Update status to indicate the start of the process
     if status_update:
@@ -39,6 +40,13 @@ def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, 
         except Exception as e:
             exception_list.write("Attribute fill Error for: " + filename + "\n")
             allerror.write(filename + ",error\n")
+            error_message = "⚠️ Attribute Fill VDC and District Error!\n\n" \
+                            "🗂 Path: {}\n" \
+                            "📜 Script: attribute_fill_vdc_district\n" \
+                            "🗂 File: {}\n" \
+                            "❌ Error: {}".format(path, mdb_file, str(e))
+            send_telegram_message(error_message)
+
             if status_update:
                 status_update("Error filling attributes for {}: {}".format(filename, str(e)))
 
@@ -60,5 +68,12 @@ def Fill_VDC_Dist_Code(self, district_code='',vdc_code='',  status_update=None, 
 
     if status_update:
         status_update("VDC and District code filling process complete.")
+
+    # Send Telegram notification for successful processing
+    success_message = "✅ Attribute Fill VDC and District Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: attribute_fill_vdc_district\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
+    send_telegram_message(success_message)
 
     print('The script took {0} seconds!'.format(time.time() - startTime))
