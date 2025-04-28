@@ -1,1 +1,1 @@
-xcopy /s "D:\FINAL KHOTANG DATA-2070\Ward Data\*.mdb" "D:\Data Back-up\2025_03_16" /y
+xcopy /s "\\10.70.87.246\d\DISTRICK SURVEY OFFICE PANCHTHAR\GEO-DATABASE OF PANCHTHAR DISTRICT\*.mdb" "H:\to_migrate\Panchthar\2025_04_07" /y
