@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import shared_data
 import time
 from csv_logging import create_csv_log_file, write_error_to_csv
 import tkMessageBox
 import arcpy
 import os
+from send_notif_telegram import send_telegram_message  # Import the function to send Telegram notifications
 
 
 def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=True, update_progress=None):
@@ -11,7 +13,7 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
     path = shared_data.directory
     mdb_list = shared_data.filtered_mdb_files
     allerror = open(os.path.join(path, "regex.csv"), "a")
-    exception_list = open(os.path.join(path, "exception_list_att_fill_ward_grid.csv"), "a")
+    exception_list = open(os.path.join(path, "exception_list_fill_gap_overlap.csv"), "a")
     exception_list.truncate(0)
 
     error_log_path = os.path.join(shared_data.directory, "error_log.csv")
@@ -38,6 +40,14 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
             if(no_of_attribute==0):
                 exception_list.write("Parcel layer has 0 Features for ," + i + "\n")
                 count+=1
+                # Send Telegram notification for error
+                error_message = "⚠️ Fix Gap Overlap Error!\n\n" \
+                                "🗂 Path: {}\n" \
+                                "📜 Script: Fix_Gap_Overlap\n" \
+                                "🗂 File: {}\n" \
+                                "❌ Error: {}".format(path, i, str("No Parcel Layer"))
+                send_telegram_message(error_message)
+
             else:
                 # Local variables:
                 Folder_Location = "d:\\"
@@ -48,6 +58,14 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                     Blank_Template = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\"+option_choosed
                 else:
                     print("Blank Template database not found, install saex")
+                    # Send Telegram notification for error
+                    error_message = "⚠️ Fix Gap Overlap Error!\n\n" \
+                                    "🗂 Path: {}\n" \
+                                    "📜 Script: Fix_Gap_Overlap\n" \
+                                    "🗂 File: {}\n" \
+                                    "❌ Error: {}".format(path, i, str("Blank template not Found"))
+                    send_telegram_message(error_message)
+
                     exit ()
                 # Process: Create Temp Folder to strore all processing intermediaries
                 DataCleanTemp = Folder_Location + "\\DataCleanTemp"
@@ -241,6 +259,13 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                 status_update("Error during processing: {}".format(str(e)))
             # if show_messagebox:
             #     tkMessageBox.showerror(title="Error", message="An error occurred: {}".format(str(e)))
+                # Send Telegram notification for error
+                error_message = "⚠️ Fix Gap Overlap Error!\n\n" \
+                                "🗂 Path: {}\n" \
+                                "📜 Script: Fix_Gap_Overlap\n" \
+                                "🗂 File: {}\n" \
+                                "❌ Error: {}".format(path, i, str(e))
+                send_telegram_message(error_message)
 
         if update_progress:
             x= progress/float(total_mdbs)
@@ -259,6 +284,12 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Check Attribute Errors", message="Fix gap and overlap process is complete.")
+    # Send Telegram notification for successful processing
+    success_message = "✅ Fix Gap Overlap Success!\n\n" \
+                      "🗂 Path: {}\n" \
+                      "📜 Script: Fix_Gap_Overlap\n" \
+                      "⏱ Duration: {:.2f} seconds".format(path, time.time() - starttime)
+    send_telegram_message(success_message)
 
 
 
