@@ -6,6 +6,7 @@ import subprocess
 
 encoded_token = 'NzcwMjcxMDUwNTpBQUY2MGxydkE1ZHN1azZTbk1ldk5VcFBWWlRMMS1IdnBOYw=='
 encoded_chat_id = 'LTEwMDI2MDExMzI0NjU='
+#encoded_chat_id = 'NjU5ODcwMzk4'
 
 socket_available = True
 try:
@@ -30,10 +31,23 @@ def check_internet():
     except OSError:
         return False
 
+def get_ip_address():
+    try:
+        # Connect to a public DNS server (Google's) to get the external IP (in LAN)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "IP not available"
+
 def send_telegram_message(message):
     app_version = "2.0"
     icon = "📱"  # Mobile phone emoji as an icon
-    message_with_version = "{}\n{} App version = {}".format(message, icon, app_version)
+    ip_address = get_ip_address()
+
+    message_with_version = "{}\n{} App version = {}\n🖥️ IP = {}".format(message, icon, app_version, ip_address)
 
     if not check_internet():
         return
