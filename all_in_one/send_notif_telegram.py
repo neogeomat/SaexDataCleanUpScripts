@@ -6,7 +6,7 @@ import subprocess
 
 encoded_token = 'NzcwMjcxMDUwNTpBQUY2MGxydkE1ZHN1azZTbk1ldk5VcFBWWlRMMS1IdnBOYw=='
 encoded_chat_id = 'LTEwMDI2MDExMzI0NjU='
-#encoded_chat_id = 'NjU5ODcwMzk4'
+#encoded_chat_id = 'NjU5ODcwMzk4'   #for test
 
 socket_available = True
 try:
@@ -43,7 +43,7 @@ def get_ip_address():
         return "IP not available"
 
 def send_telegram_message(message):
-    app_version = "2.0.1"
+    app_version = "2.0.2"
     icon = "📱"  # Mobile phone emoji as an icon
     ip_address = get_ip_address()
 

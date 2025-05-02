@@ -7,7 +7,7 @@ import os
 import time
 from send_notif_telegram import send_telegram_message  # <- import your function here
 
-def Generalize(self, tolerance, status_update=None, show_messagebox=True, update_progress=None):
+def Generalize(self, tolerance,central_medirian, status_update=None, show_messagebox=True, update_progress=None):
 
     startTime = time.time()
     path = shared_data.directory
@@ -36,11 +36,11 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True, update
             arcpy.env.overwriteOutput = True
 
             Data_Location = i
-            option_choosed = self.variable.get()
+            option_choosed = central_medirian
             blank_data = "D:\\LIS_SYSTEM\\LIS_Spatial_Data_Templates\\" + option_choosed
 
             if os.path.exists(blank_data):
-                BLANK84_Template = blank_data
+                BLANK_Template = blank_data
             else:
                 print("Blank Template database not found, install saex")
 
@@ -52,7 +52,7 @@ def Generalize(self, tolerance, status_update=None, show_messagebox=True, update
             arcpy.Delete_management(i + "\\Parcel")
 
             # Process: Copy Features
-            arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", i + "\\Parcel", "", "0", "0", "0")
+            arcpy.CopyFeatures_management(BLANK_Template + "\\Parcel", i + "\\Parcel", "", "0", "0", "0")
 
             # Process: Append
             arcpy.Append_management(DataCleanTemp + "\\Simplified_2.shp", i + "\\Parcel", "NO_TEST")

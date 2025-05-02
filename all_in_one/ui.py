@@ -208,7 +208,7 @@ class DataCleanup:
         self.tolerance_entry.insert(0, "0.2")  # Insert default value
         self.tolerance_entry.grid(row=8, column=1, sticky="w", padx=2, pady=3)
 
-        self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self, self.tolerance_entry.get()), width=30, bg=colors["light_coral"])
+        self.generalize = Button(db_section, text="Generalize", command=lambda: Generalize(self, self.tolerance_entry.get(),self.variable_cm.get()), width=30, bg=colors["light_coral"])
         self.generalize.grid(row=8, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["generalize"]).grid(row=8, column=5)
 
@@ -384,7 +384,7 @@ class DataCleanup:
                 elif action == "fix_gap_overlap":
                     Fix_Gap_Overlap(self,self.variable_cm.get(),self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "generalize":
-                    Generalize(self, self.tolerance_entry.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
+                    Generalize(self, self.tolerance_entry.get(),self.variable_cm.get(), self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "recalculate_extent":
                     recalculate_extent(self, self.update_status, show_messagebox=False,update_progress=progress_callback)
                 elif action == "remove_identical":
