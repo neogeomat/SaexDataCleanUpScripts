@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import shutil
 import time
 import tkMessageBox
 import arcpy
@@ -21,7 +22,7 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
     file_handler, csv_writer = create_csv_log_file(error_log_path)
 
     count = 1
-    total_mdbs = len(shared_data.filtered_mdb_files)
+    total_mdbs = len(mdb_list)
 
     for progress, i in enumerate(mdb_list, start=1):
         filename = os.path.basename(i)
@@ -36,27 +37,29 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
 
             print("Checking Dummy Merge for: " + basename)
 
-            if os.path.exists(blank_mdb):
-                BLANK84_Template = blank_mdb
-            else:
+            if not os.path.exists(blank_mdb):
                 print("Blank Template database not found, install saex")
                 exit()
+
             # Process: Create Temp Folder to store all processing intermediaries
             DataCleanTemp = Folder_Location + "\\DataCleanTemp"
-            if os.path.exists(DataCleanTemp):  # delete folder if it exists, otherwise it causes error
-                arcpy.Delete_management(DataCleanTemp, "Folder")
-            arcpy.CreateFolder_management(Folder_Location, "DataCleanTemp")
-            DataCleanTemp = Folder_Location + "\\DataCleanTemp"
+            safe_delete_folder(DataCleanTemp)
+
+            create_clean_temp_folder(Folder_Location,"DataCleanTemp")
+
             file_id = i[-12:-4]
-            arcpy.CreateFolder_management(DataCleanTemp, file_id)
-            DataCleanTemp = DataCleanTemp + "\\" + file_id
-            arcpy.env.workspace = DataCleanTemp
 
-            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTemp, "Parcel.shp")
+            DataCleanTempFile = DataCleanTemp + "\\" +file_id
+            create_clean_temp_folder(DataCleanTemp,file_id)
 
-            Parcel = DataCleanTemp + "\\Parcel.shp"
+
+            arcpy.env.workspace = DataCleanTempFile
+
+            arcpy.FeatureClassToFeatureClass_conversion(Data_Location + "\\Parcel", DataCleanTempFile, "Parcel.shp")
+
+            Parcel = DataCleanTempFile + "\\Parcel.shp"
             # Process: Feature To Point
-            arcpy.FeatureToPoint_management(Parcel, DataCleanTemp + "\\ParcelCentroid.shp", "INSIDE")
+            arcpy.FeatureToPoint_management(Parcel, DataCleanTempFile + "\\ParcelCentroid.shp", "INSIDE")
 
             # Process: Select Layer By Attribute
             temp = "temp" + file_id
@@ -64,21 +67,51 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
             arcpy.SelectLayerByAttribute_management(temp, 'NEW_SELECTION', 'PARCELNO < 9000 AND PARCELNO <> 0')
 
             # Process: Dissolve
-            arcpy.Dissolve_management(temp, DataCleanTemp + "\\ParcelDissolve.shp", "PARCELNO;DISTRICT;VDC;WARDNO;GRIDS1", "", "SINGLE_PART", "DISSOLVE_LINES")
+            arcpy.Dissolve_management(temp, DataCleanTempFile + "\\ParcelDissolve.shp", "PARCELNO;DISTRICT;VDC;WARDNO;GRIDS1", "", "SINGLE_PART", "DISSOLVE_LINES")
             arcpy.MakeFeatureLayer_management(Parcel, temp + "invert", "PARCELNO >= 9000 OR PARCELNO = 0")
             arcpy.SelectLayerByAttribute_management(temp + "invert", "NEW_SELECTION", "PARCELNO >= 9000 OR PARCELNO = 0")
-            arcpy.CopyFeatures_management(temp + "invert", DataCleanTemp + "\\ParcelRemain.shp")
+            arcpy.CopyFeatures_management(temp + "invert", DataCleanTempFile + "\\ParcelRemain.shp")
+
 
             # Join management
-            arcpy.SpatialJoin_analysis(DataCleanTemp + "\\ParcelDissolve.shp", DataCleanTemp + "\\ParcelCentroid.shp", DataCleanTemp + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
-                                       "PARCELNO \"PARCELNO\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelDissolve.shp,PARCELNO,-1,-1;DISTRICT \"DISTRICT\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelDissolve.shp,DISTRICT,-1,-1;VDC \"VDC\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelDissolve.shp,VDC,-1,-1;WARDNO \"WARDNO\" true true false 3 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelDissolve.shp,WARDNO,-1,-1;GRIDS1 \"GRIDS1\" true true false 9 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelDissolve.shp,GRIDS1,-1,-1;PARCELKEY \"PARCELKEY\" true true false 23 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,PARCELKEY,-1,-1;PARCELTY \"PARCELTY\" true true false 10 Long 0 10 ,First,#," + DataCleanTemp + "\\ParcelCentroid,shp,PARCELTY,-1,-1;ParcelNote \"ParcelNote\" true true false 200 Text 0 0 ,First,#," + DataCleanTemp + "\\ParcelCentroid.shp,ParcelNote,-1,-1", "CONTAINS", "", "")
+            arcpy.SpatialJoin_analysis(DataCleanTempFile + "\\ParcelDissolve.shp", DataCleanTempFile + "\\ParcelCentroid.shp",
+                                       DataCleanTempFile + "\\NewJoinedData.shp", "JOIN_ONE_TO_ONE", "KEEP_ALL",
+                                       "", "CONTAINS", "", "")
 
-            arcpy.Delete_management(Data_Location + "\\Parcel")
+            # Clear selection and delete layers referencing Parcel.shp
+            try:
+                arcpy.SelectLayerByAttribute_management(temp, "CLEAR_SELECTION")
+            except:
+                pass
+
+            try:
+                arcpy.Delete_management(temp)
+            except:
+                pass
+
+            try:
+                arcpy.Delete_management(temp + "invert")
+            except:
+                pass
+
+            # Force garbage collection to release internal ArcPy references
+            import gc
+            gc.collect()
+
+            # Optional but helpful to ensure ArcGIS clears in-memory locks
+            arcpy.ClearWorkspaceCache_management()
+
+            # Now it's safer to delete Parcel.shp
+            arcpy.Delete_management(DataCleanTempFile + "\\Parcel.shp")
+
+
+            arcpy.Delete_management(DataCleanTempFile + "\\Parcel.shp")
             # Process: Copy Features
-            arcpy.CopyFeatures_management(BLANK84_Template + "\\Parcel", Data_Location + "\\Parcel")
-            arcpy.Append_management(DataCleanTemp + "\\NewJoinedData.shp", Data_Location + "\\Parcel", "NO_TEST")
-            arcpy.Append_management(DataCleanTemp + "\\ParcelRemain.shp", Data_Location + "\\Parcel", "NO_TEST")
+            arcpy.CopyFeatures_management(blank_mdb + "\\Parcel", DataCleanTempFile + "\\Parcel.shp")
+            arcpy.Append_management(DataCleanTempFile + "\\NewJoinedData.shp", Data_Location + "\\Parcel.shp", "NO_TEST")
+            arcpy.Append_management(DataCleanTempFile + "\\ParcelRemain.shp", Data_Location + "\\Parcel.shp", "NO_TEST")
 
+            safe_delete_folder(DataCleanTempFile)
 
         except Exception as e:
             exception_list.write("Gap Overlap Error for ," + i + "\n")
@@ -114,3 +147,26 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
 
     print("Merge Dummy Planning process complete")
     exception_list.close()
+
+
+
+
+def safe_delete_folder(path):
+    if os.path.exists(path):
+        try:
+            arcpy.ClearWorkspaceCache_management()
+            arcpy.Delete_management(path, "Folder")
+            time.sleep(1)
+            if os.path.exists(path):  # Still exists? Force delete
+                shutil.rmtree(path)
+        except Exception as e:
+            print("Error deleting folder {}: {}".format(path, str(e)))
+
+def create_clean_temp_folder(base_path, subfolder_name):
+    full_path = os.path.join(base_path, subfolder_name)
+    safe_delete_folder(full_path)
+    try:
+        arcpy.CreateFolder_management(base_path, subfolder_name)
+    except Exception as e:
+        print("Failed to create folder {}: {}".format(full_path, str(e)))
+    return full_path

@@ -1,4 +1,5 @@
 import os
+from tkinter import Tk, filedialog, Listbox, MULTIPLE, Button, Frame, messagebox
 
 class FileFilter:
     def __init__(self, files):
@@ -6,11 +7,32 @@ class FileFilter:
 
     def filter_by_folder(self, folders):
         """Filter files to include only those within the specified folders."""
+        """Filter files to include only those within the specified folders."""
+        if not folders:
+            return self.files
+
         # Normalize folder paths
         folders_normalized  = [os.path.normpath(folder) for folder in folders]
 
         return [f for f in self.files
                 if any(commonpath([os.path.normpath(f), folder]) == folder for folder in folders_normalized)]
+
+    def select_folders(self):
+        """Open a dialog to select multiple folders."""
+        # Hide the main window temporarily
+        self.root.withdraw()
+
+        # Ask for directory selection
+        folders = filedialog.askdirectory(
+            title="Select folders to filter by",
+            mustexist=True
+        )
+
+        # Show the main window again
+        self.root.deiconify()
+
+        # Return as list (askdirectory returns a single path)
+        return [folders] if folders else []
 
     def filter_by_name(self, name_filters, filtered_files, use_path=False, logic_type="Or"):
         filtered_files_list = []
@@ -43,6 +65,40 @@ class FileFilter:
         for file in filtered_files:
             print(file)
         print("Number of files: {len(filtered_files)}")
+
+    def show_folder_selection_dialog(self):
+        """Display a GUI for folder selection and filtering."""
+        frame = Frame(self.root)
+        frame.pack(padx=10, pady=10)
+
+        # Button to select folders
+        select_btn = Button(frame, text="Select Folders", command=self.run_filter_process)
+        select_btn.pack(pady=5)
+
+        self.root.mainloop()
+
+    def run_filter_process(self):
+        """Handle the complete filtering process."""
+        # Get selected folders
+        folders = self.select_folders()
+        if not folders:
+            messagebox.showinfo("Info", "No folders selected. Showing all files.")
+            filtered_files = self.files
+        else:
+            # Filter by folders
+            filtered_files = self.filter_by_folder(folders)
+
+        # Display results (you could modify this to show in GUI)
+        self.display_results(filtered_files)
+
+        # Ask if user wants to filter by name
+        if messagebox.askyesno("Continue", "Do you want to filter by name?"):
+            self.show_name_filter_dialog(filtered_files)
+
+    def show_name_filter_dialog(self, files_to_filter):
+        """Show dialog for name filtering (to be implemented)"""
+        # You would implement similar GUI elements for name filtering
+        pass
 
 
 import os

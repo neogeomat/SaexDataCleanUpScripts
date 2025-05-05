@@ -36,15 +36,20 @@ except ImportError:
     except ImportError:
         psutil_available = False  # If installation fails, disable the button
 
+# Version constant
+VERSION = "2.0.3"
+
+
+
 # Define colors
 colors = {
-    "light_blue": "#add8e6",
+    "light_blue": "#9FB3DF",
     "check_button": "#add8e6",
     "light_green": "#90ee90",
     "light_yellow": "#ffffe0",
-    "light_coral": "#f08080",
+    "light_coral": "#FF8282",
     "light_pink": "#ffb6c1",
-    "light_gray": "#d3d3d3",
+    "light_gray": "#9FB3D0",
     "white": "#ffffff"
 }
 
@@ -58,56 +63,114 @@ class DataCleanup:
     def create_widgets(self):
         """Create buttons with light, colorful background colors"""
 
-        # Section for loading and filtering files
-        file_section = LabelFrame(self.master, text="Choose Path and Filter", padx=2, pady=3, bg=colors["light_blue"])
-        file_section.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        # Add version label at top
+        version_label = Label(self.master,
+                              text="DATA CLEANUP TOOLS - VERSION {}".format(VERSION),
+                              font=('Helvetica', 16, 'bold'),
+                              bg=colors["light_green"],
+                              pady=10)
+        version_label.grid(row=0, column=0, columnspan=2, sticky="ew")
 
-        # Create label for sheet
-        self.Sheet = Label(file_section, text="Choose Folder", width=30, bg=colors["light_gray"])
-        self.Sheet.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S)
+        # Configuration variables for easy adjustments
+        LABEL_WIDTH = 8
+        ENTRY_WIDTH = 30
+        BUTTON_WIDTH = 10
+        PADX = 2
+        PADY = 3
+        STICKY = E + W + N + S
+        SECTION_COLSPAN = 6  # Adjust based on number of columns needed
+        LABEL_WIDTH = 20
+        OPTIONMENU_WIDTH = 15
+        ACTION_BUTTON_WIDTH = 12
 
-        # Create entry
-        self.directory = Entry(file_section, width=30, bg=colors["white"])
-        self.directory.grid(row=0, column=1, padx=2, pady=3, sticky=E + W + N + S)
+        # Section for loading and filtering files - Single horizontal row
+        file_section = LabelFrame(self.master,
+                                  text="Choose Path and Filter",
+                                  padx=PADX,
+                                  pady=PADY,
+                                  bg=colors["light_blue"])
+        file_section.grid(row=1, column=0, padx=PADX, pady=PADY, sticky=STICKY, columnspan=SECTION_COLSPAN)
 
-        self.browseDb = Button(file_section, text="Browse", command=self.browse_folder, width=30, bg=colors["light_coral"])
-        self.browseDb.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S)
+        # Create widgets with consistent styling
+        self.Sheet = Label(file_section,
+                           text="Folder:",
+                           width=LABEL_WIDTH,
+                           bg=colors["light_gray"])
+        self.directory = Entry(file_section,
+                               width=ENTRY_WIDTH,
+                               bg=colors["white"])
+        self.browseDb = Button(file_section,
+                               text="Browse",
+                               command=self.browse_folder,
+                               width=BUTTON_WIDTH,
+                               bg=colors["light_coral"])
+        self.loaddb = Button(file_section,
+                             text="Load DB",
+                             command=self.load_db,
+                             width=BUTTON_WIDTH,
+                             bg=colors["light_green"])
+        self.filter_button = Button(file_section,
+                                    text="Filter",
+                                    command=self.open_filter_dialog,
+                                    width=BUTTON_WIDTH,
+                                    bg=colors["light_coral"])
+        self.show_filter = Button(file_section,
+                                  text="Show",
+                                  command=lambda: show_filter_list(self),
+                                  width=BUTTON_WIDTH,
+                                  bg=colors["light_coral"])
 
-        self.loaddb = Button(file_section, text="Load DB", command=self.load_db, width=45, bg=colors["light_coral"])
-        self.loaddb.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=3)
-
-        self.filter_button = Button(file_section, text="Filter Files", command=self.open_filter_dialog, width=30, bg=colors["light_coral"])
-        self.filter_button.grid(row=2, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-
-        self.show_filter = Button(file_section, text="Show Filtered Files", command=lambda: show_filter_list(self), width=30, bg=colors["light_coral"])
-        self.show_filter.grid(row=2, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
-
-        # Section for database operations
-        cm_section = LabelFrame(self.master, text="Replace Whole MDb", padx=2, pady=3, bg=colors["light_blue"])
-        cm_section.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
-
-        self.Sheet_cm = Label(cm_section, text="Choose Central Meridian", width=30, bg=colors["light_gray"])
-        self.Sheet_cm.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S,columnspan=1)
-
-        options_cm = [
-            "BLANK.mdb",
-            "BLANK81.mdb",
-            "BLANK84.mdb",
-            "BLANK87.mdb"
+        # Grid layout - all in one row
+        widgets = [
+            (self.Sheet, 0),
+            (self.directory, 1),
+            (self.browseDb, 2),
+            (self.loaddb, 3),
+            (self.filter_button, 4),
+            (self.show_filter, 5)
         ]
 
-        self.variable_cm = StringVar(cm_section)
-        self.variable_cm.set(options_cm[1]) # Default value
-        self.optionmenu_cm = OptionMenu(cm_section, self.variable_cm, *options_cm)
-        self.optionmenu_cm.config(bg=colors["white"])
-        self.optionmenu_cm.grid(row=1, column=1, padx=2, pady=3, sticky=E + W + N + S,columnspan=2)
+        for widget, col in widgets:
+            widget.grid(row=0,
+                        column=col,
+                        padx=PADX,
+                        pady=PADY,
+                        sticky=STICKY)
 
-        self.compactdb = Button(cm_section, text="Replace", command=lambda: replaceMDb(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
-        self.compactdb.grid(row=1, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        # Section for database operations - Compact horizontal layout
+        cm_section = LabelFrame(self.master,
+                                text="Replace Whole MDb",
+                                padx=PADX,
+                                pady=PADY,
+                                bg=colors["light_blue"])
+        cm_section.grid(row=2, column=0, padx=PADX, pady=PADY, sticky=STICKY, columnspan=2)
+
+        # Central Meridian Selection
+        self.Sheet_cm = Label(cm_section,
+                              text="Central Meridian:",
+                              width=LABEL_WIDTH,
+                              bg=colors["light_gray"])
+        self.Sheet_cm.grid(row=0, column=0, padx=PADX, pady=PADY, sticky=STICKY)
+
+        options_cm = ["BLANK.mdb", "BLANK81.mdb", "BLANK84.mdb", "BLANK87.mdb"]
+
+        self.variable_cm = StringVar(cm_section)
+        self.variable_cm.set(options_cm[1])  # Default value
+
+        self.optionmenu_cm = OptionMenu(cm_section, self.variable_cm, *options_cm)
+        self.optionmenu_cm.config(bg=colors["white"], width=OPTIONMENU_WIDTH)
+        self.optionmenu_cm.grid(row=0, column=1, padx=PADX, pady=PADY, sticky=STICKY)
+
+        self.compactdb = Button(cm_section,
+                                text="Replace",
+                                command=lambda: replaceMDb(self, self.variable_cm.get()),
+                                width=ACTION_BUTTON_WIDTH,
+                                bg=colors["light_coral"])
+        self.compactdb.grid(row=0, column=2, padx=PADX, pady=PADY, sticky=STICKY)
 
         # Section for database operations
         db_section = LabelFrame(self.master, text="Apply Cleanup", padx=2, pady=3, bg=colors["light_blue"])
-        db_section.grid(row=2, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        db_section.grid(row=3, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
         self.select_all_var = BooleanVar()
         self.select_all_checkbutton = Checkbutton(db_section, text="Select All", variable=self.select_all_var,
@@ -234,11 +297,11 @@ class DataCleanup:
 
         # Add the progress bar
         self.progress = Progressbar(self.master, orient=HORIZONTAL, length=200, mode='determinate')
-        self.progress.grid(row=3, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        self.progress.grid(row=4, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
         # Section for extras
         extra_section = LabelFrame(self.master, text="Extras", padx=2, pady=3, bg=colors["light_green"])
-        extra_section.grid(row=4, column=0, padx=2, pady=3, sticky=E + W + N + S,columnspan=2)
+        extra_section.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S,columnspan=2)
 
         self.merge_all = Button(extra_section, text="Merge All", command=lambda: mergeSaexMdbs(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
         self.merge_all.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
@@ -265,7 +328,7 @@ class DataCleanup:
 
         # Section for status updates
         self.status_section = LabelFrame(self.master, text="Status", padx=2, pady=3, bg=colors["light_blue"])
-        self.status_section.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        self.status_section.grid(row=6, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
         self.status_label = Label(self.status_section, text="", bg=colors["light_yellow"], anchor='w')
         self.status_label.grid(row=0, column=0, padx=2, pady=3, sticky=W, columnspan=6)
