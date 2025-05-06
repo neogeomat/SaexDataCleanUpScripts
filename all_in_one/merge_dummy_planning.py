@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import re
 import shutil
 import time
 import tkMessageBox
@@ -47,7 +48,16 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
 
             create_clean_temp_folder(Folder_Location,"DataCleanTemp")
 
-            file_id = i[-12:-4]
+            file_id = re.sub(r'\W+', '', os.path.splitext(os.path.basename(i))[0])
+            counter = 1
+
+            # Generate a unique folder name if it already exists
+            while os.path.exists(os.path.join(DataCleanTemp, file_id)):
+                try:
+                    arcpy.Delete_management(DataCleanTemp + "\\" +file_id)
+                except:
+                    file_id = file_id+"_"+counter
+                    counter += 1
 
             DataCleanTempFile = DataCleanTemp + "\\" +file_id
             create_clean_temp_folder(DataCleanTemp,file_id)
@@ -104,8 +114,6 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
             # Now it's safer to delete Parcel.shp
             arcpy.Delete_management(DataCleanTempFile + "\\Parcel.shp")
 
-
-            arcpy.Delete_management(DataCleanTempFile + "\\Parcel.shp")
             # Process: Copy Features
             arcpy.CopyFeatures_management(blank_mdb + "\\Parcel", DataCleanTempFile + "\\Parcel.shp")
             arcpy.Append_management(DataCleanTempFile + "\\NewJoinedData.shp", Data_Location + "\\Parcel.shp", "NO_TEST")

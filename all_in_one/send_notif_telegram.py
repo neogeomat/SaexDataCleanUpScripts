@@ -66,7 +66,7 @@ def get_ip_address():
         return "IP not available"
 
 def send_telegram_message(message):
-    app_version = "2.0.3"
+    app_version = "2.0.4"
     icon = "📱"  # Mobile phone emoji as an icon
     ip_address = get_ip_address()
     location = get_location()
