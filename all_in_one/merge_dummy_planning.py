@@ -31,6 +31,11 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
             status_update("Merging Dummy Plannings for {} \n({}/{})".format(filename, count, total_mdbs))
         try:
             arcpy.env.workspace = i
+            # Check if 'Parcel' layer exists in the current MDB
+            feature_classes = arcpy.ListFeatureClasses()
+            if "Parcel" not in feature_classes:
+                exception_list.write("Invalid or incorrect MDB: 'Parcel' layer not found. {}\n".format(i))
+                raise ValueError("Invalid or incorrect MDB: 'Parcel' layer not found.")
 
             Folder_Location = "d:"
             Data_Location = i
@@ -137,7 +142,7 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
 
             if status_update:
                 status_update("Error during processing: {}".format(str(e)))
-            if show_messagebox:
+            if show_messagebox and "Parcel" not in str(e):
                 tkMessageBox.showerror(title="Error", message="An error occurred: {}".format(str(e)))
 
         if update_progress:

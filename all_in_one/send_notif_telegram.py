@@ -4,7 +4,7 @@ import requests
 import subprocess
 encoded_token = 'NzcwMjcxMDUwNTpBQUY2MGxydkE1ZHN1azZTbk1ldk5VcFBWWlRMMS1IdnBOYw=='
 encoded_chat_id = 'LTEwMDI2MDExMzI0NjU='
-#encoded_chat_id = 'NjU5ODcwMzk4'   #for test
+# encoded_chat_id = 'NjU5ODcwMzk4'   #for test
 
 import subprocess
 
