@@ -7,15 +7,22 @@ class FileFilter:
 
     def filter_by_folder(self, folders):
         """Filter files to include only those within the specified folders."""
-        """Filter files to include only those within the specified folders."""
-        if not folders:
+        if not folders or folders[0] == "Select a folder":
             return self.files
 
-        # Normalize folder paths
-        folders_normalized  = [os.path.normpath(folder) for folder in folders]
+        # Normalize folder paths for Python 2.7 compatibility
+        folders_normalized = [os.path.normpath(folder) for folder in folders]
 
-        return [f for f in self.files
-                if any(commonpath([os.path.normpath(f), folder]) == folder for folder in folders_normalized)]
+        filtered_files = []
+        for f in self.files:
+            file_path = os.path.normpath(f)
+            for folder in folders_normalized:
+                # Python 2.7 compatible path comparison
+                if os.path.commonprefix([file_path, folder]) == folder:
+                    filtered_files.append(f)
+                    break
+        return filtered_files
+
 
     def select_folders(self):
         """Open a dialog to select multiple folders."""
@@ -35,27 +42,29 @@ class FileFilter:
         return [folders] if folders else []
 
     def filter_by_name(self, name_filters, filtered_files, use_path=False, logic_type="Or"):
+        """Filter files by name with Python 2.7 compatibility"""
+        if not name_filters:
+            return filtered_files
+
         filtered_files_list = []
+        name_filters_lower = [filt.lower().strip() for filt in name_filters if filt.strip()]
 
-        # Convert all filters to lowercase
-        name_filters_lower = [filter.lower() for filter in name_filters]
+        for file_path in filtered_files:
+            # Get the appropriate search target
+            if use_path:
+                search_target = file_path.lower()
+            else:
+                search_target = os.path.basename(file_path).lower()
 
-        for f in filtered_files:
-            # Get basename and full path, convert to lowercase
-            basename = os.path.basename(f).lower()
-            full_path = f.lower()
-
-            # Check if using full path or just the filename
-            search_target = full_path if use_path else basename
-
-            # Apply the selected logic type
+            # Apply the selected logic
             if logic_type == "Or":
-                # "Or" logic: if any substring matches
-                if any(name_filter in search_target for name_filter in name_filters_lower):
-                    filtered_files_list.append(f)
-            else:  # "And" logic: all substrings must match
-                if all(name_filter in search_target for name_filter in name_filters_lower):
-                    filtered_files_list.append(f)
+                # OR logic: match ANY of the filters
+                if any(filt in search_target for filt in name_filters_lower):
+                    filtered_files_list.append(file_path)
+            else:
+                # AND logic: match ALL filters
+                if all(filt in search_target for filt in name_filters_lower):
+                    filtered_files_list.append(file_path)
 
         return filtered_files_list
 
@@ -99,6 +108,17 @@ class FileFilter:
         """Show dialog for name filtering (to be implemented)"""
         # You would implement similar GUI elements for name filtering
         pass
+
+    def ignore_files_with_patterns(self, files, patterns):
+        """More reliable pattern ignoring"""
+        if not patterns or not files:
+            return files
+
+        lower_patterns = [p.lower() for p in patterns]
+        return [
+            f for f in files
+            if not any(p in os.path.normpath(f).lower() for p in lower_patterns)
+        ]
 
 
 import os

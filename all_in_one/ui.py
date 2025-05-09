@@ -37,7 +37,7 @@ except ImportError:
         psutil_available = False  # If installation fails, disable the button
 
 # Version constant
-VERSION = "2.0.4"
+VERSION = "2.1.1"
 
 
 
@@ -50,7 +50,8 @@ colors = {
     "light_coral": "#FF8282",
     "light_pink": "#ffb6c1",
     "light_gray": "#9FB3D0",
-    "white": "#ffffff"
+    "white": "#ffffff",
+    "heading":"#03A791"
 }
 
 
@@ -67,7 +68,7 @@ class DataCleanup:
         version_label = Label(self.master,
                               text="DATA CLEANUP TOOLS - VERSION {}".format(VERSION),
                               font=('Helvetica', 16, 'bold'),
-                              bg=colors["light_green"],
+                              bg=colors["heading"],
                               pady=10)
         version_label.grid(row=0, column=0, columnspan=2, sticky="ew")
 

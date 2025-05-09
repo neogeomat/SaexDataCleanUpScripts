@@ -1,13 +1,14 @@
 import os
 import Tkinter as tk
 import tkMessageBox
+import traceback
 from Tkinter import Toplevel, StringVar, OptionMenu
 
 import shared_data
 from file_filter import FileFilter
 
 import tkinter as tk
-from tkinter import Toplevel, Scrollbar, Listbox
+from tkinter import Toplevel, Scrollbar, Listbox, messagebox
 import shared_data
 from LoadDb import getCentralMeridian
 
@@ -18,9 +19,12 @@ class FilterDialog(Toplevel):
 
     def __init__(self, master, file_filter, directory, current_mdb_list):
         Toplevel.__init__(self, master)
-        self.file_filter = file_filter
+        self.file_filter = file_filter or FileFilter(current_mdb_list)  # Ensure we always have a filter
         self.directory = directory  # Directory path passed from the main application
+        self.current_mdb_list = current_mdb_list  # Store the current list
         self.title("Filter Options")
+        self.create_widgets()
+        self.populate_folder_list()
 
         # Check if the current mdb_list is unchanged from the previous one
         if FilterDialog.previous_mdb_list == current_mdb_list and FilterDialog.previous_options:
@@ -69,15 +73,39 @@ class FilterDialog(Toplevel):
         self.apply_button = tk.Button(self, text="Apply Filters", command=self.apply_filters)
         self.apply_button.grid(row=4, column=1, padx=5, pady=5, sticky='e')
 
-        # Match type selection (Correct/Incorrect)
-        self.match_type_label = tk.Label(self, text="Match Type:")
-        self.match_type_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
+        # # Match type selection (Correct/Incorrect)
+        # self.match_type_label = tk.Label(self, text="Match Type:")
+        # self.match_type_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
+        #
+        # self.match_type_var = StringVar()
+        # self.match_type_var.set("Correct Matches")  # Default value
+        #
+        # self.match_type_menu = OptionMenu(self, self.match_type_var, "Correct Matches", "Incorrect Matches")
+        # self.match_type_menu.grid(row=5, column=1, padx=5, pady=5, sticky='w')
 
-        self.match_type_var = StringVar()
-        self.match_type_var.set("Correct Matches")  # Default value
+        # Add this after the other filter options
+        self.ignore_frame = tk.LabelFrame(self, text="Ignore Files Containing")
+        self.ignore_frame.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
 
-        self.match_type_menu = OptionMenu(self, self.match_type_var, "Correct Matches", "Incorrect Matches")
-        self.match_type_menu.grid(row=5, column=1, padx=5, pady=5, sticky='w')
+        # Predefined patterns
+        self.predefined_patterns = ["file", "merge"]
+        self.ignore_vars = {}
+
+        for i, pattern in enumerate(self.predefined_patterns):
+            self.ignore_vars[pattern] = tk.BooleanVar()
+            cb = tk.Checkbutton(
+                self.ignore_frame,
+                text=pattern,
+                variable=self.ignore_vars[pattern]
+            )
+            cb.grid(row=0, column=i, padx=5, sticky='w')
+
+        # Custom pattern entry
+        self.custom_ignore_label = tk.Label(self.ignore_frame, text="Custom:")
+        self.custom_ignore_label.grid(row=1, column=0, padx=5, sticky='e')
+
+        self.custom_ignore_entry = tk.Entry(self.ignore_frame, width=30)
+        self.custom_ignore_entry.grid(row=1, column=1, columnspan=3, padx=5, sticky='ew')
 
     def restore_previous_options(self):
         """Restore the previous filter options if available."""
@@ -87,6 +115,12 @@ class FilterDialog(Toplevel):
         self.filter_type_var.set(FilterDialog.previous_options['filter_type'])
         self.logic_type_var.set(FilterDialog.previous_options['logic_type'])
 
+        # Restore ignore patterns
+        for pattern, var in self.ignore_vars.items():
+            var.set(FilterDialog.previous_options['ignore_patterns'].get(pattern, False))
+        self.custom_ignore_entry.insert(0, FilterDialog.previous_options['custom_ignore'])
+
+
     def save_filter_options(self):
         """Save the current filter options."""
         FilterDialog.previous_options = {
@@ -94,8 +128,9 @@ class FilterDialog(Toplevel):
             'name_filter': self.name_entry.get().strip(),
             'filter_type': self.filter_type_var.get(),
             'logic_type': self.logic_type_var.get(),
+            'ignore_patterns': {k: v.get() for k, v in self.ignore_vars.items()},
+            'custom_ignore': self.custom_ignore_entry.get().strip()
         }
-
 
     def get_sorted_folders(self):
         """Retrieve and sort all folders that contain .mdb files"""
@@ -113,15 +148,26 @@ class FilterDialog(Toplevel):
         return sorted_folders
 
     def populate_folder_list(self):
-        """Populate the dropdown menu with folders that contain .mdb files"""
-        folders = self.get_sorted_folders()  # Get sorted folders
-        self.folder_var.set("Select a folder")  # Reset to default
-        self.folder_menu["menu"].delete(0, "end")  # Clear the existing menu items
-        for folder in folders:
-            self.folder_menu["menu"].add_command(
+        """Fixed folder dropdown population"""
+        # Get sorted folders and add default option
+        folders = self.get_sorted_folders()
+        folder_options = ["Select a folder"] + folders
+
+        # Clear existing menu
+        menu = self.folder_menu['menu']
+        menu.delete(0, 'end')
+
+        # Add all options
+        for folder in folder_options:
+            menu.add_command(
                 label=folder,
                 command=lambda f=folder: self.folder_var.set(f)
             )
+
+        # Set default selection
+        self.folder_var.set("Select a folder")
+
+
     def get_folders_from_directory(self):
         """Retrieve folders that contain .mdb files directly or in their subfolders."""
         folders_with_mdb_files = set()
@@ -143,44 +189,65 @@ class FilterDialog(Toplevel):
         return sorted(folders_with_mdb_files)
 
     def apply_filters(self):
-        selected_folder = self.folder_var.get()
-        name_filter_input = self.name_entry.get().strip()
-        filter_type = self.filter_type_var.get()
-        logic_type = self.logic_type_var.get()
-        match_type = self.match_type_var.get()
+        try:
+            # Get filter values with proper defaults
+            selected_folder = self.folder_var.get()
+            name_filter_input = self.name_entry.get().strip()
 
-        # Save the filter options before applying the filter
-        self.save_filter_options()
+            # Skip folder filtering if none selected
+            filtered_files = self.current_mdb_list if selected_folder == "Select a folder" \
+                else self.file_filter.filter_by_folder([selected_folder])
 
-        # Save the current mdb_list for comparison in future instances
-        FilterDialog.previous_mdb_list = shared_data.mdb_files
+            # Debug print
+            print("After folder filtering: {} files".format(len(filtered_files)))
 
-        # Split the name_filter_input by commas and strip extra spaces
-        name_filters = [filter.strip() for filter in name_filter_input.split(',')]
+            # Name filtering
+            if name_filter_input:
+                name_filters = [f.strip() for f in name_filter_input.split(',') if f.strip()]
+                filtered_files = self.file_filter.filter_by_name(
+                    name_filters,
+                    filtered_files,
+                    use_path=(self.filter_type_var.get() == "Full Path"),
+                    logic_type=self.logic_type_var.get()
+                )
+                print("After name filtering: {} files".format(len(filtered_files)))
 
-        # Retrieve all .mdb files from the directory
-        all_mdb_files = shared_data.mdb_files
-        file_filter = FileFilter(all_mdb_files)
+            # Ignore patterns
+            ignore_patterns = []
+            for pattern, var in self.ignore_vars.items():
+                if var.get():
+                    ignore_patterns.append(pattern)
+            custom_pattern = self.custom_ignore_entry.get().strip()
+            if custom_pattern:
+                ignore_patterns.append(custom_pattern)
 
-        # Filter by folder first
-        filtered_by_folder = file_filter.filter_by_folder([selected_folder])
+            if ignore_patterns:
+                filtered_files = self.file_filter.ignore_files_with_patterns(filtered_files, ignore_patterns)
+                print("After ignore patterns: {} files".format(len(filtered_files)))
 
-        # Apply filter based on filter type and logic type
-        if match_type == "Correct Matches":
-            shared_data.filtered_mdb_files = file_filter.filter_by_name(
-                name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type
-            )
-        else:  # Incorrect Matches
-            all_filtered = file_filter.filter_by_name(
-                name_filters, filtered_by_folder, use_path=(filter_type == "Full Path"), logic_type=logic_type
-            )
-            shared_data.filtered_mdb_files = [file for file in filtered_by_folder if file not in all_filtered]
+            # Handle match type
+            if self.match_type_var.get() == "Incorrect Matches":
+                filtered_files = [f for f in self.current_mdb_list if f not in filtered_files]
 
-        for mdb in shared_data.filtered_mdb_files:
-            shared_data.initial_central_meridian = getCentralMeridian(mdb)
-            break
+            shared_data.filtered_mdb_files = filtered_files
+            print("Final filtered files: {}".format(len(filtered_files)))
 
-        self.destroy()
+            if filtered_files:
+                shared_data.initial_central_meridian = getCentralMeridian(filtered_files[0])
+            else:
+                messagebox.showinfo("No Results", "No files matched your filter criteria.")
+
+        except Exception as e:
+            messagebox.showerror("Filter Error", str(e))
+            print("Filter error: {}".format(traceback.format_exc()))
+        finally:
+            self.destroy()
+
+    def is_subpath(self, path, parent_path):
+        """Check if path is within parent_path (Python 2.7 compatible)"""
+        path = os.path.normpath(path)
+        parent_path = os.path.normpath(parent_path)
+        return os.path.commonprefix([path, parent_path]) == parent_path
 
 def show_filter_list(self):
     # Create a new top-level window
