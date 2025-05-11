@@ -37,7 +37,7 @@ except ImportError:
         psutil_available = False  # If installation fails, disable the button
 
 # Version constant
-VERSION = "2.1.1"
+VERSION = "2.1.2"
 
 
 

