@@ -7,7 +7,9 @@ encoded_chat_id = 'LTEwMDI2MDExMzI0NjU='
 # encoded_chat_id = 'NjU5ODcwMzk4'   #for test
 
 import subprocess
+from shared_data import VERSION
 
+version = VERSION
 socket_available = True
 base64_available = True
 urllib2_available = True
@@ -66,7 +68,8 @@ def get_ip_address():
         return "IP not available"
 
 def send_telegram_message(message):
-    app_version = "2.1.2"
+    # app_version = "2.1.2"
+    app_version = version
     icon = u"📱"  # Mobile phone emoji as an icon
     ip_address = get_ip_address()
     location = get_location()

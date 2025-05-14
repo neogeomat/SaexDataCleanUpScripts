@@ -333,8 +333,37 @@ class CoordinateShiftApp(tk.Frame):
                     break
 
     def process_single_mdb(self, mdb_path, x_offset, y_offset):
-        """Process a single MDB file"""
-        pass
+        try:
+            import arcpy
+            arcpy.env.workspace = mdb_path
+
+            # Process feature classes in the root of the geodatabase
+            fcl = arcpy.ListFeatureClasses("*", "ALL")
+            if fcl:
+                for fc in fcl:
+                    with arcpy.da.UpdateCursor(fc, ["SHAPE@XY"]) as cursor:
+                        for row in cursor:
+                            x, y = row[0]
+                            cursor.updateRow([(x + x_offset, y + y_offset)])
+
+            # Process feature classes inside feature datasets
+            fds_list = arcpy.ListDatasets("", "Feature")
+            if fds_list:
+                for fds in fds_list:
+                    arcpy.env.workspace = mdb_path + "\\" + fds  # Change workspace to dataset
+                    fcl_in_ds = arcpy.ListFeatureClasses("*", "ALL")
+                    if fcl_in_ds:
+                        for fc in fcl_in_ds:
+                            with arcpy.da.UpdateCursor(fc, ["SHAPE@XY"]) as cursor:
+                                for row in cursor:
+                                    x, y = row[0]
+                                    cursor.updateRow([(x + x_offset, y + y_offset)])
+
+            # Reset workspace back
+            arcpy.env.workspace = mdb_path
+
+        except Exception as e:
+            print("Move error for " + mdb_path + "\nError = " + str(e))
 
     def show_completion_message(self, total_files, elapsed_time):
         """Display completion message"""

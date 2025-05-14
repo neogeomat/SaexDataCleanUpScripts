@@ -1,5 +1,6 @@
 import os
 import subprocess
+import tkFont
 import tkMessageBox
 from Tkinter import *
 from ttk import Progressbar
@@ -37,7 +38,7 @@ except ImportError:
         psutil_available = False  # If installation fails, disable the button
 
 # Version constant
-VERSION = "2.1.2"
+from shared_data import VERSION
 
 
 
@@ -280,7 +281,7 @@ class DataCleanup:
         self.recalculate_extent.grid(row=9, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["recalculate_extent"]).grid(row=9, column=5)
 
-        self.remove_identical = Button(db_section, text="Remove Identical Constructions", command=lambda: Remove_Identical_Feature(self), width=30, bg=colors["light_coral"])
+        self.remove_identical = Button(db_section, text="Remove Identical Constructions & Segments",font = (tkFont.Font(size=8)) , command=lambda: Remove_Identical_Feature(self), width=30, bg=colors["light_coral"])
         self.remove_identical.grid(row=10, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         Checkbutton(db_section,bg=colors["check_button"],   variable=self.check_vars["remove_identical"]).grid(row=10, column=5)
 

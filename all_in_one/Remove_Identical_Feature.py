@@ -26,16 +26,16 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, upd
 
         try:
             arcpy.DeleteIdentical_management(os.path.join(mdb, "Construction"), ["Shape_Area", "Shape_Length", "ParFID"])
-            # arcpy.DeleteIdentical_management(os.path.join(mdb, "Parcel"), ["Shape_Area", "Shape_Length", "PARCELNO"])
+            arcpy.DeleteIdentical_management(os.path.join(mdb, "Segments"), ["Shape_Area", "Shape_Length", "ParFID"])
             if status_update:
                 status_update("Removed identical features from {} \n({}/{})".format(filename, count, total_files))
         except Exception as e:
             exception_list.write("Remove Identical Feature Error for: " + mdb + "\n")
             print("Remove Identical Feature error for " + mdb + "\nError=\n\n", e)
             # Send Telegram notification for error
-            error_message = "⚠️ Remove Identical Construction Error!\n\n" \
+            error_message = "⚠️ Remove Identical Construction and Segments Error!\n\n" \
                             "🗂 Path: {}\n" \
-                            "📜 Script: Remove_Identical_Construction\n" \
+                            "📜 Script: Remove_Identical_Construction_and_Segments\n" \
                             "🗂 File: {}\n" \
                             "❌ Error: {}".format(path, mdb, str(e))
             send_telegram_message(error_message)
@@ -52,9 +52,9 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, upd
     print("Remove Identical Feature process complete")
     print('The script took {0} seconds!'.format(time.time() - startTime))
     # Send Telegram notification for successful processing
-    success_message = "✅ Remove Identical Construction Success!\n\n" \
+    success_message = "✅ Remove Identical Construction and Segments Success!\n\n" \
                       "🗂 Path: {}\n" \
-                      "📜 Script: Remove_Identical_Construction\n" \
+                      "📜 Script: Remove_Identical_Construction_and_Segments\n" \
                       "⏱ Duration: {:.2f} seconds".format(path, time.time() - startTime)
     send_telegram_message(success_message)
 
