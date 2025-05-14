@@ -25,8 +25,8 @@ def Remove_Identical_Feature(self, status_update=None, show_messagebox=True, upd
             status_update("Processing {} \n({}/{})".format(filename, count, len(mdb_list)))
 
         try:
-            arcpy.DeleteIdentical_management(os.path.join(mdb, "Construction"), ["Shape_Area", "Shape_Length", "ParFID"])
-            arcpy.DeleteIdentical_management(os.path.join(mdb, "Segments"), ["Shape_Area", "Shape_Length", "ParFID"])
+            arcpy.DeleteIdentical_management(os.path.join(mdb, "Construction"), ["Shape"])
+            arcpy.DeleteIdentical_management(os.path.join(mdb, "Segments"), [ "Shape"])
             if status_update:
                 status_update("Removed identical features from {} \n({}/{})".format(filename, count, total_files))
         except Exception as e:
