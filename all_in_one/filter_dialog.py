@@ -73,16 +73,6 @@ class FilterDialog(Toplevel):
         self.apply_button = tk.Button(self, text="Apply Filters", command=self.apply_filters)
         self.apply_button.grid(row=4, column=1, padx=5, pady=5, sticky='e')
 
-        # # Match type selection (Correct/Incorrect)
-        # self.match_type_label = tk.Label(self, text="Match Type:")
-        # self.match_type_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
-        #
-        # self.match_type_var = StringVar()
-        # self.match_type_var.set("Correct Matches")  # Default value
-        #
-        # self.match_type_menu = OptionMenu(self, self.match_type_var, "Correct Matches", "Incorrect Matches")
-        # self.match_type_menu.grid(row=5, column=1, padx=5, pady=5, sticky='w')
-
         # Add this after the other filter options
         self.ignore_frame = tk.LabelFrame(self, text="Ignore Files Containing")
         self.ignore_frame.grid(row=6, column=0, columnspan=2, padx=5, pady=5, sticky='ew')
@@ -225,9 +215,6 @@ class FilterDialog(Toplevel):
                 filtered_files = self.file_filter.ignore_files_with_patterns(filtered_files, ignore_patterns)
                 print("After ignore patterns: {} files".format(len(filtered_files)))
 
-            # Handle match type
-            if self.match_type_var.get() == "Incorrect Matches":
-                filtered_files = [f for f in self.current_mdb_list if f not in filtered_files]
 
             shared_data.filtered_mdb_files = filtered_files
             print("Final filtered files: {}".format(len(filtered_files)))
