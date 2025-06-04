@@ -119,6 +119,7 @@ def merge_dummy_planning(self, choosen_meridian, status_update=None, show_messag
             # Now it's safer to delete Parcel.shp
             arcpy.Delete_management(Data_Location + "\\Parcel.shp")
             # arcpy.Delete_management(DataCleanTempFile + "\\Parcel.shp")
+            arcpy.Delete_management(Data_Location + "\\Parcel")
 
             # Process: Copy Features
             arcpy.CopyFeatures_management(blank_mdb + "\\Parcel", Data_Location + "\\Parcel.shp")
