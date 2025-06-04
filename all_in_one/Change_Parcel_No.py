@@ -15,19 +15,21 @@ def Change_parcel_no(self, max_parcel_no):
     exception_file_path = open(path + "\\exception_list_max_parcel_no.csv", "a")
     mdb_list = shared_data.filtered_mdb_files
     exception_file_path.truncate(0)
+    total_mdb  = len(mdb_list)
 
     for count, mdb_file in enumerate(mdb_list, start=1):
         parcelfile = os.path.join(mdb_file, "Parcel")
         filename = os.path.basename(mdb_file)
         try:
-            update_parcelno(mdb_file,max_parcel_no)
+            update_parcelno(count,mdb_file,max_parcel_no,total_mdb)
         except Exception as e:
             exception_file_path.write("Compact Error for: " + filename + "\n")
 
 
-def update_parcelno(mdb, max_parcelno):
+def update_parcelno(count,mdb, max_parcelno,total_mdb):
     """Update ParcelNo values"""
     try:
+        print ("Processing {} ({}/{})".format(mdb,count,total_mdb))
         query = "[PARCELNO] >= {}".format(max_parcelno)
         arcpy.MakeFeatureLayer_management("{}\\Parcel".format(mdb), "parcel_layer")
 

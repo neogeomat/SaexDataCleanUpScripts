@@ -227,27 +227,7 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                     else:
                         print("Field '{field_name}' already exists.")
 
-                # Check and add the "suspicious" field if it doesn't exist
-                add_field_if_not_exists("suspicious", "TEXT", field_length=5)
-
-                # Check and add the "circularity" field if it doesn't exist
-                add_field_if_not_exists("circularity", "FLOAT")
-
-                # Calculate Circularity
-                arcpy.CalculateField_management(Data_Location + "\\Parcel", "circularity",
-                                                "4 * math.pi * !SHAPE_Area!  / !SHAPE_Length!**2", "PYTHON")
-
-                # Calculate Suspicious
-                expression = "check(!Shape_Area!,!circularity!)"
-
-                codeblock = """def check(Shape_Area,circularity):
-                                if(Shape_Area < 5 and circularity < 0.2):
-                                    return 'yes'
-                                else:
-                                    return 'no'
-                                    """
-                arcpy.CalculateField_management(Data_Location + "\\Parcel", "suspicious", expression, "PYTHON",
-                                                codeblock)
+                calculate_suspicious_and_circularity(Data_Location + "\\Parcel")
 
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
@@ -292,6 +272,33 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
     send_telegram_message(success_message)
 
 
+def calculate_suspicious_and_circularity(parcel_path):
+    import math
+
+    def add_field_if_not_exists(field_name, field_type, field_length=None):
+        fields = arcpy.ListFields(parcel_path, field_name)
+        if not fields:
+            arcpy.AddField_management(parcel_path, field_name, field_type, field_length=field_length)
+        else:
+            print("Field '{}' already exists.".format(field_name))
+
+    # Check and add fields if they don't exist
+    add_field_if_not_exists("suspicious", "TEXT", field_length=5)
+    add_field_if_not_exists("circularity", "FLOAT")
+
+    # Calculate Circularity
+    arcpy.CalculateField_management(parcel_path, "circularity",
+                                    "4 * math.pi * !SHAPE_Area!  / !SHAPE_Length!**2", "PYTHON")
+
+    # Calculate Suspicious
+    expression = "check(!Shape_Area!,!circularity!)"
+    codeblock = """def check(Shape_Area,circularity):
+    if(Shape_Area < 5 and circularity < 0.2):
+        return 'yes'
+    else:
+        return 'no'
+    """
+    arcpy.CalculateField_management(parcel_path, "suspicious", expression, "PYTHON", codeblock)
 
 
 

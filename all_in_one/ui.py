@@ -154,7 +154,7 @@ class DataCleanup:
                               bg=colors["light_gray"])
         self.Sheet_cm.grid(row=0, column=0, padx=PADX, pady=PADY, sticky=STICKY)
 
-        options_cm = ["BLANK.mdb", "BLANK81.mdb", "BLANK84.mdb", "BLANK87.mdb"]
+        options_cm = ["BLANK81.mdb", "BLANK84.mdb", "BLANK87.mdb"]
 
         self.variable_cm = StringVar(cm_section)
         self.variable_cm.set(options_cm[1])  # Default value
