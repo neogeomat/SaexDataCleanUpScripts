@@ -52,7 +52,7 @@ colors = {
     "light_pink": "#ffb6c1",
     "light_gray": "#9FB3D0",
     "white": "#ffffff",
-    "heading":"#d4ac0d"
+    "heading":"#ffe896"
 }
 
 

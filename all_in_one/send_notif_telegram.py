@@ -51,7 +51,8 @@ if not json_available:
 def check_internet():
     try:
         # Try to reach Google's DNS server to check for internet connection
-        socket.create_connection(("8.8.8.8", 53), timeout=5)
+        s = socket.create_connection(("8.8.8.8", 53), timeout=5)
+        s.close()
         return True
     except OSError:
         return False
