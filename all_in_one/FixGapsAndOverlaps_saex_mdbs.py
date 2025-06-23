@@ -273,6 +273,7 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
 
 
 def calculate_suspicious_and_circularity(parcel_path):
+
     import math
 
     def add_field_if_not_exists(field_name, field_type, field_length=None):
@@ -288,7 +289,7 @@ def calculate_suspicious_and_circularity(parcel_path):
 
     # Calculate Circularity
     arcpy.CalculateField_management(parcel_path, "circularity",
-                                    "4 * math.pi * !SHAPE_Area!  / !SHAPE_Length!**2", "PYTHON")
+                                    "4 * 3.14159265 * !SHAPE_Area!  / !SHAPE_Length!**2", "PYTHON")
 
     # Calculate Suspicious
     expression = "check(!Shape_Area!,!circularity!)"
