@@ -12,8 +12,12 @@ dic_case_sen = {
     "ddha": "19",
     "dhha": "19",
     "sha": "30",
+    "Sha": "30",
     "SHA": "31",
-    "sa": "32"
+    "saa": "31",
+    "Shha": "31",
+    "sa": "32",
+    "Sa": "32"
 }
 
 dic_case_insen = {
@@ -28,15 +32,21 @@ dic_case_insen = {
     "ng": "05",
     "ch": "06",
     "cha": "06",
+    "chaa": "06",
     "chha": "07",
+    "Chha": "07",
     "ja": "08",
     "jha": "09",
     "yna": "10",
     "yan": "10",
     "Ta": "11",
+    "ta": "11",
     "Tha": "12",
+    "tha": "12",
     "Da": "13",
+    "da": "13",
     "Dha": "14",
+    "dha": "14",
     "ana": "15",
     "tta": "16",
     "taa": "16",
@@ -44,6 +54,7 @@ dic_case_insen = {
     "thaa":'17',
     "dda": "18",
     "daa": "18",
+    "dhaa": "19",
     "na": "20",
     "pa": "21",
     "pha": "22",
@@ -55,8 +66,11 @@ dic_case_insen = {
     "ra": "27",
     "la": "28",
     "wa": "29",
+    "wo": "29",
     "ha": "33",
     "ksha":"34",
+    "chey":"34",
+    "chhe":"34",
     "kshya": "34",
     "tra": "35",
     "gya": "36"
@@ -110,33 +124,47 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
 
         new_filename = base_file_name.replace(" ", "")
         x = re.findall(r"^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
-        print x
+        print ("x=",x)
 
         if x:
             bad_chars = ['_', '-', '(', ")", " "]
             new_string_name = ''.join(i for i in x[0][1] if i not in bad_chars)
+
+
             dic_code = dic_case_sen.get(new_string_name) or dic_case_insen.get(new_string_name.lower(), "")
 
+
+
+
             new_string_no = x[0][2] if x[0][2] else "0"
+
+
             ward_code = int(x[0][0])
 
             if ward_code > 99:
                 continue
 
-            if new_string_no >= 10:
+            if int(new_string_no) >= 10:
                 new_string_no = 0
+
+            print new_string_no
 
             try:
                 sheet_code = scaled_value + x[0][0].zfill(2) + dic_code + str(new_string_no)
                 print "code=" + sheet_code
-                TheRows = arcpy.UpdateCursor(parcelfile)
-                for TheRow in TheRows:
-                    TheRow.setValue("GRIDS1", sheet_code)
-                    TheRows.updateRow(TheRow)
-                    Ward = TheRow.getValue("WARDNO")
-                    if not Ward or len(Ward) == 0 or Ward == " " or int(Ward) > 40:
-                        TheRow.setValue("WARDNO", ward_code)
+                if len(sheet_code)!=9:
+                    exception_list.write("Attribute fill Error for ," + base_file_name + "\n")
+                    print "Attribute fill Error for " + base_file_name + ": " + str(e)
+
+                else:
+                    TheRows = arcpy.UpdateCursor(parcelfile)
+                    for TheRow in TheRows:
+                        TheRow.setValue("GRIDS1", sheet_code)
                         TheRows.updateRow(TheRow)
+                        Ward = TheRow.getValue("WARDNO")
+                        if not Ward or len(Ward) == 0 or Ward == " " or int(Ward) > 40:
+                            TheRow.setValue("WARDNO", ward_code)
+                            TheRows.updateRow(TheRow)
                 if status_update:
                     status_update("Processed {} ({}/{})".format(base_file_name, count, len(mdb_list)))
             except Exception as e:
