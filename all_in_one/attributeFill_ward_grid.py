@@ -114,6 +114,7 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
 
         if status_update:
             status_update("Processing {} \n({}/{})".format(base_file_name, count, len(mdb_list)))
+        print("Processing {} \n({}/{})".format(base_file_name, count, len(mdb_list)))
 
 
         try:

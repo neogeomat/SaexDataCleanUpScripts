@@ -84,6 +84,12 @@ def attributeChecker(self,check_state, status_update=None, show_messagebox=True,
                 else:
                     f.write("Parcel Layer not found for\n" + i)
                     allerror.write("Parcel Layer not found for\n" + i)
+                f.close()
+
+                # Delete individual error file if empty
+                if os.path.getsize(f.name) == 0:
+                    os.remove(f.name)
+
         except Exception as e:
             exception_list.write("Attribute Check Error for," + i + "\n")
             print("Attribute Check Error for " + i + ": " + str(e))
@@ -102,6 +108,12 @@ def attributeChecker(self,check_state, status_update=None, show_messagebox=True,
 
     exception_list.close()
     allerror.close()
+
+    # Delete them if they are empty
+    if os.path.getsize(exception_list.name) == 0:
+        os.remove(exception_list.name)
+    if os.path.getsize(allerror.name) == 0:
+        os.remove(allerror.name)
 
     if show_messagebox:
         tkMessageBox.showinfo(title="Check Attribute Errors", message="Attribute checking process is complete.")
