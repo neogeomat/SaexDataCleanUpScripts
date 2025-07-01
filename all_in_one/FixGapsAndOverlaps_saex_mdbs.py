@@ -207,6 +207,8 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                 # Process: Delete
                 arcpy.Delete_management(DataCleanTemp, "Folder")
 
+                calculate_suspicious_and_circularity(Data_Location + "\\Parcel")
+
                 ## Finalizing data
                 # Process: Delete Field
                 arcpy.DeleteField_management(Data_Location + "\\Parcel", "IDS")
@@ -218,16 +220,6 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                     exception_list.write("ParcelKey Error for ,"+i+"\n")
 
                 parcel_path = Data_Location + "\\Parcel"
-
-                # Function to add a field if it doesn't exist
-                def add_field_if_not_exists(field_name, field_type, field_length=None):
-                    fields = arcpy.ListFields(parcel_path, field_name)
-                    if not fields:
-                        arcpy.AddField_management(parcel_path, field_name, field_type, field_length=field_length)
-                    else:
-                        print("Field '{field_name}' already exists.")
-
-                calculate_suspicious_and_circularity(Data_Location + "\\Parcel")
 
                 arcpy.Compact_management(Data_Location)
                 print(Data_Location + " cleaning process complete")
