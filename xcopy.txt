@@ -1,1 +1,7 @@
-xcopy /s "\\10.70.87.246\d\DISTRICK SURVEY OFFICE PANCHTHAR\GEO-DATABASE OF PANCHTHAR DISTRICT\*.mdb" "H:\to_migrate\Panchthar\2025_04_07" /y
+xcopy /s "E:\NAPI dOLPA\*.mdb" "D:\Dolpa_backup_2025_07_23" /y
+
+robocopy "\\1-MAIN-DATABASE\1_Work in DataBase" "D:\Dingla_backup_2025_07_18" "*merged*.mdb" /S /Z /R:3 /W:5
+
+robocopy "Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18" "Z:\Dingla_2025_07_18_2" "*merged*.mdb" /S /Z /R:3 /W:5
+
+Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18

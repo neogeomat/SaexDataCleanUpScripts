@@ -77,6 +77,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
 
         for i in mdb_list:
             try:
+                print ("\nMoving data for "+ i)
                 count +=1
                 arcpy.env.workspace = i
                 fcl = arcpy.ListFeatureClasses("*","ALL")

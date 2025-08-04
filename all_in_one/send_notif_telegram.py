@@ -76,6 +76,9 @@ def send_telegram_message(message):
     location = get_location()
     comp_name = get_computer_name()
 
+    # Always send to Discord first
+    send_discord_message(message)
+
     if not check_internet():
         return
     if not socket_available:
@@ -121,3 +124,49 @@ def get_computer_name():
         return socket.gethostname()
     except:
         return 'not found'
+
+
+def send_discord_message(message):
+    # -*- coding: utf-8 -*-
+    import urllib2
+    import json
+
+    DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1397458172054208622/f5sTLzFM7r5erkFXN17RmVVj1b1gAdbF167E1ZvjJmLzp8lNvjtRodnk5lVqVv4xhZUn'
+
+    try:
+        payload = {"content": "Test message"}
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib2.Request(DISCORD_WEBHOOK_URL, data, {'Content-Type': 'application/json'})
+        response = urllib2.urlopen(req)
+        print("Message sent, status:", response.getcode())
+
+    except urllib2.HTTPError as e:
+        print("HTTPError code:", e.code)
+        print("HTTPError reason:", e.reason)
+        print("HTTPError body:", e.read())
+
+    except urllib2.URLError as e:
+        print("URLError reason:", e.reason)
+
+    except Exception as e:
+        print("Unexpected error:", str(e))
+    try:
+        message = u"""📢 **Test Notification**
+    📱 App version: 2.4.1
+    🖥️ IP: 192.168.71.155
+    📍 Location: Kathmandu
+    💻 Computer: DESKTOP-4FIHCOV
+    📝 Message: ✅ Compacting process completed successfully.
+    🗂 Path: 
+    📄 Script: compactDb
+    ⏱ Duration: 0.00 seconds"""
+
+        payload = {"content": message}
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib2.Request(DISCORD_WEBHOOK_URL, data, {'Content-Type': 'application/json'})
+        response = urllib2.urlopen(req)
+
+        print("✅ Discord message sent! Status Code:", response.getcode())
+
+    except Exception as e:
+        print("❌ Error during Discord notification:", str(e))

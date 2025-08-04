@@ -150,6 +150,11 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     arcpy.RecalculateFeatureClassExtent_management(i + "\\Segments")
                 else:
                     print("Segments Layer not found for, " + i)
+                if arcpy.Exists(i + "\\SheetIndicator"):
+                    arcpy.Append_management(i+"\\SheetIndicator",out_data+"\\SheetIndicator","NO_TEST")
+                    arcpy.RecalculateFeatureClassExtent_management(i + "\\SheetIndicator")
+                else:
+                    print("SheetIndicator Layer not found for, " + i)
                 arcpy.env.workspace=i;
                 point_features_list=arcpy.ListFeatureClasses("*","Point")
                 for pt_feature in point_features_list:

@@ -62,7 +62,7 @@ def process_mdbs(mxd, df, workspace):
     for fc in mdb_list:
         arcpy.env.workspace = fc
         base_name = os.path.basename(fc).replace(" ", "")
-        pattern = r"^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)"
+        pattern = r"^.[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)"
         match = re.findall(pattern, base_name)
 
         if not match:
@@ -113,7 +113,7 @@ def create_mxd():
                 "Success",
                 "MXD created successfully at:\n{}".format(output_mxd_path)
             )  # Fixed closing parenthesis here
-            subprocess.call([ARCMAP_EXE_PATH, output_mxd_path])
+            #subprocess.call([ARCMAP_EXE_PATH, output_mxd_path])
 
     except Exception as e:
         tkMessageBox.showerror("Error", "Failed to create MXD: {}".format(str(e)))
