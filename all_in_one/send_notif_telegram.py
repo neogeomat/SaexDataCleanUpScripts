@@ -142,6 +142,3 @@ def send_discord_message(message):
         "content": message
     }
     response = requests.post(DISCORD_WEBHOOK_URL, headers=headers, json=payload)
-
-
-send_discord_message("Hello from Python to Discord!")
