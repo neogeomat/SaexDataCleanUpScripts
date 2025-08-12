@@ -1,4 +1,4 @@
-xcopy /s "E:\NAPI dOLPA\*.mdb" "D:\Dolpa_backup_2025_07_23" /y
+xcopy /s "E:\Update Digital Data\*.mdb" "D:\Sirdibas_backup_2025_08_05" /y
 
 robocopy "\\1-MAIN-DATABASE\1_Work in DataBase" "D:\Dingla_backup_2025_07_18" "*merged*.mdb" /S /Z /R:3 /W:5
 

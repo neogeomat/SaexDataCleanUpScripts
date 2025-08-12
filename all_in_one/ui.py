@@ -303,30 +303,35 @@ class DataCleanup:
 
         # Section for extras
         extra_section = LabelFrame(self.master, text="Extras", padx=2, pady=3, bg=colors["light_green"])
-        extra_section.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S,columnspan=2)
+        extra_section.grid(row=5, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
 
+        # Divide into 4 columns, keep old buttons in place
         self.merge_all = Button(extra_section, text="Merge All", command=lambda: mergeSaexMdbs(self, self.variable_cm.get()), width=30, bg=colors["light_coral"])
-        self.merge_all.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        self.merge_all.grid(row=0, column=0, padx=2, pady=3, sticky=E + W + N + S)
 
         self.identical_parcel = Button(extra_section, text="Identical Parcels", command=self.find_identical_parcels, width=30, bg=colors["light_coral"])
-        self.identical_parcel.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        self.identical_parcel.grid(row=0, column=1, padx=2, pady=3, sticky=E + W + N + S)
+
         if psutil_available:
             self.move_data = Button(extra_section, text="Move Data", command=self.move_data, width=30, bg=colors["light_coral"])
-            self.move_data.grid(row=0, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+            self.move_data.grid(row=0, column=2, padx=2, pady=3, sticky=E + W + N + S)
         else:
             print("psutil installation failed. 'Move Data' button is disabled.")
 
+        # New Trim VDC Code button in 4th column
+        self.trim_vdc = Button(extra_section, text="Trim VDC Code", command=self.trim_vdc_code, width=30, bg=colors["light_coral"])
+        self.trim_vdc.grid(row=1, column=2, padx=2, pady=3, sticky=E + W + N + S)
 
         self.p_no_label = Label(extra_section, text="Enter Max Parcel No \n to Change to zero", width=30, bg=colors["light_gray"])
-        self.p_no_label.grid(row=1, column=0, padx=2, pady=3, sticky=E + W + N + S)
+        self.p_no_label.grid(row=2, column=0, padx=2, pady=3, sticky=E + W + N + S)
 
         # Create entry
         self.max_p_no = Entry(extra_section, width=30, bg=colors["white"])
-        self.max_p_no.grid(row=1, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
+        self.max_p_no.grid(row=2, column=1, padx=2, pady=3, sticky=E + W + N + S, columnspan=2)
         self.max_p_no.insert(0,"9999")
 
         self.change_p_no = Button(extra_section, text="Change Parcel No to 0", command=lambda: self.change_parcel_no(self.max_p_no.get()), width=30, bg=colors["light_coral"])
-        self.change_p_no.grid(row=1, column=3, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
+        self.change_p_no.grid(row=2, column=2, padx=2, pady=3, sticky=E + W + N + S, columnspan=1)
 
         # Section for status updates
         self.status_section = LabelFrame(self.master, text="Status", padx=2, pady=3, bg=colors["light_blue"])
@@ -500,6 +505,15 @@ class DataCleanup:
             tkMessageBox.showerror("Invalid Input", "max_parcel_no must be an integer.")
             return None  # Exit the function gracefully
         Change_parcel_no(self,max_parcel_no)
+
+
+    def trim_vdc_code(self):
+        try:
+            from trim_vdc_code import trim_vdc_code  # Assuming your function is in trim_vdc_code.py
+            trim_vdc_code(self)
+            tkMessageBox.showinfo("Success", "VDC Codes have been trimmed successfully.")
+        except Exception as e:
+            tkMessageBox.showerror("Error", "Failed to trim VDC Codes: {}".format(e))
 
     def browse_folder(self):
         folder_selected = tkFileDialog.askdirectory()

@@ -94,6 +94,9 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     total_points = 0
 
                     for fc in fcl:
+                        # Recalculate extent BEFORE centroid calculation
+                        arcpy.RecalculateFeatureClassExtent_management(fc)
+
                         with arcpy.da.SearchCursor(fc, ["SHAPE@XY"]) as cursor:
                             for row in cursor:
                                 centroid_x_total += row[0][0]
@@ -106,16 +109,20 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
                     avg_x = centroid_x_total / total_points
                     avg_y = centroid_y_total / total_points
 
-                    if avg_x <= centroidX or avg_y <= centroidY:
-                        print("Skipping " + i + " (centroid too low)")
+                    print("Centroid for {}: X = {}, Y = {}".format(i, avg_x, avg_y))
+                    if avg_x <= centroidX and avg_y <= centroidY:
+                        print("Skipping " + i + " (centroid below threshold)")
                         continue  # Skip move
 
-                print("Moving data " + i + "\n")
-                # Apply shift
+                # Move operation
                 for fc in fcl:
                     with arcpy.da.UpdateCursor(fc, ["SHAPE@XY"]) as cursor:
                         for row in cursor:
                             cursor.updateRow([[row[0][0] + xOffset, row[0][1] + yOffset]])
+
+                    # Recalculate extent AFTER move
+                    arcpy.RecalculateFeatureClassExtent_management(fc)
+
                 count += 1
 
             except Exception as e:
@@ -129,6 +136,7 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts"""
         print('The script took {:.2f} seconds!'.format(time.time() - startTime))
 
         tkMessageBox.showinfo(title="move database " + version, message="Done")
+
 
 root = Tk()
 root.title("Move database " + version)

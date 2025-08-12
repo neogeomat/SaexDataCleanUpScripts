@@ -9,7 +9,7 @@ import subprocess
 # Constants
 MXD_TEMPLATE = r"D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\Blank_Template.mxd"
 GROUP_LAYER_PATH = r"D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\Group.lyr"
-PARCEL_LAYER_PATH = r"D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\Parcel.lyr"
+PARCEL_LAYER_PATH = r"D:\LIS_SYSTEM\LIS_Spatial_Data_Templates\Parcel1.lyr"
 ARCMAP_EXE_PATH = r"C:\Program Files (x86)\ArcGIS\Desktop10.8\bin\ArcMap.exe"
 
 
@@ -88,6 +88,10 @@ def process_mdbs(mxd, df, workspace):
             if target_subgroup:
                 fc_path = os.path.join(arcpy.env.workspace, feature)
                 new_layer = arcpy.mapping.Layer(fc_path)
+                # Apply symbology if the feature class is "Parcel"
+                if feature.lower() == "parcel":
+                    arcpy.ApplySymbologyFromLayer_management(new_layer, PARCEL_LAYER_PATH)
+
                 arcpy.mapping.AddLayerToGroup(df, target_subgroup[0], new_layer, "BOTTOM")
 
     return mxd
