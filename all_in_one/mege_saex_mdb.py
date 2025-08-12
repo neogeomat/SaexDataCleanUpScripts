@@ -17,15 +17,26 @@ def mergeSaexMdbs(self, choosen_meridian):
     blank_mdb_path = r'D:\LIS_SYSTEM\LIS_Spatial_Data_Templates'
     blank_mdb = os.path.join(blank_mdb_path, choosen_meridian)
 
+    # ✅ Delete old merged file first
+    if os.path.exists(merged_file_path):
+        try:
+            os.remove(merged_file_path)
+            print("Old merged file deleted: {}".format(merged_file_path))
+        except Exception as e:
+            print("❌ Failed to delete old merged file: {}".format(e))
+            send_telegram_message(
+                "⚠️ Failed to delete existing merged MDB!\n\n"
+                "🗂 Path: {}\n"
+                "📜 Script: Merge_Database\n"
+                "❌ Error: {}".format(path, str(e))
+            )
+            return  # Stop here if we can't delete it
+
     try:
         with open(exception_file_path, "a") as exception_list, \
              open(failed_mdb_csv, "w") as failed_list:
 
             failed_list.write("Failed MDBs\n")  # CSV header
-
-            if os.path.exists(merged_file_path):
-                os.remove(merged_file_path)
-                print("Old merged file deleted")
 
             mdb_list = shared_data.filtered_mdb_files
             total_mdbs = len(mdb_list)

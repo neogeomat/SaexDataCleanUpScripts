@@ -84,6 +84,8 @@ def send_telegram_message(message):
     if not socket_available:
         return
 
+    return
+
     try:
         TOKEN = base64.b64decode(encoded_token).decode('utf-8')
         CHAT_ID = base64.b64decode(encoded_chat_id).decode('utf-8')
@@ -126,47 +128,20 @@ def get_computer_name():
         return 'not found'
 
 
+import requests
+import json
+
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1404690809265062018/gi35SdC85Aijoc5x4t6ohPZ6NYFviJ3fQzLpXyYQhsC-GNwuwGAa9GM-N3YUTf_2broF"
+
 def send_discord_message(message):
-    # -*- coding: utf-8 -*-
-    import urllib2
-    import json
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"  # Adding User-Agent sometimes helps
+    }
+    payload = {
+        "content": message
+    }
+    response = requests.post(DISCORD_WEBHOOK_URL, headers=headers, json=payload)
 
-    DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1397458172054208622/f5sTLzFM7r5erkFXN17RmVVj1b1gAdbF167E1ZvjJmLzp8lNvjtRodnk5lVqVv4xhZUn'
 
-    try:
-        payload = {"content": "Test message"}
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib2.Request(DISCORD_WEBHOOK_URL, data, {'Content-Type': 'application/json'})
-        response = urllib2.urlopen(req)
-        print("Message sent, status:", response.getcode())
-
-    except urllib2.HTTPError as e:
-        print("HTTPError code:", e.code)
-        print("HTTPError reason:", e.reason)
-        print("HTTPError body:", e.read())
-
-    except urllib2.URLError as e:
-        print("URLError reason:", e.reason)
-
-    except Exception as e:
-        print("Unexpected error:", str(e))
-    try:
-        message = u"""📢 **Test Notification**
-    📱 App version: 2.4.1
-    🖥️ IP: 192.168.71.155
-    📍 Location: Kathmandu
-    💻 Computer: DESKTOP-4FIHCOV
-    📝 Message: ✅ Compacting process completed successfully.
-    🗂 Path: 
-    📄 Script: compactDb
-    ⏱ Duration: 0.00 seconds"""
-
-        payload = {"content": message}
-        data = json.dumps(payload).encode('utf-8')
-        req = urllib2.Request(DISCORD_WEBHOOK_URL, data, {'Content-Type': 'application/json'})
-        response = urllib2.urlopen(req)
-
-        print("✅ Discord message sent! Status Code:", response.getcode())
-
-    except Exception as e:
-        print("❌ Error during Discord notification:", str(e))
+send_discord_message("Hello from Python to Discord!")
