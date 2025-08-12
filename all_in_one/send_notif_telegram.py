@@ -132,13 +132,41 @@ import requests
 import json
 
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1404690809265062018/gi35SdC85Aijoc5x4t6ohPZ6NYFviJ3fQzLpXyYQhsC-GNwuwGAa9GM-N3YUTf_2broF"
+DISCORD_WEBHOOK_URL_for_error = "https://discord.com/api/webhooks/1404700180791693375/qEUgXEsTiO9t7yROTYAtqsdvoX--Sczw4Qs4L-UL1qJ3eS0_bCVAPfVRuSWlWrCkoe6e"
 
 def send_discord_message(message):
+    app_version = version
+    icon = u"📱"
+    ip_address = get_ip_address()
+    location = get_location()
+    comp_name = get_computer_name()
+
+    # Compose full message with details
+    full_message = u"{}\n{} App version = {}\n{}\n{}\n{}".format(
+        message,
+        icon, app_version,
+        u"🖥️ IP = {}".format(ip_address),
+        u"📍 Location = {}".format(location),
+        u"💻 Computer = {}".format(comp_name)
+    )
+
+    # Select webhook URL based on presence of 'error' word in message (case-insensitive)
+    if "error" in message.lower():
+        webhook_url = DISCORD_WEBHOOK_URL_for_error
+    else:
+        webhook_url = DISCORD_WEBHOOK_URL
+
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"  # Adding User-Agent sometimes helps
+        "User-Agent": "Mozilla/5.0"
     }
     payload = {
-        "content": message
+        "content": full_message.encode('utf-8') if isinstance(full_message, unicode) else full_message
     }
-    response = requests.post(DISCORD_WEBHOOK_URL, headers=headers, json=payload)
+
+    try:
+        response = requests.post(webhook_url, headers=headers, json=payload)
+        # Python 2.7 requests doesn't have raise_for_status? It does, so:
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print("Failed to send Discord message: {}".format(e))
