@@ -141,13 +141,13 @@ def send_discord_message(message):
     location = get_location()
     comp_name = get_computer_name()
 
-    # Compose full message with details
     full_message = u"{}\n{} App version = {}\n{}\n{}\n{}".format(
-        message,
-        icon, app_version,
-        u"🖥️ IP = {}".format(ip_address),
-        u"📍 Location = {}".format(location),
-        u"💻 Computer = {}".format(comp_name)
+        message.decode('utf-8') if isinstance(message, str) else message,
+        icon,
+        app_version.decode('utf-8') if isinstance(app_version, str) else app_version,
+        u"🖥️ IP = {}".format(ip_address.decode('utf-8') if isinstance(ip_address, str) else ip_address),
+        u"📍 Location = {}".format(location.decode('utf-8') if isinstance(location, str) else location),
+        u"💻 Computer = {}".format(comp_name.decode('utf-8') if isinstance(comp_name, str) else comp_name)
     )
 
     # Select webhook URL based on presence of 'error' word in message (case-insensitive)
@@ -161,7 +161,7 @@ def send_discord_message(message):
         "User-Agent": "Mozilla/5.0"
     }
     payload = {
-        "content": full_message.encode('utf-8') if isinstance(full_message, unicode) else full_message
+        "content": full_message.encode('utf-8')
     }
 
     try:
