@@ -67,6 +67,7 @@ dic_case_insen = {
     "la": "28",
     "wa": "29",
     "wo": "29",
+    "saaa":"32",
     "ha": "33",
     "ksha":"34",
     "chey":"34",
@@ -155,7 +156,7 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
                 print "code=" + sheet_code
                 if len(sheet_code)!=9:
                     exception_list.write("Attribute fill Error for ," + base_file_name + "\n")
-                    print "Attribute fill Error for " + base_file_name + ": " + str(e)
+                    print "Attribute fill Error for " + base_file_name + ": " +"invalid sheet code\n"
 
                 else:
                     TheRows = arcpy.UpdateCursor(parcelfile)

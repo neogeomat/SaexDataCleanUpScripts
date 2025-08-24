@@ -1,7 +1,9 @@
-xcopy /s "E:\Update Digital Data\*.mdb" "D:\Sirdibas_backup_2025_08_05" /y
+xcopy /s "Y:\Darchula geodatabase\*.mdb" "D:\Darchula_backup_2025_08_20" /y
 
 robocopy "\\1-MAIN-DATABASE\1_Work in DataBase" "D:\Dingla_backup_2025_07_18" "*merged*.mdb" /S /Z /R:3 /W:5
 
 robocopy "Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18" "Z:\Dingla_2025_07_18_2" "*merged*.mdb" /S /Z /R:3 /W:5
 
 Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18
+
+robocopy "D:\Darchula_backup_2025_08_20" "D:\Darchula_backup_2025_08_20_1" *.mdb /S /XF GRID.mdb /R:0 /W:0

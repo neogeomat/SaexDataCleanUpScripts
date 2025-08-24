@@ -141,7 +141,17 @@ def send_discord_message(message):
     location = get_location()
     comp_name = get_computer_name()
 
-    separator = "\n======================\n"
+    # Make sure everything is unicode
+    if not isinstance(message, unicode):
+        message = unicode(message, "utf-8", errors="ignore")
+    if not isinstance(comp_name, unicode):
+        comp_name = unicode(comp_name, "utf-8", errors="ignore")
+    if not isinstance(ip_address, unicode):
+        ip_address = unicode(ip_address, "utf-8", errors="ignore")
+    if not isinstance(location, unicode):
+        location = unicode(location, "utf-8", errors="ignore")
+
+    separator = u"\n======================\n"
 
     full_message = u"{sep}\n```{msg}\n{icon} App version = {ver}\n🖥️ IP = {ip}\n📍 Location = {loc}\n💻 Computer = {comp}\n```{sep}".format(
         sep=separator,
@@ -153,7 +163,6 @@ def send_discord_message(message):
         comp=comp_name
     )
 
-    # Select webhook URL based on presence of 'error' word in message (case-insensitive)
     if "error" in message.lower():
         webhook_url = DISCORD_WEBHOOK_URL_for_error
     else:
@@ -164,12 +173,11 @@ def send_discord_message(message):
         "User-Agent": "Mozilla/5.0"
     }
     payload = {
-        "content": full_message.encode('utf-8')
+        "content": full_message  # keep it Unicode, requests will encode properly
     }
 
     try:
         response = requests.post(webhook_url, headers=headers, json=payload)
-        # Python 2.7 requests doesn't have raise_for_status? It does, so:
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print("Failed to send Discord message: {}".format(e))
