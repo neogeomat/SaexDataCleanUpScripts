@@ -5,6 +5,8 @@ import tkMessageBox
 import shared_data
 import arcpy
 from send_notif_telegram import send_telegram_message  # <- import your function here
+from FixGapsAndOverlaps_saex_mdbs import calculate_suspicious_and_circularity
+
 def trim_vdc_code(self, status_update=None, show_messagebox=True, update_progress=None):
 
     startTime = time.time()
@@ -23,6 +25,9 @@ def trim_vdc_code(self, status_update=None, show_messagebox=True, update_progres
         count += 1
         filename = os.path.basename(i)
         print (i + " (" + str(count) + "/" + str(total) + ")")
+
+        # calculate_suspicious_and_circularity(i+"//Parcel")
+        # continue
 
         try:
             if status_update:

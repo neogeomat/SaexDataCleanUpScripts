@@ -124,7 +124,7 @@ def Fill_Ward_Grid(self, scale, status_update=None, show_messagebox=True, update
             print "Compact error for " + base_file_name + ": " + str(e)
 
         new_filename = base_file_name.replace(" ", "")
-        x = re.findall(r"^...[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
+        x = re.findall(r"^.[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)", new_filename)
         print ("x=",x)
 
         if x:
