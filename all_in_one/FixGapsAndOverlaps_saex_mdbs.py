@@ -203,6 +203,14 @@ def Fix_Gap_Overlap(self,central_meridian,status_update=None, show_messagebox=Tr
                 arcpy.Append_management(DataCleanTemp + "\\ConsWithParFid.shp", Data_Location + "\\Construction",
                                         "NO_TEST")
 
+                # Delete Construction features with area < 1
+                arcpy.MakeFeatureLayer_management(Data_Location + "\\Construction", "cons_layer")
+                arcpy.SelectLayerByAttribute_management("cons_layer", "NEW_SELECTION", "[Shape_Area] < 1")
+                arcpy.DeleteFeatures_management("cons_layer")
+                arcpy.Delete_management("cons_layer")
+
+
+
                 ## remove processing folder
                 # Process: Delete
                 arcpy.Delete_management(DataCleanTemp, "Folder")

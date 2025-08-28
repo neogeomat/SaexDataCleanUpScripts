@@ -43,7 +43,7 @@ from shared_data import VERSION
 
 
 # Define colors
-colors = {
+old_colors = {
     "light_blue": "#9FB3DF",
     "check_button": "#add8e6",
     "light_green": "#90ee90",
@@ -52,9 +52,20 @@ colors = {
     "light_pink": "#ffb6c1",
     "light_gray": "#9FB3D0",
     "white": "#ffffff",
-    "heading":"#44afb1"
+    "heading":"#efa05f"
 }
-
+# Define colors (changed)
+colors = {
+    "light_blue": "#7FA6E5",     # softer sky blue
+    "check_button": "#89CFF0",   # pastel blue
+    "light_green": "#77DD77",    # minty green
+    "light_yellow": "#FFFACD",   # lemon chiffon
+    "light_coral": "#FF6F61",    # warmer coral
+    "light_pink": "#F8A5C2",     # pastel pink
+    "light_gray": "#A9B7C6",     # neutral cool gray
+    "white": "#FFFFFF",          # pure white
+    "heading": "#F4A261"         # warm sandy orange
+}
 
 class DataCleanup:
     def __init__(self, master):

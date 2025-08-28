@@ -2,4 +2,4 @@ directory=""
 mdb_files = []
 filtered_mdb_files = []
 initial_central_meridian = ""
-VERSION = "2.4.7"
+VERSION = "2.5.1"
