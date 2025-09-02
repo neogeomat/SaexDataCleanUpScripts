@@ -145,6 +145,18 @@ For recent file check https://github.com/neogeomat/SaexDataCleanUpScripts
                     # arcpy.Merge_management(l, merged)
                 except:
                     exception_list.write("Merge Database Error for ," + i + "\n")
+        for l in topo_layers:
+            try:
+                arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
+                arcpy.DeleteField_management(l, ["source_file"])
+            except:
+                exception_list.write("Merge Database Error for ," + i + "\n")
+        for l in other_layers:
+            try:
+                arcpy.Append_management(l, merged + l, "NO_TEST", "", "")
+                arcpy.DeleteField_management(l, ["source_file"])
+            except:
+                exception_list.write("Merge Database Error for ," + i + "\n")
         print("process complete")
         tkMessageBox.showinfo(title="Merge PE Mdb files" + version, message="Done")
             
