@@ -2,7 +2,7 @@ xcopy /s "Y:\Darchula geodatabase\*.mdb" "D:\Darchula_backup_2025_08_20" /y
 
 robocopy "\\1-MAIN-DATABASE\1_Work in DataBase" "D:\Dingla_backup_2025_07_18" "*merged*.mdb" /S /Z /R:3 /W:5
 
-robocopy "Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18" "Z:\Dingla_2025_07_18_2" "*merged*.mdb" /S /Z /R:3 /W:5
+robocopy "Z:\siraha" "Z:\siraha_2025_11_11" "*.mdb" /S /Z /R:3 /W:5
 
 Z:\Dingla_2025_07_18\Dingla_backup_2025_07_18
 

@@ -44,15 +44,32 @@ def validate_paths(workspace, output_path):
 
     return True
 
+import unicodedata
+import sys
 
 def process_mdbs(mxd, df, workspace):
     """Process MDB files and create layer structure"""
-    mdb_list = [
-        os.path.join(root, filename)
-        for root, _, filenames in os.walk(workspace)
-        for filename in filenames
-        if filename.endswith('.mdb')
-    ]
+    mdb_list = []
+
+    for root, _, filenames in os.walk(workspace):
+        for filename in filenames:
+
+            # Convert filename to unicode safely (Python 2)
+            if sys.version_info[0] < 3:
+                try:
+                    u_name = unicode(filename, 'utf-8', 'ignore')
+                except:
+                    u_name = filename.decode('utf-8', 'ignore')
+            else:
+                u_name = filename
+
+            # Normalize Unicode + strip spaces + lowercase
+            clean = unicodedata.normalize('NFKC', u_name).strip().lower()
+
+            if clean.endswith('.mdb'):
+                mdb_list.append(os.path.join(root, filename))
+    for f in mdb_list:
+        print(repr(f))
 
     if not mdb_list:
         tkMessageBox.showerror("Error", "No MDB files found in workspace")
@@ -62,7 +79,9 @@ def process_mdbs(mxd, df, workspace):
     for fc in mdb_list:
         arcpy.env.workspace = fc
         base_name = os.path.basename(fc).replace(" ", "")
-        pattern = r"^.[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)"
+        base_name = os.path.basename(fc).replace(".", "")
+        pattern = r"^.[A-Za-z][A-Za-z\s_-]+(\d+)([\s_(-]*[A-Za-z]*[\(\s_-]*)(\d*)..."
+        #pattern = r"(\d+)\s*([A-Za-z]+)"
         match = re.findall(pattern, base_name)
 
         if not match:
